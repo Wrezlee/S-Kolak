@@ -100,7 +100,7 @@ class DashboardPublikController extends Controller
         $waktuTerbaru = $records->max('updated_at');
         $lastUpdated = $waktuTerbaru ? $this->formatTanggalWaktu($waktuTerbaru) : '-';
 
-        return view('welcome', compact(
+        return view('public.dashboard', compact(
             'komoditasList',
             'rows',
             'summary',

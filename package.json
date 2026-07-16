@@ -6,14 +6,26 @@
         "build": "vite build",
         "dev": "vite"
     },
+    "dependencies": {
+        "clsx": "^2.1.1",
+        "date-fns": "^4.1.0",
+        "lucide-react": "^0.487.0",
+        "motion": "^12.6.2",
+        "recharts": "^2.15.0",
+        "sonner": "^1.4.0",
+        "tailwind-merge": "^3.2.0"
+    },
     "devDependencies": {
         "@tailwindcss/postcss": "^4.3.3",
         "@tailwindcss/vite": "^4.0.0",
+        "@types/react": "^18.3.20",
+        "@types/react-dom": "^18.3.5",
         "autoprefixer": "^10.5.4",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^3.1",
         "postcss": "^8.5.19",
         "tailwindcss": "^4.3.3",
+        "typescript": "^5.8.3",
         "vite": "^8.0.0"
     }
 }
