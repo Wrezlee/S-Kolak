@@ -21,7 +21,7 @@ class UserController extends Controller
                 $search = $request->string('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('username', 'like', "%{$search}%");
+                      ->orWhere('login_id', 'like', "%{$search}%");
                 });
             })
             ->when($request->filled('role'), fn ($query) => $query->where('role', $request->string('role')))
@@ -41,14 +41,14 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'username' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:users,username'],
+            'login_id' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:users,login_id'],
             'name'     => ['required', 'string', 'max:150'],
-            'role'     => ['required', Rule::in(['Admin', 'Operator', 'Verifikator'])],
+            'role'     => ['required', Rule::in(['admin', 'operator', 'verifikator'])],
             'password' => ['required', 'string', 'min:8'],
         ]);
 
         User::create([
-            'username' => $validated['username'],
+            'login_id' => $validated['login_id'],
             'name'     => $validated['name'],
             'role'     => $validated['role'],
             'password' => Hash::make($validated['password']),
@@ -60,13 +60,13 @@ class UserController extends Controller
 
     /**
      * Perbarui data pengguna (nama, role, dan password jika diisi).
-     * ID pengguna (username) tidak dapat diubah lewat form ini.
+     * ID pengguna (login_id) tidak dapat diubah lewat form ini.
      */
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
             'name'     => ['required', 'string', 'max:150'],
-            'role'     => ['required', Rule::in(['Admin', 'Operator', 'Verifikator'])],
+            'role'     => ['required', Rule::in(['admin', 'operator', 'verifikator'])],
             'password' => ['nullable', 'string', 'min:8'],
         ]);
 

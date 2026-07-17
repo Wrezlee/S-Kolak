@@ -19,8 +19,10 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'login_id' => 'admin',
+            'name' => 'Administrator',
             'password' => bcrypt('admin123'),
             'role' => 'admin',
+            'status' => 'Aktif',
         ]);
     }
 }

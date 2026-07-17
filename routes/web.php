@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardPublikController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardPublikController::class, 'index'])->name('dashboard');
@@ -22,5 +23,10 @@ Route::post('/logout', [LoginController::class, 'logout'])
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
+    // Manajemen Pengguna
+    Route::get('/users', [UserController::class, 'index'])->name('users');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });

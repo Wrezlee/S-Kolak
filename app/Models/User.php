@@ -12,8 +12,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'login_id',
+    'name',
     'password',
     'role',
+    'status',
     'last_login_at',
 ])]
 #[Hidden([
