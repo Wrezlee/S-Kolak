@@ -100,8 +100,33 @@ class DashboardPublikController extends Controller
         $waktuTerbaru = $records->max('updated_at');
         $lastUpdated = $waktuTerbaru ? $this->formatTanggalWaktu($waktuTerbaru) : '-';
 
+        // ===============================
+        // Data untuk Filter Dashboard
+        // ===============================
+
+        // Daftar bulan
+        $bulanList = array_values(self::BULAN);
+
+        // Daftar tahun berdasarkan data database
+        $tahunList = NeracaPangan::selectRaw('YEAR(periode) as tahun')
+            ->distinct()
+            ->orderBy('tahun')
+            ->pluck('tahun');
+
+        // Jika database masih kosong
+        if ($tahunList->isEmpty()) {
+            $tahunSekarang = now()->year;
+            $tahunList = collect(range($tahunSekarang - 2, $tahunSekarang + 1));
+        }
+
+        // Menyimpan nilai filter yang dipilih
+        $q = $request->all();
+
         return view('public.dashboard', compact(
             'komoditasList',
+            'bulanList',
+            'tahunList',
+            'q',
             'rows',
             'summary',
             'trendLabels',
