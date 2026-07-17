@@ -21,7 +21,7 @@ class LoginController extends Controller
         ]);
 
         // Sesuaikan 'username' dengan nama kolom ID di tabel users Anda
-        if (Auth::attempt(['username' => $credentials['id'], 'password' => $credentials['password']])) {
+        if (Auth::attempt(['login_id' => $credentials['id'], 'password' => $credentials['password']])) {
             $request->session()->regenerate();
 
             return match (Auth::user()->role ?? null) {
