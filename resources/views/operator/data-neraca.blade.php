@@ -357,7 +357,7 @@
         <div class="flex items-center justify-between px-5 py-4 border-b border-blue-50">
             <div>
                 <h3 id="detailKomoditas" class="text-sm font-bold" style="color:#1E3A5F;"></h3>
-                <p id="detailPeriode" class="text-xs text-slate-400"></p>
+                <p id="detailPeriode" class="text-sm font-medium text-slate-500 mt-0.5"></p>
             </div>
             <div class="flex items-center gap-2">
                 <span id="detailStatusBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"></span>
@@ -492,7 +492,7 @@
     // ---------- Modal Detail (read-only) ----------
     function openDetail(d) {
         document.getElementById('detailKomoditas').textContent = d.komoditas;
-        document.getElementById('detailPeriode').textContent = d.periode + ' · Kota Kediri';
+        document.getElementById('detailPeriode').textContent = d.periode;
 
         const statusBadge = document.getElementById('detailStatusBadge');
         statusBadge.textContent = d.statusLabel;

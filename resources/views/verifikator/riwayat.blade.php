@@ -15,25 +15,61 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        /* Angka pada Data Neraca Pangan dibuat tabular-nums agar rapi & mudah dibaca */
+        .angka-neraca { font-variant-numeric: tabular-nums; letter-spacing: 0.01em; }
     </style>
 </head>
 <body class="h-screen overflow-hidden" style="background-color:#F5F9FF;">
 
 @php
+    // Pastikan semua format tanggal (translatedFormat) berbahasa Indonesia,
+    // bukan Inggris ("January", "Jan", dst).
+    \Carbon\Carbon::setLocale('id');
+    if (function_exists('app')) {
+        app()->setLocale('id');
+    }
+
     // Nilai default apabila controller belum mengirim data.
     $riwayat = $riwayat ?? collect([
-        (object) ['id' => 1, 'status' => 'valid',
-            'komoditas' => (object) ['nama' => 'Beras'],
-            'operator'  => (object) ['name' => 'Siti Rahayu, S.P'],
-            'periode'   => \Illuminate\Support\Carbon::parse('2025-01-01')],
-        (object) ['id' => 2, 'status' => 'valid',
-            'komoditas' => (object) ['nama' => 'Beras'],
-            'operator'  => (object) ['name' => 'Siti Rahayu, S.P'],
-            'periode'   => \Illuminate\Support\Carbon::parse('2025-02-01')],
-        (object) ['id' => 10, 'status' => 'revisi',
-            'komoditas' => (object) ['nama' => 'Kedelai'],
-            'operator'  => (object) ['name' => 'Siti Rahayu, S.P'],
-            'periode'   => \Illuminate\Support\Carbon::parse('2025-03-01')],
+        (object) [
+            'id' => 1, 'status' => 'valid',
+            'komoditas'   => (object) ['nama' => 'Beras'],
+            'operator'    => (object) ['name' => 'Siti Rahayu, S.P'],
+            'verifikator' => (object) ['name' => 'Bambang Sutrisno, S.T'],
+            'periode'            => \Illuminate\Support\Carbon::parse('2025-01-01'),
+            'created_at'         => \Illuminate\Support\Carbon::parse('2025-01-05'),
+            'diverifikasi_pada'  => \Illuminate\Support\Carbon::parse('2025-01-07'),
+            'stok_awal' => 1200, 'produksi' => 4500, 'masuk' => 800, 'keluar' => 600,
+            'kebutuhan_rumah_tangga' => 3200, 'kebutuhan_non_rumah_tangga' => 950,
+            'nilai_neraca' => 1750,
+            'keterangan' => null,
+        ],
+        (object) [
+            'id' => 2, 'status' => 'valid',
+            'komoditas'   => (object) ['nama' => 'Beras'],
+            'operator'    => (object) ['name' => 'Siti Rahayu, S.P'],
+            'verifikator' => (object) ['name' => 'Bambang Sutrisno, S.T'],
+            'periode'            => \Illuminate\Support\Carbon::parse('2025-02-01'),
+            'created_at'         => \Illuminate\Support\Carbon::parse('2025-02-04'),
+            'diverifikasi_pada'  => \Illuminate\Support\Carbon::parse('2025-02-06'),
+            'stok_awal' => 1350, 'produksi' => 4700, 'masuk' => 750, 'keluar' => 640,
+            'kebutuhan_rumah_tangga' => 3300, 'kebutuhan_non_rumah_tangga' => 980,
+            'nilai_neraca' => 1980,
+            'keterangan' => null,
+        ],
+        (object) [
+            'id' => 10, 'status' => 'revisi',
+            'komoditas'   => (object) ['nama' => 'Kedelai'],
+            'operator'    => (object) ['name' => 'Siti Rahayu, S.P'],
+            'verifikator' => (object) ['name' => 'Bambang Sutrisno, S.T'],
+            'periode'            => \Illuminate\Support\Carbon::parse('2025-03-01'),
+            'created_at'         => \Illuminate\Support\Carbon::parse('2025-03-03'),
+            'diverifikasi_pada'  => \Illuminate\Support\Carbon::parse('2025-03-05'),
+            'stok_awal' => 400, 'produksi' => 900, 'masuk' => 150, 'keluar' => 120,
+            'kebutuhan_rumah_tangga' => 800, 'kebutuhan_non_rumah_tangga' => 300,
+            'nilai_neraca' => -230,
+            'keterangan' => 'Data barang keluar tidak sesuai dengan bukti transaksi, mohon dicek kembali.',
+        ],
     ]);
 
     $notifCount = $notifCount ?? 0;
@@ -56,6 +92,12 @@
             })->values()
             : collect()
     )));
+
+    // Jumlah data menunggu verifikasi, dipakai untuk badge menu sidebar.
+    $pendingCount = $pendingCount ?? (isset($pending) ? $pending->count() : (
+        auth()->check() ? \App\Models\NeracaPangan::where('status', 'menunggu')->count() : 0
+    ));
+
     $activeMenu = 'riwayat';
     $userName = auth()->check() ? auth()->user()->name : 'Verifikator';
 @endphp
@@ -85,7 +127,7 @@
             @php
                 $menuItems = [
                     ['key' => 'dashboard',  'label' => 'Dashboard',                 'route' => 'verifikator.dashboard',  'badge' => null],
-                    ['key' => 'menunggu',   'label' => 'Data Menunggu Verifikasi',  'route' => 'verifikator.menunggu',   'badge' => null],
+                    ['key' => 'menunggu',   'label' => 'Data Menunggu Verifikasi',  'route' => 'verifikator.menunggu',   'badge' => $pendingCount],
                     ['key' => 'riwayat',    'label' => 'Riwayat Verifikasi',        'route' => 'verifikator.riwayat',    'badge' => null],
                     ['key' => 'notifikasi', 'label' => 'Notifikasi',                'route' => 'verifikator.notifikasi', 'badge' => $notifCount],
                 ];
@@ -203,32 +245,39 @@
                                 <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Periode</th>
                                 <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Komoditas</th>
                                 <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Operator</th>
+                                <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Status</th>
                                 <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($riwayat as $i => $n)
                                 @php
-                                    $periode = $n->periode instanceof \Illuminate\Support\Carbon
+                                    $periodeRow = $n->periode instanceof \Illuminate\Support\Carbon
                                         ? $n->periode
                                         : \Illuminate\Support\Carbon::parse($n->periode);
+                                    $badgeRow = $n->status === 'valid'
+                                        ? ['label' => 'Valid',        'cls' => 'bg-green-50 text-green-700 border-green-200']
+                                        : ['label' => 'Perlu Revisi', 'cls' => 'bg-red-50 text-red-700 border-red-200'];
                                 @endphp
                                 <tr class="border-t border-blue-50 hover:bg-blue-50/30 transition-colors">
                                     <td class="px-4 py-3 text-slate-400">{{ $i + 1 }}</td>
-                                    <td class="px-4 py-3 font-medium" style="color:#1E3A5F;">{{ $periode->translatedFormat('M Y') }}</td>
+                                    <td class="px-4 py-3 font-medium" style="color:#1E3A5F;">{{ $periodeRow->locale('id')->translatedFormat('M Y') }}</td>
                                     <td class="px-4 py-3">{{ $n->komoditas->nama ?? '-' }}</td>
                                     <td class="px-4 py-3 text-slate-500">{{ $n->operator->name ?? '-' }}</td>
                                     <td class="px-4 py-3">
-                                        <a href="{{ Route::has('verifikator.riwayat.show') ? route('verifikator.riwayat.show', $n->id) : '#' }}"
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border {{ $badgeRow['cls'] }}">{{ $badgeRow['label'] }}</span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <button type="button" onclick="openRiwayatDetail({{ $n->id }})"
                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-blue-200 text-blue-600 text-xs font-medium hover:bg-blue-50 transition-colors">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-[12px] h-[12px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                             Lihat Detail
-                                        </a>
+                                        </button>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-4 py-10 text-center text-slate-400">Belum ada riwayat verifikasi.</td>
+                                    <td colspan="6" class="px-4 py-10 text-center text-slate-400">Belum ada riwayat verifikasi.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -239,6 +288,128 @@
         </main>
     </div>
 </div>
+
+{{-- ============ MODAL DETAIL RIWAYAT (dibuka di dalam halaman, tanpa pindah halaman, dengan blur background) ============ --}}
+<div id="riwayatModalOverlay" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+     onclick="if(event.target===this) closeRiwayatDetail()">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-blue-100 flex-shrink-0">
+            <h3 class="text-base font-bold" style="color:#1E3A5F;">Detail Riwayat Verifikasi</h3>
+            <button type="button" onclick="closeRiwayatDetail()"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 text-slate-400 hover:text-slate-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div id="riwayatModalBody" class="px-6 py-5 space-y-5 overflow-y-auto"></div>
+    </div>
+</div>
+
+{{-- Template data detail per baris — disuntikkan ke modal via JS saat "Lihat Detail" ditekan --}}
+@foreach ($riwayat as $n)
+    @php
+        $periodeTpl = $n->periode instanceof \Illuminate\Support\Carbon
+            ? $n->periode
+            : \Illuminate\Support\Carbon::parse($n->periode);
+
+        $badgeTpl = $n->status === 'valid'
+            ? ['label' => 'Valid',        'cls' => 'bg-green-50 text-green-700 border-green-200']
+            : ['label' => 'Perlu Revisi', 'cls' => 'bg-red-50 text-red-700 border-red-200'];
+
+        $komoditasNamaTpl   = $n->komoditas->nama ?? '-';
+        $operatorNamaTpl    = $n->operator->name ?? '-';
+        $verifikatorNamaTpl = $n->verifikator->name ?? '-';
+
+        // Format tanggal Indonesia: "18 Juli 2026"
+        $tanggalInputTpl = optional($n->created_at)
+            ? \Illuminate\Support\Carbon::parse($n->created_at)->locale('id')->translatedFormat('d F Y')
+            : null;
+
+        // Format tanggal verifikasi Indonesia, atau '-' jika belum diverifikasi
+        $tanggalVerifikasiTpl = !empty($n->diverifikasi_pada)
+            ? \Illuminate\Support\Carbon::parse($n->diverifikasi_pada)->locale('id')->translatedFormat('d F Y')
+            : null;
+
+        $fieldsTpl = [
+            ['label' => 'Stok Awal',          'val' => $n->stok_awal],
+            ['label' => 'Produksi',           'val' => $n->produksi],
+            ['label' => 'Barang Masuk',       'val' => $n->masuk],
+            ['label' => 'Barang Keluar',      'val' => $n->keluar],
+            ['label' => 'Keb. Rumah Tangga',  'val' => $n->kebutuhan_rumah_tangga],
+            ['label' => 'Keb. Non-RT',        'val' => $n->kebutuhan_non_rumah_tangga],
+        ];
+        $nilaiTpl = $n->nilai_neraca;
+    @endphp
+    <template id="riwayat-detail-{{ $n->id }}">
+        <div class="flex items-start justify-between">
+            <h2 class="text-base font-bold" style="color:#1E3A5F;">{{ $komoditasNamaTpl }}</h2>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $badgeTpl['cls'] }}">{{ $badgeTpl['label'] }}</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="rounded-xl p-3" style="background-color:#F0F7FF;">
+                <p class="text-xs text-slate-400">Operator</p>
+                <p class="text-sm font-semibold mt-0.5 text-black">{{ $operatorNamaTpl }}</p>
+            </div>
+            <div class="rounded-xl p-3" style="background-color:#F0F7FF;">
+                <p class="text-xs text-slate-400">Tanggal Input</p>
+                <p class="text-sm font-semibold mt-0.5 text-black">{{ $tanggalInputTpl ?? '-' }}</p>
+            </div>
+        </div>
+
+        <div class="rounded-xl p-3" style="background-color:#F0F7FF;">
+            <p class="text-xs text-slate-400">Periode</p>
+            <p class="text-sm font-semibold mt-0.5 text-black">{{ $periodeTpl->locale('id')->translatedFormat('F Y') }}</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="rounded-xl p-3" style="background-color:#F0F7FF;">
+                <p class="text-xs text-slate-400">Diverifikasi Oleh</p>
+                <p class="text-sm font-semibold mt-0.5 text-black">{{ $verifikatorNamaTpl }}</p>
+            </div>
+            <div class="rounded-xl p-3" style="background-color:#F0F7FF;">
+                <p class="text-xs text-slate-400">Tanggal Verifikasi</p>
+                <p class="text-sm font-semibold mt-0.5 text-black">{{ $tanggalVerifikasiTpl ?? '-' }}</p>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Data Neraca Pangan</h3>
+            <div class="grid grid-cols-3 gap-2">
+                @foreach ($fieldsTpl as $f)
+                    <div class="rounded-xl p-3 border border-blue-50">
+                        <p class="text-xs text-slate-400">{{ $f['label'] }}</p>
+                        <p class="angka-neraca text-base font-bold mt-0.5 text-black">{{ number_format($f['val'], 0, ',', '.') }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="rounded-xl p-4 border-2" style="border-color:{{ $nilaiTpl > 0 ? '#86EFAC' : '#FCA5A5' }}; background-color:{{ $nilaiTpl > 0 ? '#F0FDF4' : '#FEF2F2' }};">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-semibold text-slate-600">Nilai Neraca Pangan</p>
+                <p class="angka-neraca text-2xl font-bold text-black">{{ number_format($nilaiTpl, 0, ',', '.') }}</p>
+            </div>
+        </div>
+
+        @if ($n->keterangan)
+            <div class="rounded-xl p-3 border {{ $n->status === 'revisi' ? 'bg-orange-50 border-orange-200' : 'bg-slate-50 border-slate-100' }}">
+                <p class="text-xs font-semibold mb-1" style="color: {{ $n->status === 'revisi' ? '#C2410C' : '#64748B' }};">
+                    {{ $n->status === 'revisi' ? 'Catatan Verifikator (Alasan Revisi)' : 'Catatan Verifikator' }}
+                </p>
+                <p class="text-sm" style="color: {{ $n->status === 'revisi' ? '#9A3412' : '#475569' }};">{{ $n->keterangan }}</p>
+            </div>
+        @endif
+
+        @if ($n->status === 'revisi')
+            <div class="rounded-xl p-4 bg-blue-50 border border-blue-200">
+                <p class="text-xs text-blue-700 font-semibold mb-1">Info</p>
+                <p class="text-xs text-blue-600">Data ini telah dikembalikan ke operator untuk diperbaiki. Status akan berubah kembali menjadi "Menunggu Verifikasi" setelah operator mengirim ulang.</p>
+            </div>
+        @endif
+    </template>
+@endforeach
 
 <script>
     function toggleNotifDropdown(e) {
@@ -253,6 +424,32 @@
         if (!dropdown.parentElement.contains(e.target)) {
             dropdown.classList.add('hidden');
         }
+    });
+
+    function openRiwayatDetail(id) {
+        var tpl = document.getElementById('riwayat-detail-' + id);
+        var body = document.getElementById('riwayatModalBody');
+        var overlay = document.getElementById('riwayatModalOverlay');
+        if (!tpl || !body || !overlay) return;
+
+        body.innerHTML = '';
+        body.appendChild(tpl.content.cloneNode(true));
+
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeRiwayatDetail() {
+        var overlay = document.getElementById('riwayatModalOverlay');
+        if (!overlay) return;
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeRiwayatDetail();
     });
 </script>
 </body>

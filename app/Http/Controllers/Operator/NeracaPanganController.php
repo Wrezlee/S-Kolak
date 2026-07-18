@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Komoditas;
 use App\Models\NeracaPangan;
 use App\Models\Notifikasi;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -96,25 +97,29 @@ class NeracaPanganController extends Controller
             'diajukan_pada'              => now(),
         ]);
 
-        $this->notifikasiVerifikator($neracaPangan, $request->user()->name);
+        $this->notifikasiPengajuanBaru($neracaPangan, $request->user()->name);
 
         return redirect()->route('operator.input')
             ->with('justSubmitted', true);
     }
 
     /**
-     * Kirim notifikasi ke seluruh user berperan verifikator bahwa ada
-     * data neraca pangan baru yang menunggu ditinjau.
+     * Kirim notifikasi ke seluruh user berperan verifikator DAN admin
+     * bahwa ada data neraca pangan baru yang menunggu ditinjau.
+     *
+     * Sebelumnya method ini bernama notifikasiVerifikator() dan hanya
+     * mengirim ke role 'verifikator', sehingga admin tidak pernah
+     * menerima notifikasi apa pun. Sekarang role 'admin' ikut disertakan.
      */
-    private function notifikasiVerifikator(NeracaPangan $neracaPangan, string $namaOperator): void
+    private function notifikasiPengajuanBaru(NeracaPangan $neracaPangan, string $namaOperator): void
     {
         $komoditasNama = $neracaPangan->komoditas->nama ?? optional(Komoditas::find($neracaPangan->komoditas_id))->nama ?? 'data neraca pangan';
 
-        $verifikatorIds = \App\Models\User::where('role', 'verifikator')->pluck('id');
+        $penerimaIds = User::whereIn('role', ['verifikator', 'admin'])->pluck('id');
 
-        foreach ($verifikatorIds as $verifikatorId) {
+        foreach ($penerimaIds as $userId) {
             Notifikasi::create([
-                'user_id' => $verifikatorId,
+                'user_id' => $userId,
                 'judul'   => 'Data baru menunggu verifikasi',
                 'pesan'   => "{$namaOperator} mengirim data {$komoditasNama} untuk diverifikasi.",
                 'dibaca'  => false,
@@ -163,7 +168,7 @@ class NeracaPanganController extends Controller
             'diverifikasi_pada'          => null,
         ]);
 
-        $this->notifikasiVerifikator($neracaPangan, $request->user()->name);
+        $this->notifikasiPengajuanBaru($neracaPangan, $request->user()->name);
 
         return redirect()->route('operator.data')
             ->with('status', 'Data berhasil diperbaiki dan dikirim ulang untuk verifikasi.');

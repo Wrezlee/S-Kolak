@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\NeracaPangan;
 use App\Models\Notifikasi;
 use App\Models\RiwayatVerifikasiNeraca;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -87,7 +88,8 @@ class VerifikasiController extends Controller
 
     /**
      * Proses hasil verifikasi: tandai valid atau kembalikan untuk revisi,
-     * catat ke riwayat verifikasi, dan beri notifikasi ke operator terkait.
+     * catat ke riwayat verifikasi, dan beri notifikasi ke operator terkait
+     * serta ke seluruh admin (untuk pemantauan).
      */
     public function update(Request $request, NeracaPangan $neracaPangan)
     {
@@ -114,6 +116,7 @@ class VerifikasiController extends Controller
             'tanggal_verifikasi'  => now(),
         ]);
 
+        // Notifikasi ke operator yang menginput data ini.
         if ($neracaPangan->diinput_oleh) {
             Notifikasi::create([
                 'user_id' => $neracaPangan->diinput_oleh,
@@ -121,6 +124,20 @@ class VerifikasiController extends Controller
                 'pesan'   => $validated['status'] === 'valid'
                     ? "Data {$neracaPangan->komoditas->nama} telah divalidasi oleh verifikator."
                     : "Data {$neracaPangan->komoditas->nama} dikembalikan untuk revisi.",
+                'dibaca'  => false,
+            ]);
+        }
+
+        // Notifikasi ke seluruh admin — sebelumnya tidak ada sama sekali,
+        // sehingga halaman Notifikasi Admin selalu kosong.
+        $adminIds = User::where('role', 'admin')->pluck('id');
+        foreach ($adminIds as $adminId) {
+            Notifikasi::create([
+                'user_id' => $adminId,
+                'judul'   => $validated['status'] === 'valid' ? 'Data divalidasi' : 'Data dikembalikan untuk revisi',
+                'pesan'   => $validated['status'] === 'valid'
+                    ? "{$request->user()->name} memvalidasi data {$neracaPangan->komoditas->nama}."
+                    : "{$request->user()->name} mengembalikan data {$neracaPangan->komoditas->nama} untuk revisi.",
                 'dibaca'  => false,
             ]);
         }
