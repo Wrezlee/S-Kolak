@@ -36,12 +36,12 @@
         : ['label' => 'Perlu Revisi', 'cls' => 'bg-red-50 text-red-700 border-red-200'];
 
     $fields = [
-        ['label' => 'Stok Awal',          'val' => $item->stok_awal,                  'color' => 'text-slate-700'],
-        ['label' => 'Produksi',           'val' => $item->produksi,                   'color' => 'text-blue-600'],
-        ['label' => 'Barang Masuk',       'val' => $item->masuk,                      'color' => 'text-blue-600'],
-        ['label' => 'Barang Keluar',      'val' => $item->keluar,                     'color' => 'text-red-600'],
-        ['label' => 'Keb. Rumah Tangga',  'val' => $item->kebutuhan_rumah_tangga,     'color' => 'text-orange-600'],
-        ['label' => 'Keb. Non-RT',        'val' => $item->kebutuhan_non_rumah_tangga, 'color' => 'text-orange-600'],
+        ['label' => 'Stok Awal',          'val' => $item->stok_awal],
+        ['label' => 'Produksi',           'val' => $item->produksi],
+        ['label' => 'Barang Masuk',       'val' => $item->masuk],
+        ['label' => 'Barang Keluar',      'val' => $item->keluar],
+        ['label' => 'Keb. Rumah Tangga',  'val' => $item->kebutuhan_rumah_tangga],
+        ['label' => 'Keb. Non-RT',        'val' => $item->kebutuhan_non_rumah_tangga],
     ];
 @endphp
 
@@ -61,8 +61,8 @@
         <main class="flex-1 overflow-y-auto p-4 sm:p-6">
             <div class="max-w-2xl mx-auto space-y-5">
 
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('verifikator.riwayat') }}" class="p-2 rounded-xl hover:bg-blue-50 text-blue-500 transition-colors text-sm flex items-center gap-1">
+                <div class="space-y-1">
+                    <a href="{{ route('verifikator.riwayat') }}" class="inline-flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600 transition-colors">
                         ← Kembali
                     </a>
                     <h1 class="text-xl font-bold" style="color:#1E3A5F;">Detail Riwayat Verifikasi</h1>
@@ -72,7 +72,6 @@
                     <div class="flex items-start justify-between">
                         <div>
                             <h2 class="text-base font-bold" style="color:#1E3A5F;">{{ $komoditasNama }}</h2>
-                            <p class="text-xs text-slate-400 mt-0.5">{{ $periode->translatedFormat('F Y') }} · Kota Kediri</p>
                         </div>
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $badge['cls'] }}">{{ $badge['label'] }}</span>
                     </div>
@@ -86,6 +85,14 @@
                             <p class="text-xs text-slate-400">Tanggal Input</p>
                             <p class="text-sm font-semibold mt-0.5 text-black">{{ $tanggalInput }}</p>
                         </div>
+                    </div>
+
+                    <div class="rounded-xl p-3" style="background-color:#F0F7FF;">
+                        <p class="text-xs text-slate-400">Periode</p>
+                        <p class="text-sm font-semibold mt-0.5 text-black">{{ $periode->translatedFormat('F Y') }}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
                         <div class="rounded-xl p-3" style="background-color:#F0F7FF;">
                             <p class="text-xs text-slate-400">Diverifikasi Oleh</p>
                             <p class="text-sm font-semibold mt-0.5 text-black">{{ $verifikatorNama }}</p>
@@ -102,7 +109,7 @@
                             @foreach ($fields as $f)
                                 <div class="rounded-xl p-3 border border-blue-50">
                                     <p class="text-xs text-slate-400">{{ $f['label'] }}</p>
-                                    <p class="text-sm font-bold font-mono mt-0.5 {{ $f['color'] }}">{{ number_format($f['val'], 0, ',', '.') }}</p>
+                                    <p class="text-sm font-bold font-mono mt-0.5 text-black">{{ number_format($f['val'], 0, ',', '.') }}</p>
                                 </div>
                             @endforeach
                         </div>

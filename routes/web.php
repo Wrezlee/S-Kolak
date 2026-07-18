@@ -25,13 +25,12 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 // Proses login (POST) — dipanggil oleh <form method="POST" action="{{ route('login') }}">
 Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
 
-// Logout
+// Logout — cek guard mana yang aktif dilakukan di dalam LoginController::logout()
 Route::post('/logout', [LoginController::class, 'logout'])
-    ->middleware('auth')
     ->name('logout');
 
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/dashboard')->name('index');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -60,7 +59,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::patch('/notifikasi/baca-semua', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.baca-semua');
 });
 
-Route::middleware(['auth'])->prefix('operator')->name('operator.')->group(function () {
+Route::middleware(['auth:operator'])->prefix('operator')->name('operator.')->group(function () {
     Route::redirect('/', '/operator/dashboard')->name('index');
 
     Route::get('/dashboard', [OperatorDashboardController::class, 'index'])->name('dashboard');
@@ -83,7 +82,7 @@ Route::middleware(['auth'])->prefix('operator')->name('operator.')->group(functi
     Route::patch('/notifikasi/baca-semua', [OperatorNotifikasiController::class, 'markAllAsRead'])->name('notifikasi.baca-semua');
 });
 
-Route::middleware(['auth'])->prefix('verifikator')->name('verifikator.')->group(function () {
+Route::middleware(['auth:verifikator'])->prefix('verifikator')->name('verifikator.')->group(function () {
     Route::redirect('/', '/verifikator/dashboard')->name('index');
 
     Route::get('/dashboard', [VerifikatorDashboardController::class, 'index'])->name('dashboard');

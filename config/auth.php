@@ -42,6 +42,24 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Guard terpisah per role. Laravel menyimpan status login tiap guard
+        // di key session yang berbeda-beda (login_admin_..., login_operator_...,
+        // login_verifikator_...), sehingga login sebagai operator di satu tab
+        // tidak akan menimpa/menggeser sesi verifikator yang sedang aktif di
+        // tab lain pada browser yang sama.
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+        'operator' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+        'verifikator' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
     ],
 
     /*
