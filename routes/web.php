@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\KomoditasController;
 use App\Http\Controllers\Admin\DataNeracaController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\NotifikasiController;
+use App\Http\Controllers\Operator\DashboardController as OperatorDashboardController;
+use App\Http\Controllers\Operator\NeracaPanganController as OperatorNeracaPanganController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardPublikController::class, 'index'])->name('dashboard');
@@ -51,4 +53,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi');
     Route::patch('/notifikasi/{notifikasi}/baca', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.baca');
     Route::patch('/notifikasi/baca-semua', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.baca-semua');
+});
+
+Route::middleware(['auth'])->prefix('operator')->name('operator.')->group(function () {
+    Route::redirect('/', '/operator/dashboard')->name('index');
+
+    Route::get('/dashboard', [OperatorDashboardController::class, 'index'])->name('dashboard');
+
+    // Input Neraca Pangan
+    Route::get('/input', [OperatorNeracaPanganController::class, 'create'])->name('input');
+    Route::post('/input', [OperatorNeracaPanganController::class, 'store'])->name('input.store');
+    Route::get('/input/stok-awal', [OperatorNeracaPanganController::class, 'stokAwal'])->name('input.stok-awal');
 });

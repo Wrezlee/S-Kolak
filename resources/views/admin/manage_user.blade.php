@@ -28,9 +28,14 @@
     $notifCount = $notifCount ?? 2;
     $activeMenu = 'users';
     $roleBadge = [
-        'Admin'       => 'bg-purple-50 text-purple-700 border-purple-200',
-        'Operator'    => 'bg-blue-50 text-blue-700 border-blue-200',
-        'Verifikator' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        'admin'       => 'bg-purple-50 text-purple-700 border-purple-200',
+        'operator'    => 'bg-blue-50 text-blue-700 border-blue-200',
+        'verifikator' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    ];
+    $roleLabel = [
+        'admin'       => 'Admin',
+        'operator'    => 'Operator',
+        'verifikator' => 'Verifikator',
     ];
 @endphp
 
@@ -166,9 +171,9 @@
                     </div>
                     <select name="role" onchange="this.form.submit()" class="skolak-select px-3 py-2 rounded-lg border border-blue-100 text-sm text-slate-600 outline-none">
                         <option value="">Semua Role</option>
-                        <option value="Admin" {{ request('role') === 'Admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="Operator" {{ request('role') === 'Operator' ? 'selected' : '' }}>Operator</option>
-                        <option value="Verifikator" {{ request('role') === 'Verifikator' ? 'selected' : '' }}>Verifikator</option>
+                        <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="operator" {{ request('role') === 'operator' ? 'selected' : '' }}>Operator</option>
+                        <option value="verifikator" {{ request('role') === 'verifikator' ? 'selected' : '' }}>Verifikator</option>
                     </select>
                     <button type="submit" class="px-4 py-2 rounded-lg text-sm font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">Cari</button>
                     @if (request('search') || request('role'))
@@ -196,7 +201,7 @@
                                     // isinya di-explode berdasarkan koma sehingga terpotong.
                                     $editPayload = json_encode([
                                         'id'       => $user->id,
-                                        'username' => $user->username,
+                                        'username' => $user->login_id,
                                         'name'     => $user->name,
                                         'role'     => $user->role,
                                     ], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG);
@@ -208,11 +213,11 @@
                                 @endphp
                                 <tr class="border-t border-blue-50 hover:bg-blue-50/30 transition-colors">
                                     <td class="px-4 py-3 text-slate-400">{{ $users->firstItem() + $i }}</td>
-                                    <td class="px-4 py-3 font-mono text-blue-600">{{ $user->username }}</td>
+                                    <td class="px-4 py-3 font-mono text-blue-600">{{ $user->login_id }}</td>
                                     <td class="px-4 py-3 font-medium" style="color:#1E3A5F;">{{ $user->name }}</td>
                                     <td class="px-4 py-3">
                                         <span class="px-2 py-0.5 rounded-full text-xs font-medium border {{ $roleBadge[$user->role] ?? 'bg-slate-50 text-slate-600 border-slate-200' }}">
-                                            {{ $user->role }}
+                                            {{ $roleLabel[$user->role] ?? ucfirst($user->role) }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-slate-500">
@@ -251,7 +256,7 @@
 </div>
 
 {{-- ============ MODAL TAMBAH PENGGUNA ============ --}}
-<div id="modalTambah" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onclick="if(event.target===this) this.classList.add('hidden')">
+<div id="modalTambah" class="{{ $errors->has('login_id') ? '' : 'hidden' }} fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onclick="if(event.target===this) this.classList.add('hidden')">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
         <div class="flex items-center justify-between">
             <h3 class="text-sm font-bold" style="color:#1E3A5F;">Tambah Pengguna Baru</h3>
@@ -263,9 +268,9 @@
             @csrf
             <div>
                 <label class="text-xs text-slate-500 block mb-1">ID Pengguna <span class="text-red-500">*</span></label>
-                <input type="text" name="username" value="{{ old('username') }}" placeholder="cth. op004" required
+                <input type="text" name="login_id" value="{{ old('login_id') }}" placeholder="cth. op004" required
                        class="w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-                @error('username') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                @error('login_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="text-xs text-slate-500 block mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
@@ -276,10 +281,11 @@
             <div>
                 <label class="text-xs text-slate-500 block mb-1">Role <span class="text-red-500">*</span></label>
                 <select name="role" required class="skolak-select w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-                    <option value="Admin">Admin</option>
-                    <option value="Operator" selected>Operator</option>
-                    <option value="Verifikator">Verifikator</option>
+                    <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="operator" {{ old('role', 'operator') === 'operator' ? 'selected' : '' }}>Operator</option>
+                    <option value="verifikator" {{ old('role') === 'verifikator' ? 'selected' : '' }}>Verifikator</option>
                 </select>
+                @error('role') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="text-xs text-slate-500 block mb-1">Password Awal <span class="text-red-500">*</span></label>
@@ -318,9 +324,9 @@
             <div>
                 <label class="text-xs text-slate-500 block mb-1">Role</label>
                 <select id="editRole" name="role" class="skolak-select w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-                    <option value="Admin">Admin</option>
-                    <option value="Operator">Operator</option>
-                    <option value="Verifikator">Verifikator</option>
+                    <option value="admin">Admin</option>
+                    <option value="operator">Operator</option>
+                    <option value="verifikator">Verifikator</option>
                 </select>
             </div>
             <div>
