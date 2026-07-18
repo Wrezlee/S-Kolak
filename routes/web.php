@@ -12,6 +12,8 @@ use App\Http\Controllers\Operator\DashboardController as OperatorDashboardContro
 use App\Http\Controllers\Operator\NeracaPanganController as OperatorNeracaPanganController;
 use App\Http\Controllers\Operator\LaporanController as OperatorLaporanController;
 use App\Http\Controllers\Operator\NotifikasiController as OperatorNotifikasiController;
+use App\Http\Controllers\Verifikator\DashboardController as VerifikatorDashboardController;
+use App\Http\Controllers\Verifikator\VerifikasiController as VerifikatorVerifikasiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardPublikController::class, 'index'])->name('dashboard');
@@ -78,4 +80,15 @@ Route::middleware(['auth'])->prefix('operator')->name('operator.')->group(functi
     Route::get('/notifikasi', [OperatorNotifikasiController::class, 'index'])->name('notifikasi');
     Route::patch('/notifikasi/{notifikasi}/baca', [OperatorNotifikasiController::class, 'markAsRead'])->name('notifikasi.baca');
     Route::patch('/notifikasi/baca-semua', [OperatorNotifikasiController::class, 'markAllAsRead'])->name('notifikasi.baca-semua');
+});
+
+Route::middleware(['auth'])->prefix('verifikator')->name('verifikator.')->group(function () {
+    Route::redirect('/', '/verifikator/dashboard')->name('index');
+
+    Route::get('/dashboard', [VerifikatorDashboardController::class, 'index'])->name('dashboard');
+
+    // Data Menunggu Verifikasi
+    Route::get('/menunggu', [VerifikatorVerifikasiController::class, 'index'])->name('menunggu');
+    Route::get('/menunggu/{neracaPangan}', [VerifikatorVerifikasiController::class, 'show'])->name('menunggu.show');
+    Route::put('/menunggu/{neracaPangan}', [VerifikatorVerifikasiController::class, 'update'])->name('menunggu.update');
 });

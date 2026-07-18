@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Verifikator - S-KOLAK Kota Kediri</title>
+
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <script src="https://cdn.tailwindcss.com"></script>
+    @endif
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="h-screen overflow-hidden" style="background-color:#F5F9FF;">
+
+@php
+    // Nilai default apabila controller belum mengirim data.
+    $summary = $summary ?? ['total' => 37, 'valid' => 33, 'menunggu' => 2, 'revisi' => 1];
+
+    $notifCount = $notifCount ?? 0;
+    $activeMenu = 'dashboard';
+    $userName = auth()->check() ? auth()->user()->name : 'Verifikator';
+
+    $statusBars = [
+        ['key' => 'valid',    'label' => 'Valid',    'val' => $summary['valid'],    'color' => '#16A34A'],
+        ['key' => 'menunggu', 'label' => 'Menunggu', 'val' => $summary['menunggu'], 'color' => '#EA580C'],
+        ['key' => 'revisi',   'label' => 'Revisi',   'val' => $summary['revisi'],   'color' => '#DC2626'],
+    ];
+    $statusMax = max(collect($statusBars)->max('val'), 1);
+@endphp
+
+<div class="flex h-screen overflow-hidden">
+
+    {{-- ============ SIDEBAR ============ --}}
+    <aside class="hidden md:flex flex-col flex-shrink-0 w-[240px] border-r border-blue-100 bg-white">
+        <div class="p-4 border-b border-blue-50 flex items-center gap-3">
+            @if (file_exists(public_path('images/logo-kediri.png')))
+                <img src="{{ asset('images/logo-kediri.png') }}" alt="Logo Kota Kediri" class="w-9 h-9 object-contain flex-shrink-0">
+            @else
+                <div class="w-9 h-9 rounded-full bg-blue-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">SK</div>
+            @endif
+            <div class="overflow-hidden">
+                <p class="text-sm font-bold truncate" style="color:#1E3A5F;">S-KOLAK</p>
+                <p class="text-xs text-slate-400 truncate">Kota Kediri</p>
+            </div>
+        </div>
+
+        <div class="mx-3 mt-3 p-3 rounded-xl" style="background-color:#EFF6FF;">
+            <p class="text-xs font-semibold text-blue-600">Verifikator</p>
+            <p class="text-xs font-medium truncate mt-0.5" style="color:#1E3A5F;">{{ $userName }}</p>
+        </div>
+
+        <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto mt-2">
+            @php
+                $menuItems = [
+                    ['key' => 'dashboard',  'label' => 'Dashboard',                 'route' => 'verifikator.dashboard',  'badge' => null],
+                    ['key' => 'menunggu',   'label' => 'Data Menunggu Verifikasi',  'route' => 'verifikator.menunggu',   'badge' => $summary['menunggu']],
+                    ['key' => 'riwayat',    'label' => 'Riwayat Verifikasi',        'route' => 'verifikator.riwayat',    'badge' => null],
+                    ['key' => 'notifikasi', 'label' => 'Notifikasi',                'route' => 'verifikator.notifikasi', 'badge' => $notifCount],
+                ];
+                $menuIcons = [
+                    'dashboard'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/>',
+                    'menunggu'   => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+                    'riwayat'    => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+                    'notifikasi' => '<path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>',
+                ];
+            @endphp
+
+            @foreach ($menuItems as $item)
+                @php $isActive = $activeMenu === $item['key']; @endphp
+                <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}"
+                   class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
+                   style="{{ $isActive ? 'background-color:#2563EB; color:white; font-weight:600;' : 'color:#475569;' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-[17px] h-[17px] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        {!! $menuIcons[$item['key']] !!}
+                    </svg>
+                    <span class="truncate flex-1 text-left">{{ $item['label'] }}</span>
+                    @if ($item['badge'])
+                        <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full font-bold"
+                              style="{{ $isActive ? 'background-color:rgba(255,255,255,0.3); color:white;' : 'background-color:#FEF3C7; color:#B45309;' }}">
+                            {{ $item['badge'] }}
+                        </span>
+                    @endif
+                </a>
+            @endforeach
+        </nav>
+
+        <div class="p-3 border-t border-blue-50">
+            <form method="POST" action="{{ Route::has('logout') ? route('logout') : '#' }}">
+                @csrf
+                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-[17px] h-[17px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H3" transform="scale(-1,1) translate(-24,0)"/>
+                    </svg>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    {{-- ============ MAIN ============ --}}
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+        {{-- Topbar --}}
+        <header class="h-14 border-b border-blue-100 bg-white flex items-center px-4 gap-3 flex-shrink-0 shadow-sm">
+            <div class="flex-1">
+                <h2 class="text-sm font-bold" style="color:#1E3A5F;">Dashboard Verifikator</h2>
+                <p class="text-xs text-slate-400">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="{{ Route::has('verifikator.notifikasi') ? route('verifikator.notifikasi') : '#' }}" class="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-blue-50 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="#1E3A5F" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
+                    </svg>
+                    @if ($notifCount > 0)
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500"></span>
+                    @endif
+                </a>
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background-color:#2563EB;">
+                    {{ strtoupper(substr($userName, 0, 1)) }}
+                </div>
+            </div>
+        </header>
+
+        {{-- Content --}}
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+
+            <div>
+                <h1 class="text-xl font-bold" style="color:#1E3A5F;">Dashboard Verifikator</h1>
+                <p class="text-sm text-slate-500">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
+            </div>
+
+            {{-- Alert menunggu --}}
+            @if ($summary['menunggu'] > 0)
+                <div class="flex items-center gap-3 px-4 py-3 rounded-xl border border-orange-200 bg-orange-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] text-orange-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-sm text-orange-700 font-medium">
+                        Ada <strong>{{ $summary['menunggu'] }}</strong> data menunggu verifikasi Anda. Segera tinjau!
+                    </p>
+                </div>
+            @endif
+
+            {{-- Stat cards --}}
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-yellow-50 border-yellow-200 rounded-xl border shadow-sm p-5 flex items-start gap-4">
+                    <div class="p-3 rounded-xl bg-yellow-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Menunggu Verifikasi</p>
+                        <p class="text-2xl font-bold mt-0.5 text-black">{{ $summary['menunggu'] }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5">perlu ditinjau</p>
+                    </div>
+                </div>
+                <div class="bg-green-50 border-green-200 rounded-xl border shadow-sm p-5 flex items-start gap-4">
+                    <div class="p-3 rounded-xl bg-green-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25 4.5-4.5m4.5 2.25a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Data Divalidasi</p>
+                        <p class="text-2xl font-bold mt-0.5 text-black">{{ $summary['valid'] }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5">total valid</p>
+                    </div>
+                </div>
+                <div class="bg-red-50 border-red-200 rounded-xl border shadow-sm p-5 flex items-start gap-4">
+                    <div class="p-3 rounded-xl bg-red-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Dikembalikan</p>
+                        <p class="text-2xl font-bold mt-0.5 text-black">{{ $summary['revisi'] }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5">perlu revisi</p>
+                    </div>
+                </div>
+                <div class="bg-blue-50 border-blue-200 rounded-xl border shadow-sm p-5 flex items-start gap-4">
+                    <div class="p-3 rounded-xl bg-blue-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 5.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Total Entri</p>
+                        <p class="text-2xl font-bold mt-0.5 text-black">{{ $summary['total'] }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5">semua periode</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Distribusi status --}}
+            <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
+                <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Distribusi Status Neraca Pangan</h3>
+                <div class="space-y-3 pt-1">
+                    @foreach ($statusBars as $b)
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-slate-500 w-16 shrink-0">{{ $b['label'] }}</span>
+                            <div class="flex-1 bg-slate-100 rounded-full h-5 overflow-hidden">
+                                <div class="h-full rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                                     style="width:{{ ($b['val'] / $statusMax) * 100 }}%; background-color:{{ $b['color'] }}; min-width:{{ $b['val'] > 0 ? '2rem' : '0' }};">
+                                    @if ($b['val'] > 0)
+                                        <span class="text-white text-xs font-bold">{{ $b['val'] }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                            @if ($b['val'] === 0)
+                                <span class="text-xs text-slate-400">0</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+</body>
+</html>
