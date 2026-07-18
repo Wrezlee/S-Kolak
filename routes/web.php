@@ -5,6 +5,9 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\KomoditasController;
+use App\Http\Controllers\Admin\DataNeracaController;
+use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\NotifikasiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardPublikController::class, 'index'])->name('dashboard');
@@ -36,4 +39,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/komoditas', [KomoditasController::class, 'store'])->name('komoditas.store');
     Route::put('/komoditas/{komoditas}', [KomoditasController::class, 'update'])->name('komoditas.update');
     Route::delete('/komoditas/{komoditas}', [KomoditasController::class, 'destroy'])->name('komoditas.destroy');
+
+    // Data Neraca Pangan
+    Route::get('/data', [DataNeracaController::class, 'index'])->name('data');
+    Route::delete('/data/{neracaPangan}', [DataNeracaController::class, 'destroy'])->name('data.destroy');
+
+    // Laporan
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
+
+    // Notifikasi
+    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi');
+    Route::patch('/notifikasi/{notifikasi}/baca', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.baca');
+    Route::patch('/notifikasi/baca-semua', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.baca-semua');
 });
