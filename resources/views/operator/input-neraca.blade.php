@@ -41,11 +41,9 @@
         9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
     ];
 
-    // Rentang tahun dibangun dari tanggal server saat ini (date/now()), bukan angka tetap,
-    // jadi daftar tahun otomatis mengikuti tahun berjalan (termasuk 2xxx dan seterusnya)
-    // setiap kali halaman ini dibuka — tidak perlu diubah manual tiap tahun.
-    $tahunSekarang = (int) now()->year;
-    $daftarTahun = range($tahunSekarang + 1, $tahunSekarang - 5);
+    // Rentang tahun dibuat lebar (1900 - 2100) supaya operator bisa memilih
+    // tahun neraca apa pun tanpa dibatasi tahun berjalan.
+    $daftarTahun = range(2100, 1900);
 
     $komoditasList = $komoditasList ?? collect();
 @endphp
@@ -139,10 +137,8 @@
                         <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500"></span>
                     @endif
                 </a>
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background-color:#2563EB;">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background-color:#2563EB;">
+                    {{ strtoupper(substr($userName, 0, 1)) }}
                 </div>
             </div>
         </header>
@@ -275,18 +271,6 @@
                     </div>
                 </div>
 
-                {{-- ===== Nilai Neraca (otomatis) ===== --}}
-                <div id="cardNilaiNeraca" class="rounded-xl border p-4 flex items-center justify-between bg-slate-50 border-slate-200">
-                    <div>
-                        <p class="text-xs font-bold tracking-wide text-slate-500">NILAI NERACA PANGAN (OTOMATIS)</p>
-                        <p class="text-xs text-slate-400 mt-0.5">Stok Awal + Produksi + Masuk &minus; Keluar &minus; Keb. RT &minus; Keb. Non-RT</p>
-                    </div>
-                    <div class="text-right">
-                        <p id="nilaiNeraca" class="text-2xl font-bold text-black">0</p>
-                        <p id="statusNeraca" class="text-xs font-semibold text-slate-500">Netral</p>
-                    </div>
-                </div>
-
                 <button type="submit"
                         class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all" style="background-color:#2563EB;">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-[15px] h-[15px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
@@ -308,9 +292,6 @@
         const hintStokAwal = document.getElementById('hintStokAwal');
 
         const angkaFields = document.querySelectorAll('.angka-neraca');
-        const nilaiNeracaEl = document.getElementById('nilaiNeraca');
-        const statusNeracaEl = document.getElementById('statusNeraca');
-        const cardNeraca = document.getElementById('cardNilaiNeraca');
 
         // Hanya izinkan digit dan satu tanda titik desimal — tanpa tombol naik/turun
         // karena input pakai type="text", bukan type="number".
@@ -322,7 +303,6 @@
                     v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
                 }
                 el.value = v;
-                hitungNilaiNeraca();
             });
             el.addEventListener('focus', function () {
                 if (el.value === '0') el.value = '';
@@ -331,33 +311,6 @@
                 if (el.value === '') el.value = '0';
             });
         });
-
-        function angka(id) {
-            const v = parseFloat(document.getElementById(id).value);
-            return isNaN(v) ? 0 : v;
-        }
-
-        function hitungNilaiNeraca() {
-            const nilai = angka('stok_awal') + angka('produksi') + angka('masuk')
-                - angka('keluar') - angka('kebutuhan_rumah_tangga') - angka('kebutuhan_non_rumah_tangga');
-
-            nilaiNeracaEl.textContent = new Intl.NumberFormat('id-ID').format(nilai);
-
-            cardNeraca.classList.remove('bg-slate-50', 'border-slate-200', 'bg-green-50', 'border-green-200', 'bg-red-50', 'border-red-200');
-            if (nilai > 0) {
-                cardNeraca.classList.add('bg-green-50', 'border-green-200');
-                statusNeracaEl.textContent = 'Surplus';
-                statusNeracaEl.className = 'text-xs font-semibold text-green-600';
-            } else if (nilai < 0) {
-                cardNeraca.classList.add('bg-red-50', 'border-red-200');
-                statusNeracaEl.textContent = 'Defisit';
-                statusNeracaEl.className = 'text-xs font-semibold text-red-600';
-            } else {
-                cardNeraca.classList.add('bg-slate-50', 'border-slate-200');
-                statusNeracaEl.textContent = 'Netral';
-                statusNeracaEl.className = 'text-xs font-semibold text-slate-500';
-            }
-        }
 
         // Auto-isi Stok Awal dari nilai neraca (stok akhir) bulan sebelumnya,
         // untuk komoditas yang sama — dipanggil setiap kali tahun/bulan/komoditas berubah.
@@ -382,7 +335,6 @@
                     if (data.found) {
                         fieldStokAwal.value = data.stok_awal;
                         hintStokAwal.textContent = 'Otomatis diisi dari akhir periode ' + data.periode;
-                        hitungNilaiNeraca();
                     }
                 })
                 .catch(function () { /* diamkan bila gagal, operator tetap bisa isi manual */ });
@@ -391,8 +343,6 @@
         [fieldTahun, fieldBulan, fieldKomoditas].forEach(function (el) {
             el.addEventListener('change', ambilStokAwalSebelumnya);
         });
-
-        hitungNilaiNeraca();
     })();
 </script>
 
