@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\NotifikasiController;
 use App\Http\Controllers\Operator\DashboardController as OperatorDashboardController;
 use App\Http\Controllers\Operator\NeracaPanganController as OperatorNeracaPanganController;
+use App\Http\Controllers\Operator\LaporanController as OperatorLaporanController;
+use App\Http\Controllers\Operator\NotifikasiController as OperatorNotifikasiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardPublikController::class, 'index'])->name('dashboard');
@@ -68,4 +70,12 @@ Route::middleware(['auth'])->prefix('operator')->name('operator.')->group(functi
     // Data Neraca Saya (list milik operator + perbaikan data revisi)
     Route::get('/data', [OperatorNeracaPanganController::class, 'index'])->name('data');
     Route::put('/data/{neracaPangan}', [OperatorNeracaPanganController::class, 'update'])->name('data.update');
+
+    Route::get('/laporan', [OperatorLaporanController::class, 'index'])->name('laporan');
+    Route::get('/laporan/cetak', [OperatorLaporanController::class, 'cetak'])->name('laporan.cetak');
+
+    // Notifikasi
+    Route::get('/notifikasi', [OperatorNotifikasiController::class, 'index'])->name('notifikasi');
+    Route::patch('/notifikasi/{notifikasi}/baca', [OperatorNotifikasiController::class, 'markAsRead'])->name('notifikasi.baca');
+    Route::patch('/notifikasi/baca-semua', [OperatorNotifikasiController::class, 'markAllAsRead'])->name('notifikasi.baca-semua');
 });

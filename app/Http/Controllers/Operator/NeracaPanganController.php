@@ -32,7 +32,7 @@ class NeracaPanganController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        return view('operator.data_neraca', [
+        return view('operator.data-neraca', [
             'items'      => $items,
             'notifCount' => Notifikasi::where('user_id', $operatorId)
                 ->where('dibaca', false)
@@ -45,7 +45,7 @@ class NeracaPanganController extends Controller
      */
     public function create()
     {
-        return view('operator.input_neraca', [
+        return view('operator.input-neraca', [
             'komoditasList' => Komoditas::where('status', 'Aktif')->orderBy('nama')->get(),
         ]);
     }

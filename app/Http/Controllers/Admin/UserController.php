@@ -29,7 +29,7 @@ class UserController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.manage_user', [
+        return view('admin.manage-user', [
             'users'      => $users,
             'notifCount' => Notifikasi::where('dibaca', false)->count(),
         ]);

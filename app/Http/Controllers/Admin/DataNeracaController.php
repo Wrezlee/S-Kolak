@@ -42,7 +42,7 @@ class DataNeracaController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.data_neraca', [
+        return view('admin.data-neraca', [
             'items'      => $items,
             'notifCount' => Notifikasi::where('dibaca', false)->count(),
         ]);
