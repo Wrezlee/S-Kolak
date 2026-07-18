@@ -82,7 +82,7 @@ class NeracaPanganController extends Controller
             ]);
         }
 
-        NeracaPangan::create([
+        $neracaPangan = NeracaPangan::create([
             'komoditas_id'               => $validated['komoditas_id'],
             'periode'                    => $periode,
             'stok_awal'                  => $validated['stok_awal'],
@@ -96,8 +96,30 @@ class NeracaPanganController extends Controller
             'diajukan_pada'              => now(),
         ]);
 
+        $this->notifikasiVerifikator($neracaPangan, $request->user()->name);
+
         return redirect()->route('operator.input')
-            ->with('status', 'Data neraca pangan berhasil dikirim untuk verifikasi.');
+            ->with('justSubmitted', true);
+    }
+
+    /**
+     * Kirim notifikasi ke seluruh user berperan verifikator bahwa ada
+     * data neraca pangan baru yang menunggu ditinjau.
+     */
+    private function notifikasiVerifikator(NeracaPangan $neracaPangan, string $namaOperator): void
+    {
+        $komoditasNama = $neracaPangan->komoditas->nama ?? optional(Komoditas::find($neracaPangan->komoditas_id))->nama ?? 'data neraca pangan';
+
+        $verifikatorIds = \App\Models\User::where('role', 'verifikator')->pluck('id');
+
+        foreach ($verifikatorIds as $verifikatorId) {
+            Notifikasi::create([
+                'user_id' => $verifikatorId,
+                'judul'   => 'Data baru menunggu verifikasi',
+                'pesan'   => "{$namaOperator} mengirim data {$komoditasNama} untuk diverifikasi.",
+                'dibaca'  => false,
+            ]);
+        }
     }
 
     /**
@@ -140,6 +162,8 @@ class NeracaPanganController extends Controller
             'diverifikasi_oleh'          => null,
             'diverifikasi_pada'          => null,
         ]);
+
+        $this->notifikasiVerifikator($neracaPangan, $request->user()->name);
 
         return redirect()->route('operator.data')
             ->with('status', 'Data berhasil diperbaiki dan dikirim ulang untuk verifikasi.');

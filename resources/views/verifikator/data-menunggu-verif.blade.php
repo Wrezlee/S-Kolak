@@ -157,9 +157,7 @@
                             $isModel = $n instanceof \App\Models\NeracaPangan;
                             $komoditasNama = $n->komoditas->nama ?? '-';
                             $operatorNama = $n->operator->name ?? '-';
-                            $tanggal = $isModel
-                                ? optional($n->created_at)->translatedFormat('d M Y')
-                                : optional($n->created_at)->translatedFormat('d M Y');
+                            $tanggal = \App\Support\FormatWaktu::relatif($n->created_at);
                         @endphp
                         <div class="bg-white rounded-2xl border border-orange-100 shadow-sm p-5">
                             <div class="flex items-start justify-between gap-4 flex-wrap">

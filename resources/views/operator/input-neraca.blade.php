@@ -41,11 +41,12 @@
         9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
     ];
 
-    // Rentang tahun dibuat lebar (1900 - 2100) supaya operator bisa memilih
-    // tahun neraca apa pun tanpa dibatasi tahun berjalan.
-    $daftarTahun = range(2100, 1900);
+    // Tahun berjalan diambil otomatis dari fungsi date(), dipakai sebagai
+    // nilai default input Tahun Neraca (bukan lagi dropdown).
+    $tahunSekarang = date('Y');
 
     $komoditasList = $komoditasList ?? collect();
+    $justSubmitted = session('justSubmitted', false);
 @endphp
 
 <div class="flex h-screen overflow-hidden">
@@ -146,6 +147,22 @@
         {{-- Content --}}
         <main class="flex-1 overflow-y-auto p-4 sm:p-6">
 
+            @if ($justSubmitted)
+                <div class="max-w-3xl mx-auto bg-white rounded-xl border border-blue-100 shadow-sm p-10 flex flex-col items-center text-center gap-2">
+                    <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25 4.5-4.5m4.5 2.25a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h2 class="text-lg font-bold" style="color:#1E3A5F;">Data Berhasil Dikirim untuk Verifikasi</h2>
+                    <p class="text-sm text-slate-500">Verifikator akan segera memeriksa data Anda.</p>
+                    <a href="{{ route('operator.input') }}"
+                       class="mt-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all" style="background-color:#2563EB;">
+                        Input Data Baru
+                    </a>
+                </div>
+            @else
+
             @if (session('status'))
                 <div class="mb-5 flex items-center gap-2 px-4 py-3 rounded-xl bg-green-50 border border-green-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25 4.5-4.5m4.5 2.25a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -179,13 +196,9 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs text-slate-500 block mb-1">Tahun Neraca <span class="text-red-500">*</span></label>
-                            <select name="tahun" id="tahun" required
-                                    class="skolak-select w-full px-3 py-2.5 rounded-lg border border-blue-200 text-sm outline-none focus:border-blue-400">
-                                <option value="" disabled {{ old('tahun') ? '' : 'selected' }}>Pilih Tahun</option>
-                                @foreach ($daftarTahun as $tahun)
-                                    <option value="{{ $tahun }}" {{ (int) old('tahun') === $tahun ? 'selected' : '' }}>{{ $tahun }}</option>
-                                @endforeach
-                            </select>
+                            <input type="number" inputmode="numeric" name="tahun" id="tahun" required
+                                   value="{{ old('tahun', $tahunSekarang) }}"
+                                   class="no-spinner w-full px-3 py-2.5 rounded-lg border border-blue-200 text-sm outline-none focus:border-blue-400">
                             @error('tahun') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
@@ -273,10 +286,11 @@
 
                 <button type="submit"
                         class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all" style="background-color:#2563EB;">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-[15px] h-[15px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
                     Kirim untuk Verifikasi
                 </button>
             </form>
+
+            @endif
         </main>
     </div>
 </div>
@@ -341,7 +355,7 @@
         }
 
         [fieldTahun, fieldBulan, fieldKomoditas].forEach(function (el) {
-            el.addEventListener('change', ambilStokAwalSebelumnya);
+            if (el) el.addEventListener('change', ambilStokAwalSebelumnya);
         });
     })();
 </script>

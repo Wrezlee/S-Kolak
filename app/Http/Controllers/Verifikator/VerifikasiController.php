@@ -39,8 +39,9 @@ class VerifikasiController extends Controller
         $neracaPangan->load(['komoditas', 'operator']);
 
         return view('verifikator.verifikasi-detail', [
-            'item'       => $neracaPangan,
-            'notifCount' => Notifikasi::where('user_id', $request->user()->id)
+            'item'         => $neracaPangan,
+            'pendingCount' => NeracaPangan::where('status', 'menunggu')->count(),
+            'notifCount'   => Notifikasi::where('user_id', $request->user()->id)
                 ->where('dibaca', false)
                 ->count(),
         ]);
