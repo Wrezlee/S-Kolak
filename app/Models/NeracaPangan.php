@@ -64,6 +64,15 @@ class NeracaPangan extends Model
     }
 
     /**
+     * Scope: data yang sudah selesai diverifikasi (valid atau perlu revisi).
+     * Dipakai di halaman "Riwayat Verifikasi" milik verifikator.
+     */
+    public function scopeSudahDiverifikasi(Builder $query): Builder
+    {
+        return $query->whereIn('status', ['valid', 'revisi']);
+    }
+
+    /**
      * Nilai neraca: stok awal + produksi + masuk - keluar - kebutuhan RT - kebutuhan non-RT.
      * Accessor supaya bisa dipakai langsung sebagai $neraca->nilai_neraca di Blade,
      * selain lewat App\Http\Controllers\Admin\DataNeracaController::hitungNilaiNeraca().

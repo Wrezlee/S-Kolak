@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Verifikasi - S-KOLAK Kota Kediri</title>
+    <title>Notifikasi - S-KOLAK Kota Kediri</title>
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -20,25 +20,22 @@
 <body class="h-screen overflow-hidden" style="background-color:#F5F9FF;">
 
 @php
-    // Nilai default apabila controller belum mengirim data.
-    $riwayat = $riwayat ?? collect([
-        (object) ['id' => 1, 'status' => 'valid',
-            'komoditas' => (object) ['nama' => 'Beras'],
-            'operator'  => (object) ['name' => 'Siti Rahayu, S.P'],
-            'periode'   => \Illuminate\Support\Carbon::parse('2025-01-01')],
-        (object) ['id' => 2, 'status' => 'valid',
-            'komoditas' => (object) ['nama' => 'Beras'],
-            'operator'  => (object) ['name' => 'Siti Rahayu, S.P'],
-            'periode'   => \Illuminate\Support\Carbon::parse('2025-02-01')],
-        (object) ['id' => 10, 'status' => 'revisi',
-            'komoditas' => (object) ['nama' => 'Kedelai'],
-            'operator'  => (object) ['name' => 'Siti Rahayu, S.P'],
-            'periode'   => \Illuminate\Support\Carbon::parse('2025-03-01')],
-    ]);
+    $notifCount = $notifCount ?? 2;
+    $activeMenu = 'notifikasi';
+    $userName = auth()->check() ? auth()->user()->name : 'Budi Santoso, M.Si';
 
-    $notifCount = $notifCount ?? 0;
-    $activeMenu = 'riwayat';
-    $userName = auth()->check() ? auth()->user()->name : 'Verifikator';
+    // Jumlah data menunggu verifikasi, untuk badge menu sidebar.
+    $menungguCount = \App\Models\NeracaPangan::where('status', 'menunggu')->count();
+
+    // Data fallback (dipakai hanya untuk pratinjau tampilan bila controller
+    // belum mengirim variabel $notifikasi) — mengikuti pola file verifikator lain.
+    $notifikasi = $notifikasi ?? collect([
+        ['id' => 1, 'pesan' => 'Data neraca Telur Ayam Ras – Kota Kediri menunggu verifikasi.', 'waktu' => '10 menit lalu', 'baca' => false, 'tipe' => 'info'],
+        ['id' => 2, 'pesan' => 'Data neraca Cabai Rawit – Kota Kediri menunggu verifikasi.',    'waktu' => '25 menit lalu', 'baca' => false, 'tipe' => 'info'],
+        ['id' => 3, 'pesan' => 'Data Beras – Feb 2025 – Kota Kediri telah divalidasi.',          'waktu' => '2 jam lalu',    'baca' => true,  'tipe' => 'success'],
+        ['id' => 4, 'pesan' => 'Data Kedelai – Mar 2025 dikembalikan untuk revisi.',              'waktu' => '3 jam lalu',    'baca' => true,  'tipe' => 'warning'],
+        ['id' => 5, 'pesan' => 'Periode baru Apr 2025 telah dibuka oleh Admin.',                  'waktu' => '1 hari lalu',   'baca' => true,  'tipe' => 'info'],
+    ]);
 @endphp
 
 <div class="flex h-screen overflow-hidden">
@@ -66,7 +63,7 @@
             @php
                 $menuItems = [
                     ['key' => 'dashboard',  'label' => 'Dashboard',                 'route' => 'verifikator.dashboard',  'badge' => null],
-                    ['key' => 'menunggu',   'label' => 'Data Menunggu Verifikasi',  'route' => 'verifikator.menunggu',   'badge' => null],
+                    ['key' => 'menunggu',   'label' => 'Data Menunggu Verifikasi',  'route' => 'verifikator.menunggu',   'badge' => $menungguCount],
                     ['key' => 'riwayat',    'label' => 'Riwayat Verifikasi',        'route' => 'verifikator.riwayat',    'badge' => null],
                     ['key' => 'notifikasi', 'label' => 'Notifikasi',                'route' => 'verifikator.notifikasi', 'badge' => $notifCount],
                 ];
@@ -116,18 +113,18 @@
         {{-- Topbar --}}
         <header class="h-14 border-b border-blue-100 bg-white flex items-center px-4 gap-3 flex-shrink-0 shadow-sm">
             <div class="flex-1">
-                <h2 class="text-sm font-bold" style="color:#1E3A5F;">Riwayat Verifikasi</h2>
+                <h2 class="text-sm font-bold" style="color:#1E3A5F;">Notifikasi</h2>
                 <p class="text-xs text-slate-400">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ Route::has('verifikator.notifikasi') ? route('verifikator.notifikasi') : '#' }}" class="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-blue-50 transition-colors">
+                <div class="relative w-9 h-9 flex items-center justify-center rounded-xl">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="#1E3A5F" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
                     </svg>
                     @if ($notifCount > 0)
                         <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500"></span>
                     @endif
-                </a>
+                </div>
                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background-color:#2563EB;">
                     {{ strtoupper(substr($userName, 0, 1)) }}
                 </div>
@@ -137,53 +134,69 @@
         {{-- Content --}}
         <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
 
-            <div>
-                <h1 class="text-xl font-bold" style="color:#1E3A5F;">Riwayat Verifikasi</h1>
-                <p class="text-sm text-slate-500">{{ $riwayat->count() }} data telah diverifikasi · Kota Kediri</p>
-            </div>
-
-            <div class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs">
-                        <thead>
-                            <tr style="background-color:#F0F7FF;">
-                                <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">No</th>
-                                <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Periode</th>
-                                <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Komoditas</th>
-                                <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Operator</th>
-                                <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($riwayat as $i => $n)
-                                @php
-                                    $periode = $n->periode instanceof \Illuminate\Support\Carbon
-                                        ? $n->periode
-                                        : \Illuminate\Support\Carbon::parse($n->periode);
-                                @endphp
-                                <tr class="border-t border-blue-50 hover:bg-blue-50/30 transition-colors">
-                                    <td class="px-4 py-3 text-slate-400">{{ $i + 1 }}</td>
-                                    <td class="px-4 py-3 font-medium" style="color:#1E3A5F;">{{ $periode->translatedFormat('M Y') }}</td>
-                                    <td class="px-4 py-3">{{ $n->komoditas->nama ?? '-' }}</td>
-                                    <td class="px-4 py-3 text-slate-500">{{ $n->operator->name ?? '-' }}</td>
-                                    <td class="px-4 py-3">
-                                        <a href="{{ Route::has('verifikator.riwayat.show') ? route('verifikator.riwayat.show', $n->id) : '#' }}"
-                                           class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-blue-200 text-blue-600 text-xs font-medium hover:bg-blue-50 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-[12px] h-[12px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                            Lihat Detail
-                                        </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-4 py-10 text-center text-slate-400">Belum ada riwayat verifikasi.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+            @if (session('status'))
+                <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-green-50 border border-green-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25 4.5-4.5m4.5 2.25a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <p class="text-sm text-green-700 font-medium">{{ session('status') }}</p>
                 </div>
+            @endif
+
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <h1 class="text-xl font-bold" style="color:#1E3A5F;">Notifikasi</h1>
+                @if ($notifCount > 0)
+                    <form method="POST" action="{{ Route::has('verifikator.notifikasi.baca-semua') ? route('verifikator.notifikasi.baca-semua') : '#' }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="text-xs font-semibold text-blue-600 hover:underline">
+                            Tandai semua sudah dibaca
+                        </button>
+                    </form>
+                @endif
             </div>
 
+            <div class="bg-white rounded-xl border border-blue-100 shadow-sm divide-y divide-blue-50">
+                @forelse ($notifikasi as $n)
+                    @php
+                        $tipe  = $n['tipe'];
+                        $pesan = $n['pesan'];
+                        $waktu = $n['waktu'];
+                        $baca  = $n['baca'];
+                        $id    = $n['id'];
+
+                        $iconBg = match ($tipe) {
+                            'success' => 'bg-green-100',
+                            'warning' => 'bg-orange-100',
+                            default   => 'bg-blue-100',
+                        };
+                    @endphp
+                    <div class="px-5 py-4 flex items-start gap-4 {{ !$baca ? 'bg-blue-50/40' : '' }}">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 {{ $iconBg }}">
+                            @if ($tipe === 'success')
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25 4.5-4.5m4.5 2.25a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            @elseif ($tipe === 'warning')
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.007M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L13.71 3.86a1 1 0 00-1.72 0z"/></svg>
+                            @else
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+                            @endif
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-slate-700 leading-relaxed">{{ $pesan }}</p>
+                            <p class="text-xs text-slate-400 mt-1">{{ $waktu }}</p>
+                        </div>
+                        @if (!$baca)
+                            <form method="POST" action="{{ Route::has('verifikator.notifikasi.baca') ? route('verifikator.notifikasi.baca', $id) : '#' }}" class="flex-shrink-0">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="flex items-center gap-1.5 group" title="Tandai sudah dibaca">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 group-hover:bg-blue-600 transition-colors"></div>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                @empty
+                    <div class="px-5 py-10 text-center text-slate-400 text-sm">Belum ada notifikasi.</div>
+                @endforelse
+            </div>
         </main>
     </div>
 </div>

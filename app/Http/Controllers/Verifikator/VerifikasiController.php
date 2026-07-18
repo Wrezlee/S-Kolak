@@ -47,6 +47,44 @@ class VerifikasiController extends Controller
     }
 
     /**
+     * Daftar riwayat data neraca pangan yang sudah selesai diverifikasi
+     * (valid maupun dikembalikan untuk revisi). Bisa dilihat oleh
+     * verifikator mana pun, tidak difilter per user.
+     */
+    public function riwayat(Request $request)
+    {
+        $riwayat = NeracaPangan::with(['komoditas', 'operator'])
+            ->sudahDiverifikasi()
+            ->orderByDesc('periode')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('verifikator.riwayat', [
+            'riwayat'    => $riwayat,
+            'notifCount' => Notifikasi::where('user_id', $request->user()->id)
+                ->where('dibaca', false)
+                ->count(),
+        ]);
+    }
+
+    /**
+     * Halaman detail (read-only) satu riwayat verifikasi.
+     */
+    public function riwayatShow(Request $request, NeracaPangan $neracaPangan)
+    {
+        abort_unless(in_array($neracaPangan->status, ['valid', 'revisi']), 404);
+
+        $neracaPangan->load(['komoditas', 'operator', 'verifikator']);
+
+        return view('verifikator.riwayat-detail', [
+            'item'       => $neracaPangan,
+            'notifCount' => Notifikasi::where('user_id', $request->user()->id)
+                ->where('dibaca', false)
+                ->count(),
+        ]);
+    }
+
+    /**
      * Proses hasil verifikasi: tandai valid atau kembalikan untuk revisi,
      * catat ke riwayat verifikasi, dan beri notifikasi ke operator terkait.
      */

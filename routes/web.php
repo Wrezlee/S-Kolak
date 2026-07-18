@@ -14,6 +14,7 @@ use App\Http\Controllers\Operator\LaporanController as OperatorLaporanController
 use App\Http\Controllers\Operator\NotifikasiController as OperatorNotifikasiController;
 use App\Http\Controllers\Verifikator\DashboardController as VerifikatorDashboardController;
 use App\Http\Controllers\Verifikator\VerifikasiController as VerifikatorVerifikasiController;
+use App\Http\Controllers\Verifikator\NotifikasiController as VerifikatorNotifikasiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardPublikController::class, 'index'])->name('dashboard');
@@ -91,4 +92,10 @@ Route::middleware(['auth'])->prefix('verifikator')->name('verifikator.')->group(
     Route::get('/menunggu', [VerifikatorVerifikasiController::class, 'index'])->name('menunggu');
     Route::get('/menunggu/{neracaPangan}', [VerifikatorVerifikasiController::class, 'show'])->name('menunggu.show');
     Route::put('/menunggu/{neracaPangan}', [VerifikatorVerifikasiController::class, 'update'])->name('menunggu.update');
+
+    Route::get('/riwayat', [VerifikatorVerifikasiController::class, 'riwayat'])->name('riwayat');
+    Route::get('/riwayat/{neracaPangan}', [VerifikatorVerifikasiController::class, 'riwayatShow'])->name('riwayat.show');
+    Route::get('/notifikasi', [VerifikatorNotifikasiController::class, 'index'])->name('notifikasi');
+    Route::patch('/notifikasi/{notifikasi}/baca', [VerifikatorNotifikasiController::class, 'markAsRead'])->name('notifikasi.baca');
+    Route::patch('/notifikasi/baca-semua', [VerifikatorNotifikasiController::class, 'markAllAsRead'])->name('notifikasi.baca-semua');
 });
