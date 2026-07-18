@@ -16,7 +16,9 @@ class KomoditasController extends Controller
     {
         return view('admin.master-komoditas', [
             'komoditas'  => Komoditas::orderBy('nama')->get(),
-            'notifCount' => Notifikasi::where('dibaca', false)->count(),
+            'notifCount' => Notifikasi::where('user_id', auth()->id())
+                ->where('dibaca', false)
+                ->count(),
         ]);
     }
 

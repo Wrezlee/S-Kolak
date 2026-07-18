@@ -31,7 +31,9 @@ class UserController extends Controller
 
         return view('admin.manage-user', [
             'users'      => $users,
-            'notifCount' => Notifikasi::where('dibaca', false)->count(),
+            'notifCount' => Notifikasi::where('user_id', $request->user()->id)
+                ->where('dibaca', false)
+                ->count(),
         ]);
     }
 

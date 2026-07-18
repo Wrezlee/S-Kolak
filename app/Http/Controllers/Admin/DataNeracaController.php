@@ -44,7 +44,9 @@ class DataNeracaController extends Controller
 
         return view('admin.data-neraca', [
             'items'      => $items,
-            'notifCount' => Notifikasi::where('dibaca', false)->count(),
+            'notifCount' => Notifikasi::where('user_id', $request->user()->id)
+                ->where('dibaca', false)
+                ->count(),
         ]);
     }
 

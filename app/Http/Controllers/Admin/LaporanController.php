@@ -141,7 +141,9 @@ class LaporanController extends Controller
             'entriPerKomoditas' => $entriPerKomoditas,
             'trenBulanan'       => $trenBulanan,
             'perbandinganNilai' => $perbandinganNilai,
-            'notifCount'        => Notifikasi::where('dibaca', false)->count(),
+            'notifCount'        => Notifikasi::where('user_id', auth()->id())
+                ->where('dibaca', false)
+                ->count(),
         ]);
     }
 }

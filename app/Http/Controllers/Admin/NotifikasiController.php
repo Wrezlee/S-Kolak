@@ -12,19 +12,26 @@ class NotifikasiController extends Controller
 {
     public function index(Request $request)
     {
-        $notifikasi = Notifikasi::orderByDesc('created_at')->get()->map(function ($n) {
-            return [
-                'id'    => $n->id,
-                'pesan' => $n->pesan,
-                'waktu' => Carbon::parse($n->created_at)->diffForHumans(),
-                'baca'  => (bool) $n->dibaca,
-                'tipe'  => $this->tentukanTipe($n->pesan),
-            ];
-        });
+        $adminId = $request->user()->id;
+
+        $notifikasi = Notifikasi::where('user_id', $adminId)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($n) {
+                return [
+                    'id'    => $n->id,
+                    'pesan' => $n->pesan,
+                    'waktu' => Carbon::parse($n->created_at)->diffForHumans(),
+                    'baca'  => (bool) $n->dibaca,
+                    'tipe'  => $this->tentukanTipe($n->pesan),
+                ];
+            });
 
         return view('admin.notifikasi', [
             'notifikasi' => $notifikasi,
-            'notifCount' => Notifikasi::where('dibaca', false)->count(),
+            'notifCount' => Notifikasi::where('user_id', $adminId)
+                ->where('dibaca', false)
+                ->count(),
         ]);
     }
 

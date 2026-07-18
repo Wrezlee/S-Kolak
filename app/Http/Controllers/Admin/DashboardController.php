@@ -24,6 +24,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $trend = $this->getTrend();
+        $adminId = $request->user()->id;
 
         return view('admin.dashboard', [
             'summary'     => $this->getSummary(),
@@ -31,8 +32,10 @@ class DashboardController extends Controller
             'trendValues' => $trend->pluck('nilai')->all(),
             'statusPie'   => $this->getStatusPie(),
             'stokBars'    => $this->getStokBars(),
-            'aktivitas'   => $this->getAktivitas(),
-            'notifCount'  => Notifikasi::where('dibaca', false)->count(),
+            'aktivitas'   => $this->getAktivitas($adminId),
+            'notifCount'  => Notifikasi::where('user_id', $adminId)
+                ->where('dibaca', false)
+                ->count(),
             'activeMenu'  => 'dashboard',
         ]);
     }
@@ -113,17 +116,37 @@ class DashboardController extends Controller
             ->all();
     }
 
-    private function getAktivitas(): array
+    private function getAktivitas(int $adminId): array
     {
-        return Notifikasi::latest()
+        return Notifikasi::where('user_id', $adminId)
+            ->latest()
             ->limit(5)
             ->get()
             ->map(fn ($n) => [
-                'tipe'  => $n->tipe,
+                'tipe'  => $this->tentukanTipe($n->pesan),
                 'pesan' => $n->pesan,
                 'waktu' => Carbon::parse($n->created_at)->diffForHumans(),
                 'baca'  => (bool) $n->dibaca,
             ])
             ->all();
+    }
+
+    /**
+     * Tentukan tipe (ikon & warna) notifikasi berdasarkan isi pesan,
+     * karena tabel `notifikasi` belum memiliki kolom `tipe` tersendiri.
+     */
+    private function tentukanTipe(string $pesan): string
+    {
+        $pesanLower = \Illuminate\Support\Str::lower($pesan);
+
+        if (\Illuminate\Support\Str::contains($pesanLower, ['revisi', 'dikembalikan', 'ditolak'])) {
+            return 'warning';
+        }
+
+        if (\Illuminate\Support\Str::contains($pesanLower, ['divalidasi', 'valid', 'disetujui'])) {
+            return 'success';
+        }
+
+        return 'info';
     }
 }
