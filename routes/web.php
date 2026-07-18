@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardPublikController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\KomoditasController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardPublikController::class, 'index'])->name('dashboard');
@@ -21,8 +22,6 @@ Route::post('/logout', [LoginController::class, 'logout'])
 
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    // "/admin" tanpa akhiran diarahkan ke dashboard admin, tetap berada
-    // di dalam grup middleware 'auth' supaya tidak bisa diakses tanpa login.
     Route::redirect('/', '/admin/dashboard')->name('index');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -32,4 +31,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+    Route::get('/komoditas', [KomoditasController::class, 'index'])->name('komoditas');
+    Route::post('/komoditas', [KomoditasController::class, 'store'])->name('komoditas.store');
+    Route::put('/komoditas/{komoditas}', [KomoditasController::class, 'update'])->name('komoditas.update');
+    Route::delete('/komoditas/{komoditas}', [KomoditasController::class, 'destroy'])->name('komoditas.destroy');
 });

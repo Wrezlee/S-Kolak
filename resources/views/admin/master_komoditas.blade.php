@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Pengguna - S-KOLAK Kota Kediri</title>
+    <title>Master Komoditas - S-KOLAK Kota Kediri</title>
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -15,23 +15,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .skolak-select {
-            appearance: none; -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem; padding-right: 2.25rem;
-        }
     </style>
 </head>
 <body class="h-screen overflow-hidden" style="background-color:#F5F9FF;">
 
 @php
     $notifCount = $notifCount ?? 2;
-    $activeMenu = 'users';
-    $roleBadge = [
-        'Admin'       => 'bg-purple-50 text-purple-700 border-purple-200',
-        'Operator'    => 'bg-blue-50 text-blue-700 border-blue-200',
-        'Verifikator' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    ];
+    $activeMenu = 'komoditas';
 @endphp
 
 <div class="flex h-screen overflow-hidden">
@@ -113,7 +103,7 @@
         {{-- Topbar --}}
         <header class="h-14 border-b border-blue-100 bg-white flex items-center px-4 gap-3 flex-shrink-0 shadow-sm">
             <div class="flex-1">
-                <h2 class="text-sm font-bold" style="color:#1E3A5F;">Manajemen Pengguna</h2>
+                <h2 class="text-sm font-bold" style="color:#1E3A5F;">Master Komoditas</h2>
                 <p class="text-xs text-slate-400">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
             </div>
             <div class="flex items-center gap-2">
@@ -143,81 +133,54 @@
                 </div>
             @endif
 
+            @if ($errors->any())
+                <div class="flex items-start gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.007M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L13.71 3.86a1 1 0 00-1.72 0z"/></svg>
+                    <p class="text-sm text-red-600">{{ $errors->first() }}</p>
+                </div>
+            @endif
+
             <div class="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                    <h1 class="text-xl font-bold" style="color:#1E3A5F;">Manajemen Pengguna</h1>
-                    <p class="text-sm text-slate-500">{{ $users->total() }} pengguna terdaftar dalam sistem</p>
+                    <h1 class="text-xl font-bold" style="color:#1E3A5F;">Master Komoditas</h1>
+                    <p class="text-sm text-slate-500">{{ $komoditas->count() }} komoditas terdaftar</p>
                 </div>
                 <button type="button" onclick="document.getElementById('modalTambah').classList.remove('hidden')"
                         class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all" style="background-color:#2563EB;">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-[15px] h-[15px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                    Tambah Pengguna
+                    Tambah Komoditas
                 </button>
             </div>
 
-            <div class="bg-white rounded-xl border border-blue-100 shadow-sm">
-                {{-- Search & filter --}}
-                <form method="GET" class="p-4 border-b border-blue-50 flex items-center gap-3 flex-wrap">
-                    <div class="flex items-center gap-2 flex-1 min-w-[180px] px-3 py-2 rounded-lg border border-blue-100 bg-blue-50/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-[15px] h-[15px] text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                        <input type="text" name="search" value="{{ request('search') }}"
-                               placeholder="Cari nama atau ID pengguna..."
-                               class="flex-1 text-sm bg-transparent outline-none text-slate-700 placeholder-slate-400">
-                    </div>
-                    <select name="role" onchange="this.form.submit()" class="skolak-select px-3 py-2 rounded-lg border border-blue-100 text-sm text-slate-600 outline-none">
-                        <option value="">Semua Role</option>
-                        <option value="Admin" {{ request('role') === 'Admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="Operator" {{ request('role') === 'Operator' ? 'selected' : '' }}>Operator</option>
-                        <option value="Verifikator" {{ request('role') === 'Verifikator' ? 'selected' : '' }}>Verifikator</option>
-                    </select>
-                    <button type="submit" class="px-4 py-2 rounded-lg text-sm font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">Cari</button>
-                    @if (request('search') || request('role'))
-                        <a href="{{ route('admin.users') }}" class="text-xs text-slate-400 hover:text-slate-600">Reset</a>
-                    @endif
-                </form>
-
+            <div class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs">
                         <thead>
                             <tr style="background-color:#F0F7FF;">
                                 <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">No</th>
-                                <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">ID</th>
-                                <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Nama</th>
-                                <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Role</th>
-                                <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Login Terakhir</th>
+                                <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Nama Komoditas</th>
                                 <th class="px-4 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($users as $i => $user)
+                            @forelse ($komoditas as $i => $k)
                                 @php
                                     // Dibangun via json_encode manual (bukan @json()) karena directive
                                     // @json() Blade rusak untuk array dengan lebih dari satu key —
                                     // isinya di-explode berdasarkan koma sehingga terpotong.
                                     $editPayload = json_encode([
-                                        'id'       => $user->id,
-                                        'username' => $user->username,
-                                        'name'     => $user->name,
-                                        'role'     => $user->role,
+                                        'id'   => $k->id,
+                                        'nama' => $k->nama,
                                     ], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG);
 
                                     $deletePayload = json_encode([
-                                        'id'   => $user->id,
-                                        'name' => $user->name,
+                                        'id'   => $k->id,
+                                        'nama' => $k->nama,
                                     ], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG);
                                 @endphp
                                 <tr class="border-t border-blue-50 hover:bg-blue-50/30 transition-colors">
-                                    <td class="px-4 py-3 text-slate-400">{{ $users->firstItem() + $i }}</td>
-                                    <td class="px-4 py-3 font-mono text-blue-600">{{ $user->username }}</td>
-                                    <td class="px-4 py-3 font-medium" style="color:#1E3A5F;">{{ $user->name }}</td>
-                                    <td class="px-4 py-3">
-                                        <span class="px-2 py-0.5 rounded-full text-xs font-medium border {{ $roleBadge[$user->role] ?? 'bg-slate-50 text-slate-600 border-slate-200' }}">
-                                            {{ $user->role }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3 text-slate-500">
-                                        {{ $user->last_login_at ? \Illuminate\Support\Carbon::parse($user->last_login_at)->translatedFormat('d M Y H:i') : '-' }}
-                                    </td>
+                                    <td class="px-4 py-3 text-slate-400">{{ $i + 1 }}</td>
+                                    <td class="px-4 py-3 font-medium" style="color:#1E3A5F;">{{ $k->nama }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex gap-1.5">
                                             <button type="button"
@@ -234,15 +197,15 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">Tidak ada pengguna ditemukan</td></tr>
+                                <tr><td colspan="3" class="px-4 py-8 text-center text-slate-400">Belum ada komoditas terdaftar</td></tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
 
-                @if ($users->hasPages())
+                @if ($komoditas instanceof \Illuminate\Contracts\Pagination\Paginator && $komoditas->hasPages())
                     <div class="p-4 border-t border-blue-50">
-                        {{ $users->links() }}
+                        {{ $komoditas->links() }}
                     </div>
                 @endif
             </div>
@@ -250,42 +213,22 @@
     </div>
 </div>
 
-{{-- ============ MODAL TAMBAH PENGGUNA ============ --}}
+{{-- ============ MODAL TAMBAH KOMODITAS ============ --}}
 <div id="modalTambah" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onclick="if(event.target===this) this.classList.add('hidden')">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
         <div class="flex items-center justify-between">
-            <h3 class="text-sm font-bold" style="color:#1E3A5F;">Tambah Pengguna Baru</h3>
+            <h3 class="text-sm font-bold" style="color:#1E3A5F;">Tambah Komoditas Baru</h3>
             <button type="button" onclick="document.getElementById('modalTambah').classList.add('hidden')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <form method="POST" action="{{ route('admin.users.store') }}" class="space-y-3">
+        <form method="POST" action="{{ route('admin.komoditas.store') }}" class="space-y-3">
             @csrf
             <div>
-                <label class="text-xs text-slate-500 block mb-1">ID Pengguna <span class="text-red-500">*</span></label>
-                <input type="text" name="username" value="{{ old('username') }}" placeholder="cth. op004" required
+                <label class="text-xs text-slate-500 block mb-1">Nama Komoditas <span class="text-red-500">*</span></label>
+                <input type="text" name="nama" value="{{ old('nama') }}" placeholder="Nama komoditas baru..." required
                        class="w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-                @error('username') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label class="text-xs text-slate-500 block mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
-                <input type="text" name="name" value="{{ old('name') }}" placeholder="Nama lengkap pengguna" required
-                       class="w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-                @error('name') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label class="text-xs text-slate-500 block mb-1">Role <span class="text-red-500">*</span></label>
-                <select name="role" required class="skolak-select w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-                    <option value="Admin">Admin</option>
-                    <option value="Operator" selected>Operator</option>
-                    <option value="Verifikator">Verifikator</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-xs text-slate-500 block mb-1">Password Awal <span class="text-red-500">*</span></label>
-                <input type="password" name="password" placeholder="Minimal 8 karakter" required
-                       class="w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-                @error('password') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                @error('nama') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
             <div class="flex gap-2 justify-end pt-2">
                 <button type="button" onclick="document.getElementById('modalTambah').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-slate-200 text-xs text-slate-500 hover:bg-slate-50">Batal</button>
@@ -295,11 +238,11 @@
     </div>
 </div>
 
-{{-- ============ MODAL EDIT PENGGUNA ============ --}}
+{{-- ============ MODAL EDIT KOMODITAS ============ --}}
 <div id="modalEdit" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onclick="if(event.target===this) this.classList.add('hidden')">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
         <div class="flex items-center justify-between">
-            <h3 class="text-sm font-bold" style="color:#1E3A5F;">Edit Pengguna</h3>
+            <h3 class="text-sm font-bold" style="color:#1E3A5F;">Edit Komoditas</h3>
             <button type="button" onclick="document.getElementById('modalEdit').classList.add('hidden')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -308,25 +251,8 @@
             @csrf
             @method('PUT')
             <div>
-                <label class="text-xs text-slate-500 block mb-1">ID Pengguna</label>
-                <input id="editUsername" type="text" disabled class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50 text-slate-400">
-            </div>
-            <div>
-                <label class="text-xs text-slate-500 block mb-1">Nama Lengkap</label>
-                <input id="editName" name="name" type="text" required class="w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-            </div>
-            <div>
-                <label class="text-xs text-slate-500 block mb-1">Role</label>
-                <select id="editRole" name="role" class="skolak-select w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-                    <option value="Admin">Admin</option>
-                    <option value="Operator">Operator</option>
-                    <option value="Verifikator">Verifikator</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-xs text-slate-500 block mb-1">Password Baru (opsional)</label>
-                <input name="password" type="password" placeholder="Kosongkan jika tidak diubah"
-                       class="w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
+                <label class="text-xs text-slate-500 block mb-1">Nama Komoditas <span class="text-red-500">*</span></label>
+                <input id="editNama" name="nama" type="text" required class="w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
             </div>
             <div class="flex gap-2 justify-end pt-2">
                 <button type="button" onclick="document.getElementById('modalEdit').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-slate-200 text-xs text-slate-500 hover:bg-slate-50">Batal</button>
@@ -336,11 +262,11 @@
     </div>
 </div>
 
-{{-- ============ MODAL HAPUS PENGGUNA ============ --}}
+{{-- ============ MODAL HAPUS KOMODITAS ============ --}}
 <div id="modalDelete" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onclick="if(event.target===this) this.classList.add('hidden')">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xs p-6 space-y-4">
-        <h3 class="text-sm font-bold text-red-600">Hapus Pengguna</h3>
-        <p class="text-xs text-slate-600">Yakin ingin menghapus <strong id="deleteName"></strong>? Tindakan ini tidak dapat dibatalkan.</p>
+        <h3 class="text-sm font-bold text-red-600">Hapus Komoditas</h3>
+        <p class="text-xs text-slate-600">Yakin ingin menghapus <strong id="deleteNama"></strong>? Tindakan ini tidak dapat dibatalkan.</p>
         <form id="deleteForm" method="POST" action="">
             @csrf
             @method('DELETE')
@@ -353,19 +279,17 @@
 </div>
 
 <script>
-    const usersBaseUrl = @json(url('admin/users'));
+    const komoditasBaseUrl = @json(url('admin/komoditas'));
 
-    function openEdit(user) {
-        document.getElementById('editUsername').value = user.username;
-        document.getElementById('editName').value = user.name;
-        document.getElementById('editRole').value = user.role;
-        document.getElementById('editForm').action = usersBaseUrl + '/' + user.id;
+    function openEdit(item) {
+        document.getElementById('editNama').value = item.nama;
+        document.getElementById('editForm').action = komoditasBaseUrl + '/' + item.id;
         document.getElementById('modalEdit').classList.remove('hidden');
     }
 
-    function openDelete(user) {
-        document.getElementById('deleteName').textContent = user.name;
-        document.getElementById('deleteForm').action = usersBaseUrl + '/' + user.id;
+    function openDelete(item) {
+        document.getElementById('deleteNama').textContent = item.nama;
+        document.getElementById('deleteForm').action = komoditasBaseUrl + '/' + item.id;
         document.getElementById('modalDelete').classList.remove('hidden');
     }
 </script>
