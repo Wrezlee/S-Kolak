@@ -64,4 +64,8 @@ Route::middleware(['auth'])->prefix('operator')->name('operator.')->group(functi
     Route::get('/input', [OperatorNeracaPanganController::class, 'create'])->name('input');
     Route::post('/input', [OperatorNeracaPanganController::class, 'store'])->name('input.store');
     Route::get('/input/stok-awal', [OperatorNeracaPanganController::class, 'stokAwal'])->name('input.stok-awal');
+
+    // Data Neraca Saya (list milik operator + perbaikan data revisi)
+    Route::get('/data', [OperatorNeracaPanganController::class, 'index'])->name('data');
+    Route::put('/data/{neracaPangan}', [OperatorNeracaPanganController::class, 'update'])->name('data.update');
 });

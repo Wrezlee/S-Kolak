@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class NeracaPangan extends Model
@@ -24,7 +25,7 @@ class NeracaPangan extends Model
         'diverifikasi_oleh',
         'diverifikasi_pada',
     ];
-    
+
     public function komoditas()
     {
         return $this->belongsTo(Komoditas::class);
@@ -45,4 +46,35 @@ class NeracaPangan extends Model
         return $this->hasMany(RiwayatVerifikasiNeraca::class);
     }
 
+    /**
+     * Scope: hanya data milik satu operator (diinput_oleh = $operatorId).
+     * Dipakai di halaman "Data Neraca Saya".
+     */
+    public function scopeMilikOperator(Builder $query, int $operatorId): Builder
+    {
+        return $query->where('diinput_oleh', $operatorId);
+    }
+
+    /**
+     * Scope: data yang sudah diajukan untuk verifikasi (bukan draft).
+     */
+    public function scopeSudahDiajukan(Builder $query): Builder
+    {
+        return $query->where('status', '!=', 'draft');
+    }
+
+    /**
+     * Nilai neraca: stok awal + produksi + masuk - keluar - kebutuhan RT - kebutuhan non-RT.
+     * Accessor supaya bisa dipakai langsung sebagai $neraca->nilai_neraca di Blade,
+     * selain lewat App\Http\Controllers\Admin\DataNeracaController::hitungNilaiNeraca().
+     */
+    public function getNilaiNeracaAttribute(): float
+    {
+        return (float) $this->stok_awal
+            + (float) $this->produksi
+            + (float) $this->masuk
+            - (float) $this->keluar
+            - (float) $this->kebutuhan_rumah_tangga
+            - (float) $this->kebutuhan_non_rumah_tangga;
+    }
 }

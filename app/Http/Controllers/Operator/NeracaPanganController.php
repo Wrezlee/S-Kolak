@@ -6,11 +6,40 @@ use App\Http\Controllers\Admin\DataNeracaController;
 use App\Http\Controllers\Controller;
 use App\Models\Komoditas;
 use App\Models\NeracaPangan;
+use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class NeracaPanganController extends Controller
 {
+    /**
+     * Halaman "Data Neraca Saya": seluruh data neraca pangan milik
+     * operator yang sedang login (diinput_oleh = auth()->id()).
+     *
+     * Draft tidak ikut dikirim ke view karena belum diajukan untuk
+     * verifikasi — belum relevan ditampilkan di halaman ini. Urutan
+     * "revisi selalu di atas" ditangani di sisi Blade (operator/data_neraca.blade.php),
+     * jadi di sini query cukup diurutkan berdasarkan periode terbaru.
+     */
+    public function index(Request $request)
+    {
+        $operatorId = $request->user()->id;
+
+        $items = NeracaPangan::with(['komoditas', 'verifikator'])
+            ->where('diinput_oleh', $operatorId)
+            ->where('status', '!=', 'draft')
+            ->orderByDesc('periode')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('operator.data_neraca', [
+            'items'      => $items,
+            'notifCount' => Notifikasi::where('user_id', $operatorId)
+                ->where('dibaca', false)
+                ->count(),
+        ]);
+    }
+
     /**
      * Tampilkan form input neraca pangan.
      */
@@ -69,6 +98,51 @@ class NeracaPanganController extends Controller
 
         return redirect()->route('operator.input')
             ->with('status', 'Data neraca pangan berhasil dikirim untuk verifikasi.');
+    }
+
+    /**
+     * Perbaiki data neraca pangan yang dikembalikan verifikator (status "revisi"),
+     * lalu ajukan ulang untuk verifikasi. Dipanggil dari modal "Revisi" di halaman
+     * Data Neraca Saya (operator/data_neraca.blade.php).
+     *
+     * Periode & komoditas tidak bisa diubah di sini — operator hanya memperbaiki
+     * angka-angka neraca. Kalau memang salah periode/komoditas, harus dihapuskan
+     * lewat Admin lalu diinput ulang dari awal.
+     */
+    public function update(Request $request, NeracaPangan $neracaPangan)
+    {
+        abort_unless($neracaPangan->diinput_oleh === $request->user()->id, 403);
+
+        if ($neracaPangan->status !== 'revisi') {
+            return back()->with('status', 'Hanya data berstatus "Perlu Revisi" yang dapat diperbaiki.');
+        }
+
+        $validated = $request->validate([
+            'stok_awal'                  => ['required', 'numeric', 'min:0'],
+            'produksi'                   => ['required', 'numeric', 'min:0'],
+            'masuk'                      => ['required', 'numeric', 'min:0'],
+            'keluar'                     => ['required', 'numeric', 'min:0'],
+            'kebutuhan_rumah_tangga'     => ['required', 'numeric', 'min:0'],
+            'kebutuhan_non_rumah_tangga' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $neracaPangan->update([
+            'stok_awal'                  => $validated['stok_awal'],
+            'produksi'                   => $validated['produksi'],
+            'masuk'                      => $validated['masuk'],
+            'keluar'                     => $validated['keluar'],
+            'kebutuhan_rumah_tangga'     => $validated['kebutuhan_rumah_tangga'],
+            'kebutuhan_non_rumah_tangga' => $validated['kebutuhan_non_rumah_tangga'],
+            'status'                     => 'menunggu',
+            'diajukan_pada'              => now(),
+            // Reset hasil verifikasi sebelumnya — data ini menunggu ditinjau ulang
+            // dari awal oleh verifikator (catatan lama tetap tersimpan sbg riwayat).
+            'diverifikasi_oleh'          => null,
+            'diverifikasi_pada'          => null,
+        ]);
+
+        return redirect()->route('operator.data')
+            ->with('status', 'Data berhasil diperbaiki dan dikirim ulang untuk verifikasi.');
     }
 
     /**
