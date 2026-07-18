@@ -41,14 +41,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Menggunakan login_id sebagai username untuk autentikasi.
-     */
-    public function getAuthIdentifierName(): string
-    {
-        return 'login_id';
-    }
-
-    /**
      * Data neraca yang diinput oleh operator.
      */
     public function dataNeraca(): HasMany

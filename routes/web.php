@@ -7,7 +7,6 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardPublikController::class, 'index'])->name('dashboard');
-Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
 
 // Halaman login (GET) — inilah yang dibutuhkan tombol "Masuk"
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -22,6 +21,10 @@ Route::post('/logout', [LoginController::class, 'logout'])
 
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    // "/admin" tanpa akhiran diarahkan ke dashboard admin, tetap berada
+    // di dalam grup middleware 'auth' supaya tidak bisa diakses tanpa login.
+    Route::redirect('/', '/admin/dashboard')->name('index');
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Manajemen Pengguna

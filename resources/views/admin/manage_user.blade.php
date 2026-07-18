@@ -28,9 +28,9 @@
     $notifCount = $notifCount ?? 2;
     $activeMenu = 'users';
     $roleBadge = [
-        'Admin'       => 'bg-purple-50 text-purple-700 border-purple-200',
-        'Operator'    => 'bg-blue-50 text-blue-700 border-blue-200',
-        'Verifikator' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        'admin'       => 'bg-purple-50 text-purple-700 border-purple-200',
+        'operator'    => 'bg-blue-50 text-blue-700 border-blue-200',
+        'verifikator' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
     ];
 @endphp
 
@@ -166,9 +166,9 @@
                     </div>
                     <select name="role" onchange="this.form.submit()" class="skolak-select px-3 py-2 rounded-lg border border-blue-100 text-sm text-slate-600 outline-none">
                         <option value="">Semua Role</option>
-                        <option value="Admin" {{ request('role') === 'Admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="Operator" {{ request('role') === 'Operator' ? 'selected' : '' }}>Operator</option>
-                        <option value="Verifikator" {{ request('role') === 'Verifikator' ? 'selected' : '' }}>Verifikator</option>
+                        <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="operator" {{ request('role') === 'operator' ? 'selected' : '' }}>Operator</option>
+                        <option value="verifikator" {{ request('role') === 'verifikator' ? 'selected' : '' }}>Verifikator</option>
                     </select>
                     <button type="submit" class="px-4 py-2 rounded-lg text-sm font-medium border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">Cari</button>
                     @if (request('search') || request('role'))
@@ -192,11 +192,11 @@
                             @forelse ($users as $i => $user)
                                 <tr class="border-t border-blue-50 hover:bg-blue-50/30 transition-colors">
                                     <td class="px-4 py-3 text-slate-400">{{ $users->firstItem() + $i }}</td>
-                                    <td class="px-4 py-3 font-mono text-blue-600">{{ $user->username }}</td>
+                                    <td class="px-4 py-3 font-mono text-blue-600">{{ $user->login_id }}</td>
                                     <td class="px-4 py-3 font-medium" style="color:#1E3A5F;">{{ $user->name }}</td>
                                     <td class="px-4 py-3">
                                         <span class="px-2 py-0.5 rounded-full text-xs font-medium border {{ $roleBadge[$user->role] ?? 'bg-slate-50 text-slate-600 border-slate-200' }}">
-                                            {{ $user->role }}
+                                            {{ ucfirst($user->role) }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-slate-500">
@@ -205,12 +205,12 @@
                                     <td class="px-4 py-3">
                                         <div class="flex gap-1.5">
                                             <button type="button"
-                                                    onclick='openEdit(@json(["id" => $user->id, "username" => $user->username, "name" => $user->name, "role" => $user->role]))'
+                                                    onclick='openEdit({!! json_encode(["id" => $user->id, "login_id" => $user->login_id, "name" => $user->name, "role" => $user->role]) !!})'
                                                     class="p-1.5 rounded-lg border border-blue-200 text-blue-500 hover:bg-blue-50 transition-colors" title="Edit">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-[13px] h-[13px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/></svg>
                                             </button>
                                             <button type="button"
-                                                    onclick='openDelete(@json(["id" => $user->id, "name" => $user->name]))'
+                                                    onclick='openDelete({!! json_encode(["id" => $user->id, "name" => $user->name]) !!})'
                                                     class="p-1.5 rounded-lg border border-red-100 text-red-400 hover:bg-red-50 transition-colors" title="Hapus">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-[13px] h-[13px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
                                             </button>
@@ -247,9 +247,9 @@
             @csrf
             <div>
                 <label class="text-xs text-slate-500 block mb-1">ID Pengguna <span class="text-red-500">*</span></label>
-                <input type="text" name="username" value="{{ old('username') }}" placeholder="cth. op004" required
+                <input type="text" name="login_id" value="{{ old('login_id') }}" placeholder="cth. op004" required
                        class="w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-                @error('username') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                @error('login_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
                 <label class="text-xs text-slate-500 block mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
@@ -260,9 +260,9 @@
             <div>
                 <label class="text-xs text-slate-500 block mb-1">Role <span class="text-red-500">*</span></label>
                 <select name="role" required class="skolak-select w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-                    <option value="Admin">Admin</option>
-                    <option value="Operator" selected>Operator</option>
-                    <option value="Verifikator">Verifikator</option>
+                    <option value="admin">Admin</option>
+                    <option value="operator" selected>Operator</option>
+                    <option value="verifikator">Verifikator</option>
                 </select>
             </div>
             <div>
@@ -302,9 +302,9 @@
             <div>
                 <label class="text-xs text-slate-500 block mb-1">Role</label>
                 <select id="editRole" name="role" class="skolak-select w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
-                    <option value="Admin">Admin</option>
-                    <option value="Operator">Operator</option>
-                    <option value="Verifikator">Verifikator</option>
+                    <option value="admin">Admin</option>
+                    <option value="operator">Operator</option>
+                    <option value="verifikator">Verifikator</option>
                 </select>
             </div>
             <div>
@@ -340,7 +340,7 @@
     const usersBaseUrl = @json(url('admin/users'));
 
     function openEdit(user) {
-        document.getElementById('editUsername').value = user.username;
+        document.getElementById('editUsername').value = user.login_id;
         document.getElementById('editName').value = user.name;
         document.getElementById('editRole').value = user.role;
         document.getElementById('editForm').action = usersBaseUrl + '/' + user.id;
