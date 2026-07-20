@@ -44,10 +44,15 @@ class NeracaPanganController extends Controller
     /**
      * Tampilkan form input neraca pangan.
      */
-    public function create()
+    public function create(Request $request)
     {
+        $operatorId = $request->user()->id;
+
         return view('operator.input-neraca', [
             'komoditasList' => Komoditas::where('status', 'Aktif')->orderBy('nama')->get(),
+            'notifCount' => Notifikasi::where('user_id', $operatorId)
+                ->where('dibaca', false)
+                ->count(),
         ]);
     }
 

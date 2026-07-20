@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Pakai tampilan pagination custom (Showing X to Y of Z entries + first/last)
+        // di seluruh halaman yang memanggil {{ $items->links() }}.
+        Paginator::defaultView('vendor.pagination.custom');
     }
 }
