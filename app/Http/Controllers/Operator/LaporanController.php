@@ -11,17 +11,11 @@ use Illuminate\Support\Carbon;
 
 class LaporanController extends Controller
 {
-    /** Nama bulan Indonesia (singkatan) -> nomor bulan, untuk parsing filter "Jan", "Feb", dst. */
     private const BULAN_INDO = [
         'Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4, 'Mei' => 5, 'Jun' => 6,
         'Jul' => 7, 'Agt' => 8, 'Sep' => 9, 'Okt' => 10, 'Nov' => 11, 'Des' => 12,
     ];
 
-    /**
-     * Halaman "Laporan Neraca Saya": data neraca pangan milik operator yang
-     * sedang login, difilter berdasarkan rentang periode dan komoditas.
-     * Draft tidak diikutsertakan karena belum diajukan untuk verifikasi.
-     */
     public function index(Request $request)
     {
         $operatorId = $request->user()->id;
@@ -53,20 +47,17 @@ class LaporanController extends Controller
         $items = $query->orderByDesc('periode')->orderByDesc('id')->get();
 
         return view('operator.laporan', [
-            'filters'       => $filters,
-            'items'         => $items,
-            'komoditasList' => Komoditas::where('status', 'Aktif')->orderBy('nama')->get(),
-            'notifCount'    => Notifikasi::where('user_id', $operatorId)
+            'filters'        => $filters,
+            'items'          => $items,
+            'komoditasList'  => Komoditas::where('status', 'Aktif')->orderBy('nama')->get(),
+            'notifCount'     => Notifikasi::where('user_id', $operatorId)
                 ->where('dibaca', false)
                 ->count(),
+            'totalEntriSaya' => NeracaPangan::where('diinput_oleh', $operatorId)->count(),
         ]);
     }
 
-    /**
-     * Versi cetak (print-friendly) dari laporan, memakai filter query string yang sama.
-     * Tidak memakai library PDF terpisah — halaman ini dicetak lewat dialog print browser
-     * (window.print()), jadi tetap konsisten tanpa dependency tambahan.
-     */
+
     public function cetak(Request $request)
     {
         $operatorId = $request->user()->id;
@@ -104,10 +95,6 @@ class LaporanController extends Controller
         ]);
     }
 
-    /**
-     * Tanggal awal rentang filter (tanggal 1 pada bulan/tahun awal).
-     * Mengembalikan null kalau tahun atau bulan awal tidak diisi.
-     */
     private function buildPeriodeAwal(?string $tahun, ?string $bulan): ?Carbon
     {
         if (empty($tahun) || empty($bulan) || ! isset(self::BULAN_INDO[$bulan])) {
@@ -117,10 +104,6 @@ class LaporanController extends Controller
         return Carbon::create((int) $tahun, self::BULAN_INDO[$bulan], 1)->startOfMonth();
     }
 
-    /**
-     * Tanggal akhir rentang filter (tanggal terakhir pada bulan/tahun akhir).
-     * Mengembalikan null kalau tahun atau bulan akhir tidak diisi.
-     */
     private function buildPeriodeAkhir(?string $tahun, ?string $bulan): ?Carbon
     {
         if (empty($tahun) || empty($bulan) || ! isset(self::BULAN_INDO[$bulan])) {
