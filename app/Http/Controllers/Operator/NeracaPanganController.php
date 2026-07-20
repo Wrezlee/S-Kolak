@@ -13,15 +13,6 @@ use Illuminate\Support\Carbon;
 
 class NeracaPanganController extends Controller
 {
-    /**
-     * Halaman "Data Neraca Saya": seluruh data neraca pangan milik
-     * operator yang sedang login (diinput_oleh = auth()->id()).
-     *
-     * Draft tidak ikut dikirim ke view karena belum diajukan untuk
-     * verifikasi — belum relevan ditampilkan di halaman ini. Urutan
-     * "revisi selalu di atas" ditangani di sisi Blade (operator/data_neraca.blade.php),
-     * jadi di sini query cukup diurutkan berdasarkan periode terbaru.
-     */
     public function index(Request $request)
     {
         $operatorId = $request->user()->id;
@@ -50,15 +41,13 @@ class NeracaPanganController extends Controller
 
         return view('operator.input-neraca', [
             'komoditasList' => Komoditas::where('status', 'Aktif')->orderBy('nama')->get(),
+            'totalEntri' => NeracaPangan::where('diinput_oleh', $operatorId)->count(),
             'notifCount' => Notifikasi::where('user_id', $operatorId)
                 ->where('dibaca', false)
                 ->count(),
         ]);
     }
 
-    /**
-     * Simpan data neraca pangan baru dan langsung ajukan untuk verifikasi.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -108,14 +97,7 @@ class NeracaPanganController extends Controller
             ->with('justSubmitted', true);
     }
 
-    /**
-     * Kirim notifikasi ke seluruh user berperan verifikator DAN admin
-     * bahwa ada data neraca pangan baru yang menunggu ditinjau.
-     *
-     * Sebelumnya method ini bernama notifikasiVerifikator() dan hanya
-     * mengirim ke role 'verifikator', sehingga admin tidak pernah
-     * menerima notifikasi apa pun. Sekarang role 'admin' ikut disertakan.
-     */
+ 
     private function notifikasiPengajuanBaru(NeracaPangan $neracaPangan, string $namaOperator): void
     {
         $komoditasNama = $neracaPangan->komoditas->nama ?? optional(Komoditas::find($neracaPangan->komoditas_id))->nama ?? 'data neraca pangan';
@@ -132,15 +114,7 @@ class NeracaPanganController extends Controller
         }
     }
 
-    /**
-     * Perbaiki data neraca pangan yang dikembalikan verifikator (status "revisi"),
-     * lalu ajukan ulang untuk verifikasi. Dipanggil dari modal "Revisi" di halaman
-     * Data Neraca Saya (operator/data_neraca.blade.php).
-     *
-     * Periode & komoditas tidak bisa diubah di sini — operator hanya memperbaiki
-     * angka-angka neraca. Kalau memang salah periode/komoditas, harus dihapuskan
-     * lewat Admin lalu diinput ulang dari awal.
-     */
+  
     public function update(Request $request, NeracaPangan $neracaPangan)
     {
         abort_unless($neracaPangan->diinput_oleh === $request->user()->id, 403);
@@ -167,8 +141,6 @@ class NeracaPanganController extends Controller
             'kebutuhan_non_rumah_tangga' => $validated['kebutuhan_non_rumah_tangga'],
             'status'                     => 'menunggu',
             'diajukan_pada'              => now(),
-            // Reset hasil verifikasi sebelumnya — data ini menunggu ditinjau ulang
-            // dari awal oleh verifikator (catatan lama tetap tersimpan sbg riwayat).
             'diverifikasi_oleh'          => null,
             'diverifikasi_pada'          => null,
         ]);
@@ -179,10 +151,7 @@ class NeracaPanganController extends Controller
             ->with('status', 'Data berhasil diperbaiki dan dikirim ulang untuk verifikasi.');
     }
 
-    /**
-     * AJAX: ambil nilai neraca (stok akhir) bulan sebelumnya untuk komoditas yang sama,
-     * dipakai untuk auto-isi field Stok Awal pada bulan berjalan.
-     */
+
     public function stokAwal(Request $request)
     {
         $validated = $request->validate([
