@@ -89,7 +89,7 @@
                 'status'        => $n->status,
                 'verifikator'   => $n->verifikator->name ?? null,
                 'keterangan'    => $n->keterangan,
-                'tanggal_input' => optional($n->created_at)->translatedFormat('d M Y'),
+                'tanggal_input' => optional($n->created_at)->locale('id')->translatedFormat('d F Y'),
             ];
         }
 

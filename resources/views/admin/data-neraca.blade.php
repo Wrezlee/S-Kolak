@@ -246,7 +246,7 @@
                                         'nilaiNeraca'  => (float) $nilaiNeraca,
                                         'operator'     => $n->operator->name ?? '-',
                                         'verifikator'  => $n->verifikator->name ?? '—',
-                                        'tanggalInput' => optional($n->created_at)->translatedFormat('d M Y'),
+                                        'tanggalInput' => optional($n->created_at)->locale('id')->translatedFormat('d F Y'),
                                         'keterangan'   => $n->keterangan ?? '',
                                     ], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG);
 
@@ -384,7 +384,7 @@
 
     function openDetail(d) {
         document.getElementById('detailKomoditas').textContent = d.komoditas;
-        document.getElementById('detailPeriode').textContent = d.periode + ' · Kota Kediri';
+        document.getElementById('detailPeriode').textContent = d.periode;
 
         const statusBadge = document.getElementById('detailStatusBadge');
         statusBadge.textContent = d.statusLabel;
