@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardPublikController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\KomoditasController;
@@ -29,6 +30,13 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
 Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout');
 
+// Lupa password — sistem login berbasis Login ID (bukan email), sehingga
+// tautan reset ditampilkan langsung di layar alih-alih dikirim via email.
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update');
+
 
 Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/dashboard')->name('index');
@@ -48,6 +56,8 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
 
     // Data Neraca Pangan
     Route::get('/data', [DataNeracaController::class, 'index'])->name('data');
+    Route::get('/data/export/excel', [DataNeracaController::class, 'exportExcel'])->name('data.export.excel');
+    Route::get('/data/export/pdf', [DataNeracaController::class, 'exportPdf'])->name('data.export.pdf');
     Route::delete('/data/{neracaPangan}', [DataNeracaController::class, 'destroy'])->name('data.destroy');
 
     // Laporan
