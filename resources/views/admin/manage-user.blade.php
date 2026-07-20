@@ -436,11 +436,17 @@
         document.getElementById('modalEdit').classList.remove('hidden');
     }
 
-    function openDelete(user) {
+   function openDelete(user) {
         document.getElementById('deleteName').textContent = user.name;
         document.getElementById('deleteForm').action = usersBaseUrl + '/' + user.id;
         document.getElementById('modalDelete').classList.remove('hidden');
     }
+
+    document.getElementById('deleteForm').addEventListener('submit', function () {
+        const btn = this.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Menghapus...';
+    });
 </script>
 
 <script>

@@ -23,4 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        $exceptions->render(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, Request $request) {
+            if (!$request->is('api/*')) {
+                return back()->withErrors([
+                    'delete' => 'Data tidak ditemukan. Mungkin sudah dihapus atau diperbarui sebelumnya.',
+                ]);
+            }
+        });
     })->create();
