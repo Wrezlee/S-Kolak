@@ -16,6 +16,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        #appSidebar { transition: width .2s ease; }
+        #appSidebar.sidebar-collapsed { width: 76px !important; }
+        #appSidebar.sidebar-collapsed .sidebar-label { display: none !important; }
+        #appSidebar.sidebar-collapsed .p-4.border-b.border-blue-50 { justify-content: center; }
+        #appSidebar.sidebar-collapsed nav a { justify-content: center; }
+        #appSidebar.sidebar-collapsed .p-3.border-t.border-blue-50 button { justify-content: center; }
+        #appSidebar.sidebar-collapsed #sidebarToggleIcon { transform: rotate(180deg); }
     </style>
 </head>
 <body class="h-screen overflow-hidden" style="background-color:#F5F9FF;">
@@ -101,14 +108,14 @@
             @else
                 <div class="w-9 h-9 rounded-full bg-blue-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">SK</div>
             @endif
-            <div class="overflow-hidden">
+            <div class="overflow-hidden sidebar-label">
                 <p class="text-sm font-bold truncate" style="color:#1E3A5F;">S-KOLAK</p>
                 <p class="text-xs text-slate-400 truncate">Kota Kediri</p>
             </div>
         </div>
 
         {{-- Role (tanpa nama, hanya label "Administrator") --}}
-        <div class="mx-3 mt-3 p-3 rounded-xl" style="background-color:#EFF6FF;">
+        <div class="mx-3 mt-3 p-3 rounded-xl sidebar-label" style="background-color:#EFF6FF;">
             <p class="text-xs font-semibold text-blue-600">Admin</p>
             <p class="text-xs font-medium truncate mt-0.5" style="color:#1E3A5F;">Administrator</p>
         </div>
@@ -137,14 +144,15 @@
             @foreach ($menuItems as $item)
                 @php $isActive = $activeMenu === $item['key']; @endphp
                 <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}"
+                   title="{{ $item['label'] }}"
                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
                    style="{{ $isActive ? 'background-color:#2563EB; color:white; font-weight:600;' : 'color:#475569;' }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-[17px] h-[17px] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         {!! $menuIcons[$item['key']] !!}
                     </svg>
-                    <span class="truncate flex-1 text-left">{{ $item['label'] }}</span>
+                    <span class="truncate flex-1 text-left sidebar-label">{{ $item['label'] }}</span>
                     @if ($item['badge'])
-                        <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full font-bold"
+                        <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full font-bold sidebar-label"
                               style="{{ $isActive ? 'background-color:rgba(255,255,255,0.3); color:white;' : 'background-color:#FEF3C7; color:#B45309;' }}">
                             {{ $item['badge'] }}
                         </span>
@@ -161,7 +169,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-[17px] h-[17px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H3" transform="scale(-1,1) translate(-24,0)"/>
                     </svg>
-                    <span>Logout</span>
+                    <span class="sidebar-label">Logout</span>
                 </button>
             </form>
         </div>
@@ -418,5 +426,6 @@
         }
     });
 </script>
+    <script src="{{ asset('js/sidebar-toggle.js') }}"></script>
 </body>
 </html>

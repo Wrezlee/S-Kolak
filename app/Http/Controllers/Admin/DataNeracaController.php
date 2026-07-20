@@ -7,7 +7,6 @@ use App\Models\NeracaPangan;
 use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class DataNeracaController extends Controller
 {
@@ -44,7 +43,7 @@ class DataNeracaController extends Controller
     }
 
     /**
-     * Query dasar dengan filter yang sama dipakai index(), exportExcel(), dan exportPdf(),
+     * Query dasar dengan filter yang sama dipakai index(), exportExcel(), dan cetak(),
      * supaya hasil export selalu konsisten dengan filter yang sedang aktif di halaman.
      */
     private function filteredQuery(Request $request)
@@ -94,7 +93,7 @@ class DataNeracaController extends Controller
                 'status'       => self::STATUS_LABEL[$n->status] ?? ucfirst($n->status),
                 'operator'     => $n->operator->name ?? '-',
                 'verifikator'  => $n->verifikator->name ?? '-',
-                'tanggal'      => optional($n->created_at)->translatedFormat('d M Y'),
+                'tanggal'      => $n->created_at ? self::formatTanggalIndo($n->created_at) : '-',
             ];
         })->all();
     }
@@ -109,7 +108,7 @@ class DataNeracaController extends Controller
     public function exportExcel(Request $request)
     {
         $rows = $this->exportRows($request);
-        $generatedAt = now()->translatedFormat('d F Y H:i');
+        $generatedAt = self::formatTanggalIndo(now(), true);
 
         $html = view('admin.exports.data-neraca-excel', [
             'rows'        => $rows,
@@ -126,22 +125,21 @@ class DataNeracaController extends Controller
     }
 
     /**
-     * Export data neraca pangan (sesuai filter aktif) ke file PDF.
-     * Membutuhkan paket "barryvdh/laravel-dompdf" (composer require barryvdh/laravel-dompdf).
+     * Versi cetak (print-friendly) dari data neraca pangan, memakai filter query string
+     * yang sama dengan halaman index. Sama seperti "Cetak PDF" di Laporan Operator: tidak
+     * memakai library PDF terpisah (mis. DomPDF) — halaman ini dicetak lewat dialog print
+     * browser (window.print()), sehingga tidak bergantung pada extension/paket tambahan
+     * yang mungkin belum terpasang di server.
      */
-    public function exportPdf(Request $request)
+    public function cetak(Request $request)
     {
         $rows = $this->exportRows($request);
-        $generatedAt = now()->translatedFormat('d F Y H:i');
+        $generatedAt = self::formatTanggalIndo(now(), true);
 
-        $pdf = Pdf::loadView('admin.exports.data-neraca-pdf', [
+        return view('admin.exports.data-neraca-cetak', [
             'rows'        => $rows,
             'generatedAt' => $generatedAt,
-        ])->setPaper('a4', 'landscape');
-
-        $filename = 'data-neraca-pangan-' . now()->format('Y-m-d_His') . '.pdf';
-
-        return $pdf->download($filename);
+        ]);
     }
 
     /**
@@ -175,5 +173,26 @@ class DataNeracaController extends Controller
         $date = $periode instanceof Carbon ? $periode : Carbon::parse($periode);
 
         return (self::BULAN_INDO[(int) $date->month] ?? $date->month) . ' ' . $date->year;
+    }
+
+    /**
+     * Format tanggal lengkap berbahasa Indonesia, mis. "18 Juli 2026" atau
+     * (dengan waktu) "18 Juli 2026, 08:59". Sengaja tidak memakai
+     * ->translatedFormat()/Carbon::setLocale(), karena hasilnya masih bisa
+     * jatuh ke bahasa Inggris jika extension "intl" tidak terpasang di
+     * server — array BULAN_INDO di atas membuat hasilnya selalu konsisten
+     * berbahasa Indonesia di server mana pun.
+     */
+    public static function formatTanggalIndo($date, bool $withTime = false): string
+    {
+        $date = $date instanceof Carbon ? $date : Carbon::parse($date);
+
+        $hasil = $date->day . ' ' . (self::BULAN_INDO[(int) $date->month] ?? $date->month) . ' ' . $date->year;
+
+        if ($withTime) {
+            $hasil .= ', ' . $date->format('H:i');
+        }
+
+        return $hasil;
     }
 }

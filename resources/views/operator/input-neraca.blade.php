@@ -15,6 +15,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        #appSidebar { transition: width .2s ease; }
+        #appSidebar.sidebar-collapsed { width: 76px !important; }
+        #appSidebar.sidebar-collapsed .sidebar-label { display: none !important; }
+        #appSidebar.sidebar-collapsed .p-4.border-b.border-blue-50 { justify-content: center; }
+        #appSidebar.sidebar-collapsed nav a { justify-content: center; }
+        #appSidebar.sidebar-collapsed .p-3.border-t.border-blue-50 button { justify-content: center; }
+        #appSidebar.sidebar-collapsed #sidebarToggleIcon { transform: rotate(180deg); }
         .skolak-select {
             appearance: none; -webkit-appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -71,20 +78,27 @@
 <div class="flex h-screen overflow-hidden">
 
     {{-- ============ SIDEBAR ============ --}}
-    <aside class="hidden md:flex flex-col flex-shrink-0 w-[240px] border-r border-blue-100 bg-white">
+    <aside id="appSidebar" class="hidden md:flex flex-col flex-shrink-0 relative border-r border-blue-100 bg-white" style="width:240px;">
+        <script>(function(){var s=document.getElementById('appSidebar');if(s&&localStorage.getItem('skolak_sidebar_collapsed')==='1'){s.classList.add('sidebar-collapsed');}})();</script>
+        <button type="button" onclick="toggleSidebar()" title="Ciutkan/luaskan sidebar"
+            class="hidden md:flex absolute -right-3 top-8 w-6 h-6 rounded-full bg-white border border-blue-200 shadow-md items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-400 transition-all z-20">
+            <svg id="sidebarToggleIcon" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
         <div class="p-4 border-b border-blue-50 flex items-center gap-3">
             @if (file_exists(public_path('images/logo-kediri.png')))
                 <img src="{{ asset('images/logo-kediri.png') }}" alt="Logo Kota Kediri" class="w-9 h-9 object-contain flex-shrink-0">
             @else
                 <div class="w-9 h-9 rounded-full bg-blue-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">SK</div>
             @endif
-            <div class="overflow-hidden">
+            <div class="overflow-hidden sidebar-label">
                 <p class="text-sm font-bold truncate" style="color:#1E3A5F;">S-KOLAK</p>
                 <p class="text-xs text-slate-400 truncate">Kota Kediri</p>
             </div>
         </div>
 
-        <div class="mx-3 mt-3 p-3 rounded-xl" style="background-color:#EFF6FF;">
+        <div class="mx-3 mt-3 p-3 rounded-xl sidebar-label" style="background-color:#EFF6FF;">
             <p class="text-xs font-semibold text-blue-600">Operator</p>
             <p class="text-xs font-medium truncate mt-0.5" style="color:#1E3A5F;">{{ $userName }}</p>
         </div>
@@ -110,14 +124,15 @@
             @foreach ($menuItems as $item)
                 @php $isActive = $activeMenu === $item['key']; @endphp
                 <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}"
+                   title="{{ $item['label'] }}"
                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
                    style="{{ $isActive ? 'background-color:#2563EB; color:white; font-weight:600;' : 'color:#475569;' }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-[17px] h-[17px] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         {!! $menuIcons[$item['key']] !!}
                     </svg>
-                    <span class="truncate flex-1 text-left">{{ $item['label'] }}</span>
+                    <span class="truncate flex-1 text-left sidebar-label">{{ $item['label'] }}</span>
                     @if ($item['badge'])
-                        <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full font-bold"
+                        <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full font-bold sidebar-label"
                               style="{{ $isActive ? 'background-color:rgba(255,255,255,0.3); color:white;' : 'background-color:#FEF3C7; color:#B45309;' }}">
                             {{ $item['badge'] }}
                         </span>
@@ -133,7 +148,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-[17px] h-[17px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H3" transform="scale(-1,1) translate(-24,0)"/>
                     </svg>
-                    <span>Logout</span>
+                    <span class="sidebar-label">Logout</span>
                 </button>
             </form>
         </div>
@@ -427,5 +442,6 @@
         }
     });
 </script>
+    <script src="{{ asset('js/sidebar-toggle.js') }}"></script>
 </body>
 </html>

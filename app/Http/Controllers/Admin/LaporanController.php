@@ -60,36 +60,7 @@ class LaporanController extends Controller
         });
 
         // ── Laporan Detail (mengikuti filter) ──
-        $startDate = null;
-        $endDate = null;
-
-        if ($filters['tahun_awal'] && $filters['bulan_awal']) {
-            $bulanNum = array_search($filters['bulan_awal'], self::BULAN_ABBR);
-            if ($bulanNum) {
-                $startDate = Carbon::create((int) $filters['tahun_awal'], $bulanNum, 1)->startOfMonth();
-            }
-        }
-
-        if ($filters['tahun_akhir'] && $filters['bulan_akhir']) {
-            $bulanNum = array_search($filters['bulan_akhir'], self::BULAN_ABBR);
-            if ($bulanNum) {
-                $endDate = Carbon::create((int) $filters['tahun_akhir'], $bulanNum, 1)->endOfMonth();
-            }
-        }
-
-        $detailQuery = NeracaPangan::with('komoditas')->orderByDesc('periode');
-
-        if ($startDate) {
-            $detailQuery->where('periode', '>=', $startDate);
-        }
-        if ($endDate) {
-            $detailQuery->where('periode', '<=', $endDate);
-        }
-        if ($filters['status']) {
-            $detailQuery->where('status', $filters['status']);
-        }
-
-        $detail = $detailQuery->paginate(15)->withQueryString();
+        $detail = $this->filteredDetailQuery($filters)->paginate(15)->withQueryString();
 
         // ── Grafik & Visualisasi (dari seluruh data, seperti pada desain) ──
         $komoditasList = Komoditas::orderBy('nama')->pluck('nama', 'id');
@@ -145,5 +116,133 @@ class LaporanController extends Controller
                 ->where('dibaca', false)
                 ->count(),
         ]);
+    }
+
+    /**
+     * Export Laporan Detail (sesuai filter aktif) ke file Excel (.xls).
+     * Tanpa dependensi tambahan: tabel HTML disajikan dengan header MIME Excel.
+     */
+    public function exportExcel(Request $request)
+    {
+        $filters = $this->readFilters($request);
+        $rows = $this->exportRows($filters);
+        $generatedAt = DataNeracaController::formatTanggalIndo(now(), true);
+
+        $html = view('admin.exports.laporan-excel', [
+            'rows'        => $rows,
+            'filters'     => $filters,
+            'generatedAt' => $generatedAt,
+        ])->render();
+
+        $filename = 'laporan-neraca-pangan-' . now()->format('Y-m-d_His') . '.xls';
+
+        return response($html, 200, [
+            'Content-Type'        => 'application/vnd.ms-excel; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control'       => 'max-age=0',
+        ]);
+    }
+
+    /**
+     * Versi cetak (print-friendly) dari Laporan, memakai filter query string yang sama.
+     * Sama seperti "Cetak PDF" di Laporan Operator: dicetak lewat dialog print browser
+     * (window.print()), tanpa dependency PDF tambahan.
+     */
+    public function cetak(Request $request)
+    {
+        $filters = $this->readFilters($request);
+        $rows = $this->exportRows($filters);
+        $generatedAt = DataNeracaController::formatTanggalIndo(now(), true);
+
+        return view('admin.exports.laporan-cetak', [
+            'rows'        => $rows,
+            'filters'     => $filters,
+            'generatedAt' => $generatedAt,
+        ]);
+    }
+
+    /**
+     * Ambil & normalisasi filter dari query string (tahun/bulan awal-akhir & status).
+     */
+    private function readFilters(Request $request): array
+    {
+        return [
+            'tahun_awal'  => $request->input('tahun_awal', ''),
+            'bulan_awal'  => $request->input('bulan_awal', ''),
+            'tahun_akhir' => $request->input('tahun_akhir', ''),
+            'bulan_akhir' => $request->input('bulan_akhir', ''),
+            'status'      => $request->input('status', ''),
+        ];
+    }
+
+    /**
+     * Query Laporan Detail dengan filter yang sama dipakai index(), exportExcel(), dan cetak().
+     */
+    private function filteredDetailQuery(array $filters)
+    {
+        $startDate = null;
+        $endDate = null;
+
+        if ($filters['tahun_awal'] && $filters['bulan_awal']) {
+            $bulanNum = array_search($filters['bulan_awal'], self::BULAN_ABBR);
+            if ($bulanNum) {
+                $startDate = Carbon::create((int) $filters['tahun_awal'], $bulanNum, 1)->startOfMonth();
+            }
+        }
+
+        if ($filters['tahun_akhir'] && $filters['bulan_akhir']) {
+            $bulanNum = array_search($filters['bulan_akhir'], self::BULAN_ABBR);
+            if ($bulanNum) {
+                $endDate = Carbon::create((int) $filters['tahun_akhir'], $bulanNum, 1)->endOfMonth();
+            }
+        }
+
+        $query = NeracaPangan::with(['komoditas', 'operator', 'verifikator'])->orderByDesc('periode');
+
+        if ($startDate) {
+            $query->where('periode', '>=', $startDate);
+        }
+        if ($endDate) {
+            $query->where('periode', '<=', $endDate);
+        }
+        if ($filters['status']) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Susun baris Laporan Detail (format array datar) untuk keperluan export Excel & cetak PDF.
+     */
+    private function exportRows(array $filters): array
+    {
+        $items = $this->filteredDetailQuery($filters)->orderByDesc('id')->get();
+
+        $statusLabel = [
+            'valid'    => 'Valid',
+            'menunggu' => 'Menunggu Verifikasi',
+            'revisi'   => 'Perlu Revisi',
+        ];
+
+        return $items->map(function (NeracaPangan $n, $i) use ($statusLabel) {
+            $nilai = DataNeracaController::hitungNilaiNeraca($n);
+
+            return [
+                'no'           => $i + 1,
+                'periode'      => DataNeracaController::formatPeriode($n->periode),
+                'komoditas'    => $n->komoditas->nama ?? '-',
+                'stok_awal'    => (float) $n->stok_awal,
+                'produksi'     => (float) $n->produksi,
+                'masuk'        => (float) $n->masuk,
+                'keluar'       => (float) $n->keluar,
+                'keb_rt'       => (float) $n->kebutuhan_rumah_tangga,
+                'keb_non_rt'   => (float) $n->kebutuhan_non_rumah_tangga,
+                'nilai_neraca' => (float) $nilai,
+                'status'       => $statusLabel[$n->status] ?? ucfirst($n->status),
+                'operator'     => $n->operator->name ?? '-',
+                'verifikator'  => $n->verifikator->name ?? '-',
+            ];
+        })->all();
     }
 }
