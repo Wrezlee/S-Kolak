@@ -2,12 +2,6 @@
 
 @source "../views/**/*.blade.php";
 
-/* =========================================================
-   Efek interaktif global (hover + klik/press)
-   Berlaku otomatis untuk semua elemen yang bisa diklik:
-   <a>, <button>, elemen dengan role="button", input submit/button,
-   dan elemen apa pun yang diberi class .clickable atau onclick=""
-   ========================================================= */
 @layer base {
 
   a,
