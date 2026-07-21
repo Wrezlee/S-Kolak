@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Operator;
 
 use App\Http\Controllers\Controller;
+use App\Models\NeracaPangan;
 use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -35,6 +36,7 @@ class NotifikasiController extends Controller
             'notifCount' => Notifikasi::where('user_id', $operatorId)
                 ->where('dibaca', false)
                 ->count(),
+            'totalEntri' => NeracaPangan::where('diinput_oleh', $operatorId)->count(),
         ]);
     }
 
@@ -48,6 +50,16 @@ class NotifikasiController extends Controller
 
         if (! $notifikasi->dibaca) {
             $notifikasi->update(['dibaca' => true, 'dibaca_pada' => now()]);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'id'         => $notifikasi->id,
+                'baca'       => true,
+                'notifCount' => Notifikasi::where('user_id', $request->user()->id)
+                    ->where('dibaca', false)
+                    ->count(),
+            ]);
         }
 
         return back();
