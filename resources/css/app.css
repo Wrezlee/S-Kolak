@@ -2,3 +2,72 @@
 
 @source "../views/**/*.blade.php";
 
+/* =========================================================
+   Efek interaktif global (hover + klik/press)
+   Berlaku otomatis untuk semua elemen yang bisa diklik:
+   <a>, <button>, elemen dengan role="button", input submit/button,
+   dan elemen apa pun yang diberi class .clickable atau onclick=""
+   ========================================================= */
+@layer base {
+
+  a,
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"],
+  select,
+  label[for],
+  .clickable,
+  [onclick] {
+    transition-property: color, background-color, border-color,
+      text-decoration-color, fill, stroke, opacity, box-shadow, transform,
+      filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  /* Sedikit lebih terang saat hover, kecuali tombol yang sudah punya efek hover sendiri */
+  a:hover,
+  button:not(:disabled):hover,
+  [role="button"]:hover,
+  input[type="submit"]:not(:disabled):hover,
+  input[type="button"]:not(:disabled):hover,
+  .clickable:hover {
+    filter: brightness(1.06);
+  }
+
+  /* Efek "ditekan" saat diklik */
+  button:not(:disabled):active,
+  [role="button"]:active,
+  input[type="submit"]:not(:disabled):active,
+  input[type="button"]:not(:disabled):active,
+  .clickable:active {
+    transform: scale(0.97);
+    filter: brightness(0.97);
+  }
+
+  a:active {
+    transform: scale(0.985);
+  }
+
+  /* Ring fokus yang jelas untuk aksesibilitas (keyboard navigation) */
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  .clickable:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  button:disabled,
+  input:disabled,
+  .clickable[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
