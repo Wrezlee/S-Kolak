@@ -173,7 +173,7 @@ class NeracaPanganController extends Controller
 
         return response()->json([
             'found'     => true,
-            'stok_awal' => round(DataNeracaController::hitungNilaiNeraca($dataSebelumnya)),
+            'stok_awal' => (DataNeracaController::hitungNilaiNeraca($dataSebelumnya)),
             'periode'   => DataNeracaController::formatPeriode($dataSebelumnya->periode),
         ]);
     }
