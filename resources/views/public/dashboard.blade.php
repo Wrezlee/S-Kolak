@@ -391,9 +391,18 @@
     {{-- Footer --}}
     <footer class="bg-blue-50 border-t border-slate-200">
         <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between text-sm">
-            <div>
-                <p class="font-semibold text-slate-800">S-KOLAK · Kota Kediri</p>
-                <p class="text-xs text-slate-500">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
+            <div class="flex items-center gap-3">
+                @if(file_exists(public_path('images/logo-kediri.png')))
+                    <img src="{{ asset('images/logo-kediri.png') }}" alt="Logo Kota Kediri" class="h-9 w-9 object-contain flex-shrink-0">
+                @else
+                    <div class="h-9 w-9 rounded-full bg-blue-700 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        SK
+                    </div>
+                @endif
+                <div>
+                    <p class="font-semibold text-slate-800">S-KOLAK · Kota Kediri</p>
+                    <p class="text-xs text-slate-500">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
+                </div>
             </div>
             <p class="text-xs text-slate-500">© {{ date('Y') }} Pemerintah Kota Kediri. Seluruh data bersumber dari sistem neraca pangan resmi.</p>
         </div>
