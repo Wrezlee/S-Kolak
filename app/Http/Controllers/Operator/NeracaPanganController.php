@@ -20,6 +20,10 @@ class NeracaPanganController extends Controller
         $items = NeracaPangan::with(['komoditas', 'verifikator'])
             ->where('diinput_oleh', $operatorId)
             ->where('status', '!=', 'draft')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search');
+                $query->whereHas('komoditas', fn ($q) => $q->where('nama', 'like', "%{$search}%"));
+            })
             ->orderByDesc('periode')
             ->orderByDesc('id')
             ->get();

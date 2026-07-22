@@ -21,6 +21,13 @@ class VerifikasiController extends Controller
     {
         $pending = NeracaPangan::with(['komoditas', 'operator'])
             ->where('status', 'menunggu')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search');
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('komoditas', fn ($q2) => $q2->where('nama', 'like', "%{$search}%"))
+                      ->orWhereHas('operator', fn ($q2) => $q2->where('name', 'like', "%{$search}%"));
+                });
+            })
             ->orderBy('periode')
             ->get();
 
@@ -57,6 +64,13 @@ class VerifikasiController extends Controller
     {
         $riwayat = NeracaPangan::with(['komoditas', 'operator'])
             ->sudahDiverifikasi()
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search');
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('komoditas', fn ($q2) => $q2->where('nama', 'like', "%{$search}%"))
+                      ->orWhereHas('operator', fn ($q2) => $q2->where('name', 'like', "%{$search}%"));
+                });
+            })
             ->orderByDesc('periode')
             ->orderByDesc('id')
             ->get();

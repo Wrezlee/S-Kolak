@@ -225,6 +225,20 @@
             </div>
 
             <div class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden">
+                {{-- Search --}}
+                <form method="GET" class="p-4 border-b border-blue-50 flex items-center gap-3 flex-wrap">
+                    <div class="flex items-center gap-2 flex-1 min-w-[220px] px-3 py-2 rounded-lg border border-blue-100 bg-blue-50/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-[15px] h-[15px] text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                        <input type="text" name="search" value="{{ request('search') }}"
+                               placeholder="Cari nama komoditas..."
+                               class="flex-1 text-sm bg-transparent outline-none text-slate-700 placeholder-slate-400">
+                    </div>
+                    <button type="submit" class="px-4 py-2 rounded-lg text-sm font-medium border border-blue-200 text-blue-600 hover:bg-blue-100 transition-colors">Cari</button>
+                    @if (request('search'))
+                        <a href="{{ route('admin.komoditas') }}" class="text-xs text-slate-400 hover:text-slate-600">Reset</a>
+                    @endif
+                </form>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs">
                         <thead>

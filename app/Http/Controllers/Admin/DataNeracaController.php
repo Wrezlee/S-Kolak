@@ -50,6 +50,15 @@ class DataNeracaController extends Controller
     {
         $query = NeracaPangan::with(['komoditas', 'operator', 'verifikator']);
 
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('komoditas', fn ($q2) => $q2->where('nama', 'like', "%{$search}%"))
+                  ->orWhereHas('operator', fn ($q2) => $q2->where('name', 'like', "%{$search}%"))
+                  ->orWhereHas('verifikator', fn ($q2) => $q2->where('name', 'like', "%{$search}%"));
+            });
+        }
+
         if ($request->filled('komoditas_id')) {
             $query->where('komoditas_id', $request->input('komoditas_id'));
         }

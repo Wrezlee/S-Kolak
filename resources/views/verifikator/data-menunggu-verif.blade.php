@@ -217,10 +217,26 @@
                 <p class="text-sm text-slate-500">{{ $pending->count() }} data dalam antrian · Kota Kediri</p>
             </div>
 
+            {{-- Search --}}
+            <form method="GET" class="bg-white rounded-xl border border-blue-100 shadow-sm p-4 flex items-center gap-3 flex-wrap">
+                <div class="flex items-center gap-2 flex-1 min-w-[220px] px-3 py-2 rounded-lg border border-blue-100 bg-blue-50/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-[15px] h-[15px] text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           placeholder="Cari komoditas atau operator..."
+                           class="flex-1 text-sm bg-transparent outline-none text-slate-700 placeholder-slate-400">
+                </div>
+                <button type="submit" class="px-4 py-2 rounded-lg text-sm font-medium border border-blue-200 text-blue-600 hover:bg-blue-100 transition-colors">Cari</button>
+                @if (request('search'))
+                    <a href="{{ route('verifikator.menunggu') }}" class="text-xs text-slate-400 hover:text-slate-600">Reset</a>
+                @endif
+            </form>
+
             @if ($pending->isEmpty())
                 <div class="flex flex-col items-center justify-center h-56 gap-3 bg-white rounded-2xl border border-blue-100 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25 4.5-4.5m4.5 2.25a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <p class="text-sm font-medium text-slate-500">Semua data sudah diverifikasi.</p>
+                    <p class="text-sm font-medium text-slate-500">
+                        {{ request('search') ? 'Tidak ada data yang cocok dengan pencarian.' : 'Semua data sudah diverifikasi.' }}
+                    </p>
                 </div>
             @else
                 <div class="space-y-3">

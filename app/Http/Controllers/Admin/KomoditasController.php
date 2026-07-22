@@ -10,12 +10,20 @@ use Illuminate\Http\Request;
 class KomoditasController extends Controller
 {
     /**
-     * Tampilkan daftar komoditas.
+     * Tampilkan daftar komoditas, dengan pencarian berdasarkan nama.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $komoditas = Komoditas::query()
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search');
+                $query->where('nama', 'like', "%{$search}%");
+            })
+            ->orderBy('nama')
+            ->get();
+
         return view('admin.master-komoditas', [
-            'komoditas'  => Komoditas::orderBy('nama')->get(),
+            'komoditas'  => $komoditas,
             'notifCount' => Notifikasi::where('user_id', auth()->id())
                 ->where('dibaca', false)
                 ->count(),
