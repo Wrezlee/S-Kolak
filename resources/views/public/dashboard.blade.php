@@ -207,7 +207,7 @@
             @foreach ($cards as $card)
                 @php $cc = $cardColorMap[$card['color']]; @endphp
                 <button type="button" onclick="openModal('{{ $card['key'] }}')"
-                        class="text-left w-full {{ $cc['card'] }} border rounded-xl shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                        class="text-left w-full {{ $cc['card'] }} border rounded-xl shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 hover:brightness-100 transition-all">
                     <div class="h-9 w-9 rounded-lg flex items-center justify-center {{ $cc['icon'] }} mb-3">
                         @if ($card['icon'] === 'box')
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

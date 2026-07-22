@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Notifikasi - S-KOLAK Kota Kediri</title>
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
@@ -39,6 +40,7 @@
                     $tipe = 'success';
                 }
                 return [
+                    'id'    => $n->id,
                     'pesan' => $n->pesan,
                     'waktu' => \Illuminate\Support\Carbon::parse($n->created_at)->diffForHumans(),
                     'baca'  => (bool) $n->dibaca,
@@ -119,7 +121,7 @@
                     </svg>
                     <span class="truncate flex-1 text-left sidebar-label">{{ $item['label'] }}</span>
                     @if ($item['badge'])
-                        <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full font-bold sidebar-label"
+                        <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full font-bold sidebar-label notif-count-badge"
                               style="{{ $isActive ? 'background-color:rgba(255,255,255,0.3); color:white;' : 'background-color:#FEF3C7; color:#B45309;' }}">
                             {{ $item['badge'] }}
                         </span>
@@ -157,7 +159,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
                         </svg>
                         @if ($notifCount > 0)
-                            <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500"></span>
+                            <span id="notifBellDot" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500"></span>
                         @endif
                     </button>
 
@@ -166,12 +168,15 @@
                         <div class="px-4 py-3 border-b border-blue-50 flex items-center justify-between">
                             <h4 class="text-sm font-bold" style="color:#1E3A5F;">Notifikasi</h4>
                             @if ($notifCount > 0)
-                                <span class="text-xs px-1.5 py-0.5 rounded-full font-bold" style="background-color:#FEF3C7; color:#B45309;">{{ $notifCount }} baru</span>
+                                <span class="text-xs px-1.5 py-0.5 rounded-full font-bold" style="background-color:#FEF3C7; color:#B45309;"><span class="notif-count-badge">{{ $notifCount }}</span> baru</span>
                             @endif
                         </div>
                         <div class="max-h-80 overflow-y-auto divide-y divide-blue-50">
                             @forelse ($notifDropdownItems as $n)
-                                <div class="px-4 py-3 flex items-start gap-3 {{ !($n['baca'] ?? true) ? 'bg-blue-50/40' : '' }}">
+                                <div class="px-4 py-3 flex items-start gap-3 transition-colors {{ !($n['baca'] ?? true) ? 'bg-blue-50/40 cursor-pointer hover:bg-blue-100' : '' }}"
+                                     @if (!($n['baca'] ?? true) && !empty($n['id']))
+                                     onclick="tandaiNotifDibaca(this, '{{ route('verifikator.notifikasi.baca', $n['id']) }}')"
+                                     @endif>
                                     <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 {{ ($n['tipe'] ?? '') === 'success' ? 'bg-green-100' : (($n['tipe'] ?? '') === 'warning' ? 'bg-orange-100' : 'bg-blue-100') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-[13px] h-[13px] {{ ($n['tipe'] ?? '') === 'success' ? 'text-green-600' : (($n['tipe'] ?? '') === 'warning' ? 'text-orange-600' : 'text-blue-600') }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
@@ -182,7 +187,7 @@
                                         <p class="text-xs text-slate-400 mt-0.5">{{ $n['waktu'] ?? '' }}</p>
                                     </div>
                                     @if (!($n['baca'] ?? true))
-                                        <div class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5"></div>
+                                        <div class="notif-unread-dot w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5"></div>
                                     @endif
                                 </div>
                             @empty
@@ -269,6 +274,37 @@
 </div>
 
 <script>
+    function tandaiNotifDibaca(el, url) {
+        if (!url || el.dataset.done === '1') return;
+        el.dataset.done = '1';
+        el.classList.remove('bg-blue-50/40', 'cursor-pointer', 'hover:bg-blue-100');
+        var dot = el.querySelector('.notif-unread-dot');
+        if (dot) dot.remove();
+        document.querySelectorAll('.notif-count-badge').forEach(function (badge) {
+            var n = parseInt(badge.textContent, 10);
+            if (!isNaN(n) && n > 1) {
+                badge.textContent = n - 1;
+            } else if (!isNaN(n)) {
+                var wrap = badge.closest('span.sidebar-label, span:not(.notif-count-badge)') || badge.parentElement;
+                if (wrap && wrap !== badge) { wrap.remove(); } else { badge.remove(); }
+            }
+        });
+        if (document.querySelectorAll('.notif-unread-dot').length === 0) {
+            var bellDot = document.getElementById('notifBellDot');
+            if (bellDot) bellDot.remove();
+        }
+        var token = document.querySelector('meta[name="csrf-token"]');
+        fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': token ? token.content : '',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+        }).catch(function () {});
+    }
+
     function toggleNotifDropdown(e) {
         e.stopPropagation();
         var dropdown = document.getElementById('notifDropdown');
