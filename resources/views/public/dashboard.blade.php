@@ -431,7 +431,7 @@
                         borderColor: '#1d4ed8',
                         backgroundColor: 'rgba(29, 78, 216, 0.1)',
                         fill: true,
-                        tension: 0.35,
+                        tension: 0,
                         pointRadius: 3,
                     }]
                 },

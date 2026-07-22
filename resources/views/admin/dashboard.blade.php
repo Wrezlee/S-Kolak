@@ -145,7 +145,7 @@
                 @php $isActive = $activeMenu === $item['key']; @endphp
                 <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}"
                    title="{{ $item['label'] }}"
-                   class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
+                   class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all hover:bg-blue-50"
                    style="{{ $isActive ? 'background-color:#2563EB; color:white; font-weight:600;' : 'color:#475569;' }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-[17px] h-[17px] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         {!! $menuIcons[$item['key']] !!}
@@ -396,7 +396,7 @@
                 borderColor: '#2563EB',
                 backgroundColor: 'rgba(37, 99, 235, 0.12)',
                 fill: true,
-                tension: 0.35,
+                tension: 0,
                 pointRadius: 4,
                 pointBackgroundColor: '#2563EB',
             }]

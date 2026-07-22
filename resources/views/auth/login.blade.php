@@ -126,7 +126,7 @@
                 </p>
             @endif
 
-            <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-5">
+            <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-5" id="loginForm">
                 @csrf
 
                 <!-- ID -->
@@ -172,10 +172,11 @@
                 <!-- Login Button -->
                 <button
                     type="submit"
-                    class="w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md active:scale-[0.98]"
+                    id="loginButton"
+                    class="w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md active:scale-[0.98] disabled:hover:shadow-sm"
                     style="background-color:#2563EB; color:white;"
                 >
-                    Login
+                    <span id="loginButtonContent" class="flex items-center gap-2">Login</span>
                 </button>
 
                 <!-- Forgot -->
@@ -189,6 +190,21 @@
     </div>
 
     <script>
+        document.getElementById('loginForm').addEventListener('submit', function () {
+            const btn = document.getElementById('loginButton');
+            const content = document.getElementById('loginButtonContent');
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.style.backgroundColor = '#93C5FD';
+            content.innerHTML = `
+                <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Memproses...
+            `;
+        });
+
         function togglePassword() {
             const input = document.getElementById('password');
             const icon = document.getElementById('eyeIcon');
