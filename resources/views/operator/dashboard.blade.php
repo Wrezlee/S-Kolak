@@ -373,20 +373,25 @@
                 </div>
             </div>
 
+            {{-- Script khusus konten halaman ini. Diletakkan DI DALAM
+                 #pageContent supaya ikut dieksekusi ulang oleh
+                 spa-nav.js setiap kali menu dipindah lewat SPA nav. --}}
+            <script>
+                function openModal(key) {
+                    var el = document.getElementById('modal-' + key);
+                    if (el) el.style.display = 'flex';
+                }
+                function closeModal(key) {
+                    var el = document.getElementById('modal-' + key);
+                    if (el) el.style.display = 'none';
+                }
+            </script>
+
         </main>
     </div>
 </div>
 
 <script>
-    function openModal(key) {
-        var el = document.getElementById('modal-' + key);
-        if (el) el.style.display = 'flex';
-    }
-    function closeModal(key) {
-        var el = document.getElementById('modal-' + key);
-        if (el) el.style.display = 'none';
-    }
-
     function tandaiNotifDibaca(el, url) {
         if (!url || el.dataset.done === '1') return;
         el.dataset.done = '1';

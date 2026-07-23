@@ -421,6 +421,44 @@
                 </div>
             </div>
 
+            {{-- Script khusus konten halaman ini (chart & modal detail).
+                 Sengaja diletakkan DI DALAM #pageContent supaya ikut
+                 dieksekusi ulang oleh spa-nav.js setiap kali menu
+                 dipindah lewat SPA nav (lihat runScripts() di spa-nav.js). --}}
+            <script>
+                new Chart(document.getElementById('trendChart'), {
+                    type: 'line',
+                    data: {
+                        labels: @json($trendLabels),
+                        datasets: [{
+                            data: @json($trendValues),
+                            borderColor: '#2563EB',
+                            backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                            fill: true,
+                            tension: 0,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#2563EB',
+                        }]
+                    },
+                    options: {
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#EFF6FF' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+
+                function openModal(key) {
+                    var el = document.getElementById('modal-' + key);
+                    if (el) el.style.display = 'flex';
+                }
+                function closeModal(key) {
+                    var el = document.getElementById('modal-' + key);
+                    if (el) el.style.display = 'none';
+                }
+            </script>
+
         </main>
     </div>
 </div>
@@ -444,40 +482,6 @@
 </div>
 
 <script>
-    new Chart(document.getElementById('trendChart'), {
-        type: 'line',
-        data: {
-            labels: @json($trendLabels),
-            datasets: [{
-                data: @json($trendValues),
-                borderColor: '#2563EB',
-                backgroundColor: 'rgba(37, 99, 235, 0.12)',
-                fill: true,
-                tension: 0,
-                pointRadius: 4,
-                pointBackgroundColor: '#2563EB',
-            }]
-        },
-        options: {
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: '#EFF6FF' } },
-                x: { grid: { display: false } }
-            }
-        }
-    });
-</script>
-
-<script>
-    function openModal(key) {
-        var el = document.getElementById('modal-' + key);
-        if (el) el.style.display = 'flex';
-    }
-    function closeModal(key) {
-        var el = document.getElementById('modal-' + key);
-        if (el) el.style.display = 'none';
-    }
-
     function tandaiNotifDibaca(el, url) {
         if (!url || el.dataset.done === '1') return;
         el.dataset.done = '1';

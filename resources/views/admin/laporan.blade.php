@@ -535,102 +535,109 @@
                 </div>
             </div>
 
+            {{-- Script khusus konten halaman ini (tab switching & chart).
+                 Diletakkan DI DALAM #pageContent supaya ikut dieksekusi
+                 ulang oleh spa-nav.js setiap kali menu dipindah lewat
+                 SPA nav (lihat runScripts() di spa-nav.js). Sebelumnya
+                 blok ini ada di luar #pageContent sehingga tab
+                 Detail/Grafik & chart berhenti berfungsi setelah
+                 pindah menu tanpa refresh. --}}
+            <script>
+                // ── Tab switching ──
+                const tabButtons = document.querySelectorAll('.tab-btn');
+                const tabPanels = { ringkasan: document.getElementById('tab-ringkasan'), detail: document.getElementById('tab-detail'), grafik: document.getElementById('tab-grafik') };
+                const filterTabInput = document.getElementById('filterTabInput');
+                let chartsRendered = false;
+
+                function activateTab(tab) {
+                    tabButtons.forEach(btn => {
+                        const isActive = btn.dataset.tab === tab;
+                        btn.classList.toggle('text-white', isActive);
+                        btn.classList.toggle('shadow-sm', isActive);
+                        btn.classList.toggle('text-slate-500', !isActive);
+                        btn.style.backgroundColor = isActive ? '#2563EB' : '';
+                    });
+                    Object.entries(tabPanels).forEach(([key, panel]) => panel.classList.toggle('hidden', key !== tab));
+                    if (filterTabInput) filterTabInput.value = tab;
+
+                    if (tab === 'grafik' && !chartsRendered) {
+                        renderCharts();
+                        chartsRendered = true;
+                    }
+                }
+
+                tabButtons.forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
+
+                @php $initialTab = request('tab', 'ringkasan'); @endphp
+                activateTab(@json($initialTab));
+
+                // ── Charts ──
+                function renderCharts() {
+                    new Chart(document.getElementById('chartEntriKomoditas'), {
+                        type: 'bar',
+                        data: {
+                            labels: @json($entriPerKomoditas['labels']),
+                            datasets: [
+                                { label: 'Valid',    data: @json($entriPerKomoditas['valid']),    backgroundColor: '#16A34A', stack: 'a' },
+                                { label: 'Menunggu', data: @json($entriPerKomoditas['menunggu']), backgroundColor: '#EA580C', stack: 'a' },
+                                { label: 'Revisi',   data: @json($entriPerKomoditas['revisi']),   backgroundColor: '#DC2626', stack: 'a' },
+                            ]
+                        },
+                        options: {
+                            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
+                            scales: {
+                                x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 40, minRotation: 40 } },
+                                y: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#EFF6FF' } },
+                            }
+                        }
+                    });
+
+                    new Chart(document.getElementById('chartTrenBulanan'), {
+                        type: 'line',
+                        data: {
+                            labels: @json($trenBulanan['labels']),
+                            datasets: [{
+                                data: @json($trenBulanan['nilai']),
+                                borderColor: '#2563EB',
+                                backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                                fill: true, tension: 0, pointRadius: 4, pointBackgroundColor: '#2563EB',
+                            }]
+                        },
+                        options: {
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: '#EFF6FF' } },
+                                x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                            }
+                        }
+                    });
+
+                    const perbandinganColors = ['#2563EB','#1D4ED8','#60A5FA','#1E40AF','#3B82F6','#93C5FD','#2563EB','#60A5FA'];
+                    const perbandinganData = @json($perbandinganNilai->pluck('nilai'));
+                    new Chart(document.getElementById('chartPerbandingan'), {
+                        type: 'bar',
+                        data: {
+                            labels: @json($perbandinganNilai->pluck('nama')),
+                            datasets: [{
+                                label: 'Nilai Neraca',
+                                data: perbandinganData,
+                                backgroundColor: perbandinganData.map((_, i) => perbandinganColors[i % perbandinganColors.length]),
+                            }]
+                        },
+                        options: {
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                                y: { beginAtZero: true, grid: { color: '#EFF6FF' } },
+                            }
+                        }
+                    });
+                }
+            </script>
+
         </main>
     </div>
 </div>
-
-<script>
-    // ── Tab switching ──
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabPanels = { ringkasan: document.getElementById('tab-ringkasan'), detail: document.getElementById('tab-detail'), grafik: document.getElementById('tab-grafik') };
-    const filterTabInput = document.getElementById('filterTabInput');
-    let chartsRendered = false;
-
-    function activateTab(tab) {
-        tabButtons.forEach(btn => {
-            const isActive = btn.dataset.tab === tab;
-            btn.classList.toggle('text-white', isActive);
-            btn.classList.toggle('shadow-sm', isActive);
-            btn.classList.toggle('text-slate-500', !isActive);
-            btn.style.backgroundColor = isActive ? '#2563EB' : '';
-        });
-        Object.entries(tabPanels).forEach(([key, panel]) => panel.classList.toggle('hidden', key !== tab));
-        if (filterTabInput) filterTabInput.value = tab;
-
-        if (tab === 'grafik' && !chartsRendered) {
-            renderCharts();
-            chartsRendered = true;
-        }
-    }
-
-    tabButtons.forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
-
-    @php $initialTab = request('tab', 'ringkasan'); @endphp
-    activateTab(@json($initialTab));
-
-    // ── Charts ──
-    function renderCharts() {
-        new Chart(document.getElementById('chartEntriKomoditas'), {
-            type: 'bar',
-            data: {
-                labels: @json($entriPerKomoditas['labels']),
-                datasets: [
-                    { label: 'Valid',    data: @json($entriPerKomoditas['valid']),    backgroundColor: '#16A34A', stack: 'a' },
-                    { label: 'Menunggu', data: @json($entriPerKomoditas['menunggu']), backgroundColor: '#EA580C', stack: 'a' },
-                    { label: 'Revisi',   data: @json($entriPerKomoditas['revisi']),   backgroundColor: '#DC2626', stack: 'a' },
-                ]
-            },
-            options: {
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
-                scales: {
-                    x: { stacked: true, grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 40, minRotation: 40 } },
-                    y: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#EFF6FF' } },
-                }
-            }
-        });
-
-        new Chart(document.getElementById('chartTrenBulanan'), {
-            type: 'line',
-            data: {
-                labels: @json($trenBulanan['labels']),
-                datasets: [{
-                    data: @json($trenBulanan['nilai']),
-                    borderColor: '#2563EB',
-                    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-                    fill: true, tension: 0, pointRadius: 4, pointBackgroundColor: '#2563EB',
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#EFF6FF' } },
-                    x: { grid: { display: false }, ticks: { font: { size: 10 } } }
-                }
-            }
-        });
-
-        const perbandinganColors = ['#2563EB','#1D4ED8','#60A5FA','#1E40AF','#3B82F6','#93C5FD','#2563EB','#60A5FA'];
-        const perbandinganData = @json($perbandinganNilai->pluck('nilai'));
-        new Chart(document.getElementById('chartPerbandingan'), {
-            type: 'bar',
-            data: {
-                labels: @json($perbandinganNilai->pluck('nama')),
-                datasets: [{
-                    label: 'Nilai Neraca',
-                    data: perbandinganData,
-                    backgroundColor: perbandinganData.map((_, i) => perbandinganColors[i % perbandinganColors.length]),
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-                    y: { beginAtZero: true, grid: { color: '#EFF6FF' } },
-                }
-            }
-        });
-    }
-</script>
 
 <script>
     function tandaiNotifDibaca(el, url) {
