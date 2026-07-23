@@ -188,7 +188,7 @@
                 </svg>
             </button>
             <div class="flex-1">
-                <h2 class="text-sm font-bold" style="color:#1E3A5F;">Dashboard Admin</h2>
+                <h2 id="pageHeaderTitle" class="text-sm font-bold" style="color:#1E3A5F;">Dashboard Admin</h2>
                 <p class="text-xs text-slate-400">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
             </div>
             <div class="flex items-center gap-2">
@@ -246,7 +246,7 @@
         </header>
 
         {{-- Content --}}
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+        <main id="pageContent" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
 
             <div>
                 <h1 class="text-xl font-bold" style="color:#1E3A5F;">Dashboard Admin</h1>
@@ -524,5 +524,6 @@
     });
 </script>
     <script src="{{ asset('js/sidebar-toggle.js') }}"></script>
+    <script src="{{ asset('js/spa-nav.js') }}"></script>
 </body>
 </html>

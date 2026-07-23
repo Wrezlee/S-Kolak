@@ -163,7 +163,7 @@
         {{-- Topbar --}}
         <header class="h-14 border-b border-blue-100 bg-white flex items-center px-4 gap-3 flex-shrink-0 shadow-sm">
             <div class="flex-1">
-                <h2 class="text-sm font-bold" style="color:#1E3A5F;">Input Neraca Pangan</h2>
+                <h2 id="pageHeaderTitle" class="text-sm font-bold" style="color:#1E3A5F;">Input Neraca Pangan</h2>
                 <p class="text-xs text-slate-400">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
             </div>
             <div class="flex items-center gap-2">
@@ -218,7 +218,7 @@
         </header>
 
         {{-- Content --}}
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6">
+        <main id="pageContent" class="flex-1 overflow-y-auto p-4 sm:p-6">
 
             @if ($justSubmitted)
                 <div class="max-w-3xl mx-auto bg-white rounded-xl border border-blue-100 shadow-sm p-10 flex flex-col items-center text-center gap-2">
@@ -480,5 +480,6 @@
     });
 </script>
     <script src="{{ asset('js/sidebar-toggle.js') }}"></script>
+    <script src="{{ asset('js/spa-nav.js') }}"></script>
 </body>
 </html>
