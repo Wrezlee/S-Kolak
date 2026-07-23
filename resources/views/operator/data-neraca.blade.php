@@ -515,6 +515,7 @@
 </div>
 
 <script>
+(function () {
     const operatorDataBaseUrl = @json(url('operator/data'));
 
     function fmtNumber(n) {
@@ -522,7 +523,7 @@
     }
 
     // ---------- Modal Detail (read-only) ----------
-    function openDetail(d) {
+    window.openDetail = function (d) {
         document.getElementById('detailKomoditas').textContent = d.komoditas;
         document.getElementById('detailPeriode').textContent = d.periode;
 
@@ -545,11 +546,11 @@
         document.getElementById('detailTanggal').textContent = d.tanggalInput;
 
         document.getElementById('modalDetail').classList.remove('hidden');
-    }
+    };
 
     // ---------- Modal Revisi (detail + alasan + form edit, jadi satu) ----------
 
-    function openRevisi(d) {
+    window.openRevisi = function (d) {
         document.getElementById('revisiKomoditas').textContent = d.komoditas;
         document.getElementById('revisiVerifikator').textContent = d.verifikator || 'Verifikator';
         document.getElementById('revisiKeterangan').textContent = d.keterangan || 'Verifikator tidak menyertakan catatan tambahan.';
@@ -564,7 +565,8 @@
         document.getElementById('revisiForm').action = operatorDataBaseUrl + '/' + d.id;
 
         document.getElementById('modalRevisi').classList.remove('hidden');
-    }
+    };
+})();
 </script>
 
 <script>

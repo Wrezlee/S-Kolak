@@ -335,55 +335,57 @@
                  openDetail/openDelete tidak terdefinisi ketika
                  halaman ini dibuka lewat klik menu (tanpa refresh). --}}
             <script>
-                const dataBaseUrl = @json(url('admin/data'));
+                (function () {
+                    const dataBaseUrl = @json(url('admin/data'));
 
-                function fmtNumber(n) {
-                    return Number(n).toLocaleString('id-ID');
-                }
-
-                function openDetail(d) {
-                    document.getElementById('detailKomoditas').textContent = d.komoditas;
-                    document.getElementById('detailPeriode').textContent = d.periode;
-
-                    const statusBadge = document.getElementById('detailStatusBadge');
-                    statusBadge.textContent = d.statusLabel;
-                    statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ' + d.statusCls;
-
-                    document.getElementById('detailStokAwal').textContent = fmtNumber(d.stokAwal);
-                    document.getElementById('detailProduksi').textContent = fmtNumber(d.produksi);
-                    document.getElementById('detailMasuk').textContent = fmtNumber(d.masuk);
-                    document.getElementById('detailKeluar').textContent = fmtNumber(d.keluar);
-                    document.getElementById('detailKebRT').textContent = fmtNumber(d.kebRT);
-                    document.getElementById('detailKebNonRT').textContent = fmtNumber(d.kebNonRT);
-                    document.getElementById('detailNilaiNeraca').textContent = fmtNumber(d.nilaiNeraca);
-
-                    const nilaiBox = document.getElementById('detailNilaiBox');
-                    if (d.nilaiNeraca >= 0) {
-                        nilaiBox.className = 'rounded-xl px-4 py-3 border-2 border-green-200 bg-green-50';
-                    } else {
-                        nilaiBox.className = 'rounded-xl px-4 py-3 border-2 border-red-200 bg-red-50';
+                    function fmtNumber(n) {
+                        return Number(n).toLocaleString('id-ID');
                     }
 
-                    document.getElementById('detailOperator').textContent = d.operator;
-                    document.getElementById('detailVerifikator').textContent = d.verifikator;
-                    document.getElementById('detailTanggal').textContent = d.tanggalInput;
+                    window.openDetail = function (d) {
+                        document.getElementById('detailKomoditas').textContent = d.komoditas;
+                        document.getElementById('detailPeriode').textContent = d.periode;
 
-                    const ketBox = document.getElementById('detailKeteranganBox');
-                    if (d.keterangan) {
-                        document.getElementById('detailKeterangan').textContent = d.keterangan;
-                        ketBox.classList.remove('hidden');
-                    } else {
-                        ketBox.classList.add('hidden');
-                    }
+                        const statusBadge = document.getElementById('detailStatusBadge');
+                        statusBadge.textContent = d.statusLabel;
+                        statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ' + d.statusCls;
 
-                    document.getElementById('modalDetail').classList.remove('hidden');
-                }
+                        document.getElementById('detailStokAwal').textContent = fmtNumber(d.stokAwal);
+                        document.getElementById('detailProduksi').textContent = fmtNumber(d.produksi);
+                        document.getElementById('detailMasuk').textContent = fmtNumber(d.masuk);
+                        document.getElementById('detailKeluar').textContent = fmtNumber(d.keluar);
+                        document.getElementById('detailKebRT').textContent = fmtNumber(d.kebRT);
+                        document.getElementById('detailKebNonRT').textContent = fmtNumber(d.kebNonRT);
+                        document.getElementById('detailNilaiNeraca').textContent = fmtNumber(d.nilaiNeraca);
 
-                function openDelete(item) {
-                    document.getElementById('deleteLabel').textContent = item.label;
-                    document.getElementById('deleteForm').action = dataBaseUrl + '/' + item.id;
-                    document.getElementById('modalDelete').classList.remove('hidden');
-                }
+                        const nilaiBox = document.getElementById('detailNilaiBox');
+                        if (d.nilaiNeraca >= 0) {
+                            nilaiBox.className = 'rounded-xl px-4 py-3 border-2 border-green-200 bg-green-50';
+                        } else {
+                            nilaiBox.className = 'rounded-xl px-4 py-3 border-2 border-red-200 bg-red-50';
+                        }
+
+                        document.getElementById('detailOperator').textContent = d.operator;
+                        document.getElementById('detailVerifikator').textContent = d.verifikator;
+                        document.getElementById('detailTanggal').textContent = d.tanggalInput;
+
+                        const ketBox = document.getElementById('detailKeteranganBox');
+                        if (d.keterangan) {
+                            document.getElementById('detailKeterangan').textContent = d.keterangan;
+                            ketBox.classList.remove('hidden');
+                        } else {
+                            ketBox.classList.add('hidden');
+                        }
+
+                        document.getElementById('modalDetail').classList.remove('hidden');
+                    };
+
+                    window.openDelete = function (item) {
+                        document.getElementById('deleteLabel').textContent = item.label;
+                        document.getElementById('deleteForm').action = dataBaseUrl + '/' + item.id;
+                        document.getElementById('modalDelete').classList.remove('hidden');
+                    };
+                })();
             </script>
         
 <!-- ====== Modal & script khusus halaman ini (dipindah ke dalam #pageContent supaya ikut ter-refresh saat navigasi SPA - lihat runScripts() di spa-nav.js) ====== -->

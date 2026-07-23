@@ -363,19 +363,21 @@
 </div>
 
 <script>
+(function () {
     const komoditasBaseUrl = @json(url('admin/komoditas'));
 
-    function openEdit(item) {
+    window.openEdit = function (item) {
         document.getElementById('editNama').value = item.nama;
         document.getElementById('editForm').action = komoditasBaseUrl + '/' + item.id;
         document.getElementById('modalEdit').classList.remove('hidden');
-    }
+    };
 
-    function openDelete(item) {
+    window.openDelete = function (item) {
         document.getElementById('deleteNama').textContent = item.nama;
         document.getElementById('deleteForm').action = komoditasBaseUrl + '/' + item.id;
         document.getElementById('modalDelete').classList.remove('hidden');
-    }
+    };
+})();
 </script>
 
 <script>

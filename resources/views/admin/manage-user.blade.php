@@ -429,27 +429,29 @@
 </div>
 
 <script>
+(function () {
     const usersBaseUrl = @json(url('admin/users'));
 
-    function openEdit(user) {
+    window.openEdit = function (user) {
         document.getElementById('editUsername').value = user.username;
         document.getElementById('editName').value = user.name;
         document.getElementById('editRole').value = user.role;
         document.getElementById('editForm').action = usersBaseUrl + '/' + user.id;
         document.getElementById('modalEdit').classList.remove('hidden');
-    }
+    };
 
-   function openDelete(user) {
+    window.openDelete = function (user) {
         document.getElementById('deleteName').textContent = user.name;
         document.getElementById('deleteForm').action = usersBaseUrl + '/' + user.id;
         document.getElementById('modalDelete').classList.remove('hidden');
-    }
+    };
 
     document.getElementById('deleteForm').addEventListener('submit', function () {
         const btn = this.querySelector('button[type="submit"]');
         btn.disabled = true;
         btn.textContent = 'Menghapus...';
     });
+})();
 </script>
 
 <script>

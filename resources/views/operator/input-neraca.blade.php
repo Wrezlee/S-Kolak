@@ -229,7 +229,7 @@
                     </div>
                     <h2 class="text-lg font-bold" style="color:#1E3A5F;">Data Berhasil Dikirim untuk Verifikasi</h2>
                     <p class="text-sm text-slate-500">Verifikator akan segera memeriksa data Anda.</p>
-                    <a href="{{ route('operator.input') }}"
+                    <a href="{{ route('operator.input') }}" data-no-spa
                        class="mt-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all" style="background-color:#2563EB;">
                         Input Data Baru
                     </a>

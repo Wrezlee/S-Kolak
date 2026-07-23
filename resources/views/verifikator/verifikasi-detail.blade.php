@@ -264,9 +264,16 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('verifikator.menunggu.update', $item->id) }}" class="space-y-5">
+                    <form method="POST" action="{{ route('verifikator.menunggu.update', $item->id) }}" id="formVerifikasi" class="space-y-5">
                         @csrf
                         @method('PUT')
+                        {{-- Tombol submit dengan name/value ("status") sebelumnya TIDAK
+                             pernah terkirim: spa-nav.js membangun FormData(form) tanpa
+                             tahu tombol mana yang diklik (beda dengan submit form native
+                             biasa), jadi field "status" selalu kosong dan validasi selalu
+                             gagal -> makanya verifikasi tidak pernah berhasil. Diganti
+                             pakai hidden input yang diisi lewat JS sebelum submit. --}}
+                        <input type="hidden" name="status" id="statusInput" value="">
 
                         <div class="flex flex-col gap-1">
                             <label for="catatan" class="text-xs font-semibold text-slate-600">Catatan Verifikator (Opsional)</label>
@@ -276,18 +283,24 @@
                         </div>
 
                         <div class="flex gap-3 pt-1">
-                            <button type="submit" name="status" value="revisi"
+                            <button type="button" onclick="submitVerifikasi('revisi')"
                                     class="flex-1 py-3 rounded-xl text-sm font-semibold border-2 border-red-300 text-red-600 hover:bg-red-100 flex items-center justify-center gap-2 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                 Tidak Valid (Revisi)
                             </button>
-                            <button type="submit" name="status" value="valid"
+                            <button type="button" onclick="submitVerifikasi('valid')"
                                     class="flex-1 py-3 rounded-xl text-sm font-semibold text-white shadow-sm hover:shadow-md flex items-center justify-center gap-2 transition-all" style="background-color:#16A34A;">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                                 Validasi Data
                             </button>
                         </div>
                     </form>
+                    <script>
+                        function submitVerifikasi(status) {
+                            document.getElementById('statusInput').value = status;
+                            document.getElementById('formVerifikasi').requestSubmit();
+                        }
+                    </script>
                 </div>
             </div>
         
