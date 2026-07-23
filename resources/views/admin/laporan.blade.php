@@ -257,11 +257,11 @@
                     <p class="text-sm text-slate-500">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
                 </div>
                 <div class="flex gap-2">
-                    <a href="{{ route('admin.laporan.export.excel', request()->query()) }}" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border-2 border-blue-300 text-blue-700 hover:bg-blue-100 transition-colors">
+                    <a href="{{ route('admin.laporan.export.excel', request()->query()) }}" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border-2 border-blue-300 text-blue-700 hover:bg-blue-100 transition-colors" target="_blank" rel="noopener">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-[15px] h-[15px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
                         Ekspor Excel
                     </a>
-                    <a href="{{ route('admin.laporan.cetak', request()->query()) }}" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-sm" style="background-color:#2563EB;">
+                    <a href="{{ route('admin.laporan.cetak', request()->query()) }}" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-sm" style="background-color:#2563EB;" target="_blank" rel="noopener">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-[15px] h-[15px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
                         Cetak PDF
                     </a>
@@ -635,10 +635,8 @@
                 }
             </script>
 
-        </main>
-    </div>
-</div>
-
+        
+<!-- ====== Modal & script khusus halaman ini (dipindah ke dalam #pageContent supaya ikut ter-refresh saat navigasi SPA - lihat runScripts() di spa-nav.js) ====== -->
 <script>
     function tandaiNotifDibaca(el, url) {
         if (!url || el.dataset.done === '1') return;
@@ -677,15 +675,26 @@
         if (!dropdown) return;
         dropdown.classList.toggle('hidden');
     }
-    document.addEventListener('click', function (e) {
-        var dropdown = document.getElementById('notifDropdown');
-        if (!dropdown || dropdown.classList.contains('hidden')) return;
-        if (!dropdown.parentElement.contains(e.target)) {
-            dropdown.classList.add('hidden');
-        }
-    });
+    // Guard: script ini sekarang dieksekusi ulang setiap kali halaman
+    // dibuka lewat SPA nav (karena dipindah ke dalam #pageContent), jadi
+    // pasang listener document sekali saja supaya tidak menumpuk dobel.
+    if (!window.__notifDropdownOutsideClickBound) {
+        window.__notifDropdownOutsideClickBound = true;
+        document.addEventListener('click', function (e) {
+            var dropdown = document.getElementById('notifDropdown');
+            if (!dropdown || dropdown.classList.contains('hidden')) return;
+            if (!dropdown.parentElement.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    }
 </script>
-    <script src="{{ asset('js/sidebar-toggle.js') }}"></script>
+    
+</main>
+    </div>
+</div>
+
+<script src="{{ asset('js/sidebar-toggle.js') }}"></script>
     <script src="{{ asset('js/spa-nav.js') }}"></script>
 </body>
 </html>

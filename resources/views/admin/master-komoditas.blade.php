@@ -295,10 +295,8 @@
                     </div>
                 @endif
             </div>
-        </main>
-    </div>
-</div>
-
+        
+<!-- ====== Modal & script khusus halaman ini (dipindah ke dalam #pageContent supaya ikut ter-refresh saat navigasi SPA - lihat runScripts() di spa-nav.js) ====== -->
 {{-- ============ MODAL TAMBAH KOMODITAS ============ --}}
 <div id="modalTambah" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onclick="if(event.target===this) this.classList.add('hidden')">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
@@ -418,15 +416,26 @@
         if (!dropdown) return;
         dropdown.classList.toggle('hidden');
     }
-    document.addEventListener('click', function (e) {
-        var dropdown = document.getElementById('notifDropdown');
-        if (!dropdown || dropdown.classList.contains('hidden')) return;
-        if (!dropdown.parentElement.contains(e.target)) {
-            dropdown.classList.add('hidden');
-        }
-    });
+    // Guard: script ini sekarang dieksekusi ulang setiap kali halaman
+    // dibuka lewat SPA nav (karena dipindah ke dalam #pageContent), jadi
+    // pasang listener document sekali saja supaya tidak menumpuk dobel.
+    if (!window.__notifDropdownOutsideClickBound) {
+        window.__notifDropdownOutsideClickBound = true;
+        document.addEventListener('click', function (e) {
+            var dropdown = document.getElementById('notifDropdown');
+            if (!dropdown || dropdown.classList.contains('hidden')) return;
+            if (!dropdown.parentElement.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    }
 </script>
-    <script src="{{ asset('js/sidebar-toggle.js') }}"></script>
+    
+</main>
+    </div>
+</div>
+
+<script src="{{ asset('js/sidebar-toggle.js') }}"></script>
     <script src="{{ asset('js/spa-nav.js') }}"></script>
 </body>
 </html>

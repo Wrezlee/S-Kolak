@@ -73,8 +73,8 @@
             </h1>
 
             <p class="mt-4 max-w-2xl text-blue-100 text-sm md:text-base">
-                Informasi neraca pangan Kota Kediri yang transparan, terkini, dan telah melalui proses
-                verifikasi oleh Dinas Ketahanan Pangan dan Pertanian Kota Kediri.
+                sKOLAK adalah Sistem Informasi Neraca Pangan berdasarkan analisis prognosa data stok pangan di Kota Kediri. 
+                Data disajikan bersumber dari hasil perekaman pemantauan data stok pangan dari pelaku usaha pangan di Kota Kediri.
             </p>
 
             {{-- Filter card, still inside the blue section so the blue background
@@ -392,7 +392,7 @@
     <footer class="bg-blue-50 border-t border-slate-200">
         <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between text-sm">
             <div class="flex items-center gap-3">
-                @if(file_exists(public_path('images/logo-kediri.png')))
+                <!-- @if(file_exists(public_path('images/logo-kediri.png'))) -->
                     <img src="{{ asset('images/logo-kediri.png') }}" alt="Logo Kota Kediri" class="h-9 w-9 object-contain flex-shrink-0">
                 @else
                     <div class="h-9 w-9 rounded-full bg-blue-700 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
