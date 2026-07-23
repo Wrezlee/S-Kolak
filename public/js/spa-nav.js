@@ -1,57 +1,80 @@
 /**
  * spa-nav.js
  * ---------------------------------------------------------------
- * Membuat navigasi sidebar terasa seperti SPA: saat menu di sidebar
- * diklik, hanya konten di dalam <main id="pageContent"> yang diganti.
- * Sidebar dan header (<header>) TIDAK ikut di-refresh / reload.
+ * Membuat navigasi & aksi (pindah menu, filter, tambah, edit, hapus,
+ * tandai notif, dll) terasa seperti SPA: yang di-refresh cuma
+ * <main id="pageContent">, sidebar & <header> tidak ikut dibongkar.
  *
- * Cara kerja:
- * 1. Klik link di dalam #appSidebar / #mobileSidebar di-intercept.
- * 2. Halaman tujuan diambil lewat fetch() (masih HTML biasa dari
- *    controller yang sama, tidak perlu ubah route/controller).
- * 3. Dari HTML hasil fetch, kita ambil elemen #pageContent lalu
- *    tempelkan innerHTML-nya ke #pageContent yang sedang tampil.
- * 4. Judul di header (#pageHeaderTitle) & <title> ikut diperbarui,
- *    tanpa membongkar ulang seluruh header.
- * 5. URL di address bar diperbarui via history.pushState, dan
- *    tombol back/forward browser tetap berfungsi (popstate).
+ * Menangani 2 hal:
+ * 1. Klik <a href> apa pun di halaman (menu sidebar, pagination,
+ *    tombol lihat detail, dsb) -> di-fetch, lalu #pageContent
+ *    ditempel dari hasil fetch.
+ * 2. Submit <form> apa pun (filter GET, tambah/edit POST, hapus
+ *    method DELETE via @method spoofing) -> juga lewat fetch,
+ *    termasuk kalau controller-nya redirect() setelah proses,
+ *    fetch otomatis ngikutin redirect itu dan #pageContent
+ *    diperbarui dari halaman hasil redirect (jadi flash message
+ *    "berhasil ditambahkan/dihapus" dari session tetap muncul).
+ *
+ * Tidak perlu ubah route / controller sama sekali.
  * ---------------------------------------------------------------
  */
 (function () {
-  var contentSelector = '#pageContent';
-  var navContainerSelector = '#appSidebar, #mobileSidebar, [data-spa-nav]';
+  var CONTENT_SEL = '#pageContent';
   var currentController = null;
 
-  function isInternalLink(a) {
-    if (!a.hasAttribute('href')) return false;
-    var href = a.getAttribute('href');
-    if (!href || href === '#' || href.indexOf('#') === 0) return false;
-    if (a.target && a.target !== '' && a.target !== '_self') return false;
-    if (a.hasAttribute('download')) return false;
+  // --- helper ---------------------------------------------------
+
+  function resolveUrl(href) {
     try {
-      var url = new URL(href, window.location.href);
-      return url.origin === window.location.origin;
+      return new URL(href, window.location.href);
     } catch (e) {
-      return false;
+      return null;
     }
   }
 
-  function bindNavLinks(root) {
-    var scope = root || document;
-    scope.querySelectorAll(navContainerSelector + ' a[href]').forEach(function (a) {
-      if (a.dataset.spaBound === '1') return;
-      if (!isInternalLink(a)) return;
-      a.dataset.spaBound = '1';
-      a.addEventListener('click', handleLinkClick);
-    });
+  // Sengaja TIDAK membandingkan origin dengan window.location.origin.
+  // Kadang APP_URL di .env beda dari domain yang benar-benar dipakai
+  // di browser (localhost vs 127.0.0.1 vs *.test) -- kalau dicek ketat
+  // pakai origin, link jadi dianggap "eksternal" padahal sebenarnya
+  // halaman yang sama, dan berakhir full reload. Cukup pastikan
+  // protokolnya http/https, sisanya biar fetch() yang urus (kalau
+  // memang beda origin & gagal, otomatis fallback ke reload biasa).
+  function isHttpUrl(url) {
+    return !!url && (url.protocol === 'http:' || url.protocol === 'https:');
   }
 
-  function handleLinkClick(e) {
-    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-    var href = this.getAttribute('href');
-    e.preventDefault();
-    if (href === window.location.pathname + window.location.search) return;
-    navigate(href, true);
+  function isEligibleLink(a) {
+    if (!a || !a.hasAttribute('href')) return false;
+    var href = a.getAttribute('href');
+    if (!href || href.charAt(0) === '#') return false;
+    if (/^(javascript:|mailto:|tel:)/i.test(href)) return false;
+    if (a.hasAttribute('download')) return false;
+    if (a.dataset.noSpa !== undefined) return false;
+    if (a.target && a.target !== '' && a.target !== '_self') return false;
+    return isHttpUrl(resolveUrl(href));
+  }
+
+  function isEligibleForm(form) {
+    if (!form) return false;
+    if (form.dataset.noSpa !== undefined) return false;
+    if (form.target && form.target !== '' && form.target !== '_self') return false;
+    return isHttpUrl(resolveUrl(form.action));
+  }
+
+  function getContentEl() {
+    return document.querySelector(CONTENT_SEL);
+  }
+
+  function startLoading(el) {
+    el.style.transition = 'opacity .12s ease';
+    el.style.opacity = '0.45';
+    el.setAttribute('aria-busy', 'true');
+  }
+
+  function endLoading(el) {
+    el.style.opacity = '';
+    el.removeAttribute('aria-busy');
   }
 
   function runScripts(container) {
@@ -65,16 +88,17 @@
     });
   }
 
-  function setActiveMenu(targetUrl) {
-    var targetPath = new URL(targetUrl, window.location.href).pathname;
-    document.querySelectorAll(navContainerSelector + ' a[href]').forEach(function (a) {
-      var linkPath;
-      try {
-        linkPath = new URL(a.getAttribute('href'), window.location.href).pathname;
-      } catch (e) {
-        return;
-      }
-      var active = linkPath === targetPath;
+  function setActiveMenu(finalUrl) {
+    var targetPath;
+    try {
+      targetPath = new URL(finalUrl, window.location.href).pathname;
+    } catch (e) {
+      return;
+    }
+    document.querySelectorAll('#appSidebar a[href], #mobileSidebar a[href], [data-spa-nav] a[href]').forEach(function (a) {
+      var linkUrl = resolveUrl(a.getAttribute('href'));
+      if (!linkUrl) return;
+      var active = linkUrl.pathname === targetPath;
       if (active) {
         a.style.backgroundColor = '#2563EB';
         a.style.color = '#fff';
@@ -91,86 +115,127 @@
     });
   }
 
-  function startLoadingState(el) {
-    el.style.transition = 'opacity .12s ease';
-    el.style.opacity = '0.45';
-    el.setAttribute('aria-busy', 'true');
+  // --- inti: ambil halaman lewat fetch, tempel #pageContent ------
+
+  function swapFromResponse(res, html, pushState) {
+    var contentEl = getContentEl();
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    var newContent = doc.querySelector(CONTENT_SEL);
+
+    if (!newContent) {
+      // Halaman hasil (mis. login, atau halaman lama yang belum
+      // dikasih #pageContent) -> lakukan navigasi normal saja.
+      window.location.href = res.url || window.location.href;
+      return;
+    }
+
+    contentEl.innerHTML = newContent.innerHTML;
+    runScripts(contentEl);
+    endLoading(contentEl);
+
+    var newTitleEl = doc.getElementById('pageHeaderTitle');
+    var curTitleEl = document.getElementById('pageHeaderTitle');
+    if (newTitleEl && curTitleEl) curTitleEl.textContent = newTitleEl.textContent;
+    if (doc.title) document.title = doc.title;
+
+    var finalUrl = res.url || window.location.href;
+    if (pushState) {
+      window.history.pushState({ spaNav: true }, doc.title || '', finalUrl);
+    }
+
+    setActiveMenu(finalUrl);
+    contentEl.scrollTop = 0;
+    window.scrollTo(0, 0);
+
+    document.dispatchEvent(new CustomEvent('spa:navigated', { detail: { url: finalUrl } }));
   }
 
-  function endLoadingState(el) {
-    el.style.opacity = '';
-    el.removeAttribute('aria-busy');
-  }
-
-  function navigate(url, pushState) {
-    var contentEl = document.querySelector(contentSelector);
+  function request(url, fetchOptions, pushState) {
+    var contentEl = getContentEl();
     if (!contentEl) {
-      // Halaman ini belum punya #pageContent (belum di-setup) -> fallback normal.
       window.location.href = url;
       return;
     }
 
     if (currentController) currentController.abort();
     currentController = new AbortController();
-    startLoadingState(contentEl);
+    startLoading(contentEl);
 
-    fetch(url, {
+    var opts = Object.assign({}, fetchOptions || {}, {
       credentials: 'same-origin',
-      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      headers: Object.assign({ 'X-Requested-With': 'XMLHttpRequest' }, (fetchOptions && fetchOptions.headers) || {}),
       signal: currentController.signal,
-    })
+    });
+
+    fetch(url, opts)
       .then(function (res) {
-        if (!res.ok) throw new Error('Gagal memuat halaman (' + res.status + ')');
-        return res.text();
-      })
-      .then(function (html) {
-        var doc = new DOMParser().parseFromString(html, 'text/html');
-        var newContent = doc.querySelector(contentSelector);
-
-        if (!newContent) {
-          // Struktur halaman tujuan beda / tidak punya #pageContent -> fallback.
+        var contentType = res.headers.get('content-type') || '';
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (contentType.indexOf('text/html') === -1) {
+          // Bukan halaman HTML (misalnya file export/download) -> biarkan browser yang urus.
           window.location.href = url;
-          return;
+          return null;
         }
-
-        contentEl.innerHTML = newContent.innerHTML;
-        runScripts(contentEl);
-        endLoadingState(contentEl);
-
-        var newTitleEl = doc.getElementById('pageHeaderTitle');
-        var curTitleEl = document.getElementById('pageHeaderTitle');
-        if (newTitleEl && curTitleEl) {
-          curTitleEl.textContent = newTitleEl.textContent;
-        }
-        if (doc.title) document.title = doc.title;
-
-        if (pushState) {
-          window.history.pushState({ spaNav: true }, doc.title || '', url);
-        }
-
-        setActiveMenu(url);
-        contentEl.scrollTop = 0;
-        window.scrollTo(0, 0);
-
-        document.dispatchEvent(new CustomEvent('spa:navigated', { detail: { url: url } }));
+        return res.text().then(function (html) {
+          return { res: res, html: html };
+        });
+      })
+      .then(function (result) {
+        if (!result) return;
+        swapFromResponse(result.res, result.html, pushState);
       })
       .catch(function (err) {
-        if (err.name === 'AbortError') return;
-        // Kalau gagal (network error dll), fallback ke navigasi normal supaya tidak "nyangkut".
+        if (err && err.name === 'AbortError') return;
+        // Gagal (network error / CORS / dll) -> fallback navigasi biasa supaya tidak "nyangkut".
         window.location.href = url;
       });
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    bindNavLinks(document);
-  });
+  // --- event handlers --------------------------------------------
 
-  // Setiap kali konten baru masuk, ada kemungkinan link baru muncul (mis. pagination) -> re-bind.
-  document.addEventListener('spa:navigated', function () {
-    bindNavLinks(document);
-  });
+  function handleLinkClick(e) {
+    var a = e.target.closest ? e.target.closest('a[href]') : null;
+    if (!a || !isEligibleLink(a)) return;
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+    var target = resolveUrl(a.getAttribute('href'));
+    if (!target) return;
+
+    e.preventDefault();
+    if (target.pathname === window.location.pathname && target.search === window.location.search) return;
+
+    request(target.href, { method: 'GET' }, true);
+  }
+
+  function handleFormSubmit(e) {
+    var form = e.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    if (e.defaultPrevented) return; // sudah dibatalkan (mis. lewat confirm() yang return false)
+    if (!isEligibleForm(form)) return;
+
+    var method = (form.getAttribute('method') || 'GET').toUpperCase();
+
+    if (method === 'GET') {
+      var params = new URLSearchParams(new FormData(form));
+      var url = resolveUrl(form.action);
+      if (!url) return;
+      url.search = params.toString();
+      e.preventDefault();
+      request(url.href, { method: 'GET' }, true);
+      return;
+    }
+
+    // POST (termasuk yang di-spoof jadi PUT/PATCH/DELETE lewat @method())
+    e.preventDefault();
+    request(form.action, { method: 'POST', body: new FormData(form) }, true);
+  }
+
+  // Delegasi di level document supaya otomatis "nyantol" ke konten baru
+  // hasil swap tanpa perlu bind ulang manual.
+  document.addEventListener('click', handleLinkClick);
+  document.addEventListener('submit', handleFormSubmit);
 
   window.addEventListener('popstate', function () {
-    navigate(window.location.href, false);
+    request(window.location.href, { method: 'GET' }, false);
   });
 })();
