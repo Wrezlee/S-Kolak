@@ -295,7 +295,7 @@
                 @foreach ($statCards as $card)
                     @php $sc = $statColorMap[$card['color']]; @endphp
                     <button type="button" onclick="openModal('{{ $card['key'] }}')"
-                            class="text-left w-full {{ $sc['card'] }} rounded-xl border shadow-sm p-5 flex items-start gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                            class="text-left w-full {{ $sc['card'] }} rounded-xl border shadow-sm p-5 flex items-start gap-4 hover:shadow-md hover:-translate-y-0.5 hover:brightness-100 transition-all">
                         <div class="p-3 rounded-xl {{ $sc['icon'] }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 {!! $statIcons[$card['icon']] !!}
