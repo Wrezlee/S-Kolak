@@ -7,6 +7,7 @@ use App\Models\NeracaPangan;
 use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class DataNeracaController extends Controller
 {
@@ -153,10 +154,31 @@ class DataNeracaController extends Controller
 
     /**
      * Hapus data neraca pangan.
+     * Beri notifikasi ke operator yang menginput & verifikator yang menangani
+     * data tersebut (jika ada), supaya mereka tahu data tersebut sudah tidak ada.
      */
     public function destroy(NeracaPangan $neracaPangan)
     {
+        $neracaPangan->load('komoditas');
+
+        $namaKomoditas = $neracaPangan->komoditas->nama ?? 'data neraca pangan';
+        $periode       = self::formatPeriode($neracaPangan->periode);
+        $adminNama     = Auth::user()->name ?? 'Admin';
+
+        $penerimaIds = collect([$neracaPangan->diinput_oleh, $neracaPangan->diverifikasi_oleh])
+            ->filter()
+            ->unique();
+
         $neracaPangan->delete();
+
+        foreach ($penerimaIds as $userId) {
+            Notifikasi::create([
+                'user_id' => $userId,
+                'judul'   => 'Data neraca pangan dihapus',
+                'pesan'   => "{$adminNama} menghapus data {$namaKomoditas} periode {$periode}.",
+                'dibaca'  => false,
+            ]);
+        }
 
         return back()->with('status', 'Data neraca pangan berhasil dihapus.');
     }

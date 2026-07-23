@@ -49,13 +49,22 @@ class UserController extends Controller
             'password' => ['required', 'string', 'min:8'],
         ]);
 
-        User::create([
+        $user = User::create([
             'login_id' => $validated['login_id'],
             'name'     => $validated['name'],
             'role'     => $validated['role'],
             'password' => Hash::make($validated['password']),
             'status'   => 'Aktif',
         ]);
+
+        if (in_array($validated['role'], ['operator', 'verifikator'])) {
+            Notifikasi::create([
+                'user_id' => $user->id,
+                'judul'   => 'Akun Anda telah dibuat',
+                'pesan'   => "Akun Anda telah dibuat oleh admin dengan role {$validated['role']}. Selamat bergabung!",
+                'dibaca'  => false,
+            ]);
+        }
 
         return back()->with('status', 'Pengguna baru berhasil ditambahkan.');
     }
@@ -72,14 +81,41 @@ class UserController extends Controller
             'password' => ['nullable', 'string', 'min:8'],
         ]);
 
+        $roleLama = $user->role;
+        $passwordDiubah = !empty($validated['password']);
+
         $user->name = $validated['name'];
         $user->role = $validated['role'];
 
-        if (!empty($validated['password'])) {
+        if ($passwordDiubah) {
             $user->password = Hash::make($validated['password']);
         }
 
         $user->save();
+
+        // Beri tahu operator/verifikator yang bersangkutan jika ada perubahan
+        // pada akun mereka (data diri, role, atau password).
+        if (in_array($validated['role'], ['operator', 'verifikator'])) {
+            $perubahan = [];
+
+            if ($roleLama !== $validated['role']) {
+                $perubahan[] = "role menjadi {$validated['role']}";
+            }
+            if ($passwordDiubah) {
+                $perubahan[] = 'password';
+            }
+
+            $pesan = $perubahan
+                ? 'Admin memperbarui akun Anda: ' . implode(' dan ', $perubahan) . '.'
+                : 'Admin memperbarui data akun Anda.';
+
+            Notifikasi::create([
+                'user_id' => $user->id,
+                'judul'   => 'Akun Anda diperbarui',
+                'pesan'   => $pesan,
+                'dibaca'  => false,
+            ]);
+        }
 
         return back()->with('status', 'Data pengguna berhasil diperbarui.');
     }

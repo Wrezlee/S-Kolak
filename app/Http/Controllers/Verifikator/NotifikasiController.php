@@ -73,7 +73,7 @@ class NotifikasiController extends Controller
     {
         $pesanLower = Str::lower($pesan);
 
-        if (Str::contains($pesanLower, ['revisi', 'dikembalikan', 'ditolak'])) {
+        if (Str::contains($pesanLower, ['revisi', 'dikembalikan', 'ditolak', 'dihapus', 'hapus'])) {
             return 'warning';
         }
 

@@ -21,6 +21,7 @@ class DashboardController extends Controller
             'summary'     => $this->getSummary($operatorId),
             'totalEntri'  => NeracaPangan::where('diinput_oleh', $operatorId)->count(),
             'dataTerbaru' => $this->getDataTerbaru($operatorId),
+            'cardItems'   => $this->getCardItems($operatorId),
             'notifCount'  => Notifikasi::where('user_id', $operatorId)
                 ->where('dibaca', false)
                 ->count(),
@@ -53,5 +54,31 @@ class DashboardController extends Controller
             ->orderByDesc('created_at')
             ->limit(10)
             ->get();
+    }
+
+    /** Nama bulan Indonesia (singkatan), dipakai untuk format label "Jan 2025" dsb. */
+    private const BULAN_INDO = [
+        1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun',
+        7 => 'Jul', 8 => 'Agt', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des',
+    ];
+
+    /**
+     * Daftar data neraca pangan milik operator (sampai 100 terbaru), dipakai
+     * untuk mengisi modal "Lihat detail" pada tiap stat card di dashboard.
+     */
+    private function getCardItems(int $operatorId): array
+    {
+        return NeracaPangan::with('komoditas')
+            ->where('diinput_oleh', $operatorId)
+            ->orderByDesc('created_at')
+            ->limit(100)
+            ->get()
+            ->map(fn ($item) => [
+                'komoditas'    => $item->komoditas->nama ?? '-',
+                'periode'      => (self::BULAN_INDO[(int) \Illuminate\Support\Carbon::parse($item->periode)->month] ?? '') . ' ' . \Illuminate\Support\Carbon::parse($item->periode)->year,
+                'nilai_neraca' => $item->nilai_neraca,
+                'status'       => $item->status,
+            ])
+            ->all();
     }
 }

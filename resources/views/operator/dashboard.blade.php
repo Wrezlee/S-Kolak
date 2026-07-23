@@ -238,48 +238,95 @@
             @endif
 
             {{-- Stat cards --}}
+            @php
+                $statCards = [
+                    ['key' => 'total',    'label' => 'Total Data Saya',       'value' => $summary['total'],    'sub' => 'semua status',    'color' => 'blue',   'icon' => 'database'],
+                    ['key' => 'valid',    'label' => 'Sudah Valid',           'value' => $summary['valid'],    'sub' => 'terverifikasi',   'color' => 'green',  'icon' => 'check'],
+                    ['key' => 'menunggu', 'label' => 'Menunggu Verifikasi',   'value' => $summary['menunggu'], 'sub' => 'dalam antrian',   'color' => 'yellow', 'icon' => 'clock'],
+                    ['key' => 'revisi',   'label' => 'Perlu Revisi',          'value' => $summary['revisi'],   'sub' => 'dikembalikan',    'color' => 'red',    'icon' => 'warning'],
+                ];
+                $statColorMap = [
+                    'blue'   => ['card' => 'bg-blue-50 border-blue-200',     'icon' => 'bg-blue-100 text-blue-600',    'link' => 'text-blue-600'],
+                    'green'  => ['card' => 'bg-green-50 border-green-200',   'icon' => 'bg-green-100 text-green-600',  'link' => 'text-green-600'],
+                    'yellow' => ['card' => 'bg-yellow-50 border-yellow-200', 'icon' => 'bg-yellow-100 text-yellow-600','link' => 'text-yellow-600'],
+                    'red'    => ['card' => 'bg-red-50 border-red-200',       'icon' => 'bg-red-100 text-red-600',      'link' => 'text-red-600'],
+                ];
+                $statIcons = [
+                    'database' => '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 5.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/>',
+                    'check'    => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25 4.5-4.5m4.5 2.25a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+                    'clock'    => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+                    'warning'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.007M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L13.71 3.86a1 1 0 00-1.72 0z"/>',
+                ];
+
+                // Kelompokkan cardItems per status untuk mengisi modal detail
+                // tiap card, dengan pola yang sama seperti dashboard publik.
+                $cardItemsCollection = collect($cardItems ?? []);
+                $modalData = [
+                    'total'    => ['title' => 'Semua Data Saya',           'items' => $cardItemsCollection->values()],
+                    'valid'    => ['title' => 'Data Sudah Valid',          'items' => $cardItemsCollection->where('status', 'valid')->values()],
+                    'menunggu' => ['title' => 'Data Menunggu Verifikasi',  'items' => $cardItemsCollection->where('status', 'menunggu')->values()],
+                    'revisi'   => ['title' => 'Data Perlu Revisi',         'items' => $cardItemsCollection->where('status', 'revisi')->values()],
+                ];
+                $statusBadgeMap = [
+                    'valid'    => 'bg-green-50 text-green-700 border border-green-200',
+                    'menunggu' => 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+                    'revisi'   => 'bg-red-50 text-red-700 border border-red-200',
+                    'draft'    => 'bg-slate-50 text-slate-600 border border-slate-200',
+                ];
+                $statusLabelMap = ['valid' => 'Valid', 'menunggu' => 'Menunggu', 'revisi' => 'Revisi', 'draft' => 'Draft'];
+            @endphp
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-blue-50 border-blue-200 rounded-xl border shadow-sm p-5 flex items-start gap-4">
-                    <div class="p-3 rounded-xl bg-blue-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 5.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Total Data Saya</p>
-                        <p class="text-2xl font-bold mt-0.5 text-black">{{ $summary['total'] }}</p>
-                        <p class="text-xs text-slate-500 mt-0.5">semua status</p>
-                    </div>
-                </div>
-                <div class="bg-green-50 border-green-200 rounded-xl border shadow-sm p-5 flex items-start gap-4">
-                    <div class="p-3 rounded-xl bg-green-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25 4.5-4.5m4.5 2.25a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Sudah Valid</p>
-                        <p class="text-2xl font-bold mt-0.5 text-black">{{ $summary['valid'] }}</p>
-                        <p class="text-xs text-slate-500 mt-0.5">terverifikasi</p>
-                    </div>
-                </div>
-                <div class="bg-yellow-50 border-yellow-200 rounded-xl border shadow-sm p-5 flex items-start gap-4">
-                    <div class="p-3 rounded-xl bg-yellow-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Menunggu Verifikasi</p>
-                        <p class="text-2xl font-bold mt-0.5 text-black">{{ $summary['menunggu'] }}</p>
-                        <p class="text-xs text-slate-500 mt-0.5">dalam antrian</p>
-                    </div>
-                </div>
-                <div class="bg-red-50 border-red-200 rounded-xl border shadow-sm p-5 flex items-start gap-4">
-                    <div class="p-3 rounded-xl bg-red-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.007M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L13.71 3.86a1 1 0 00-1.72 0z"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Perlu Revisi</p>
-                        <p class="text-2xl font-bold mt-0.5 text-black">{{ $summary['revisi'] }}</p>
-                        <p class="text-xs text-slate-500 mt-0.5">dikembalikan</p>
-                    </div>
-                </div>
+                @foreach ($statCards as $card)
+                    @php $sc = $statColorMap[$card['color']]; @endphp
+                    <button type="button" onclick="openModal('{{ $card['key'] }}')"
+                            class="text-left w-full {{ $sc['card'] }} rounded-xl border shadow-sm p-5 flex items-start gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                        <div class="p-3 rounded-xl {{ $sc['icon'] }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                {!! $statIcons[$card['icon']] !!}
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">{{ $card['label'] }}</p>
+                            <p class="text-2xl font-bold mt-0.5 text-black">{{ $card['value'] }}</p>
+                            <p class="text-xs text-slate-500 mt-0.5">{{ $card['sub'] }}</p>
+                            <span class="mt-1 inline-flex items-center gap-1 text-xs font-semibold {{ $sc['link'] }}">
+                                Lihat detail →
+                            </span>
+                        </div>
+                    </button>
+                @endforeach
             </div>
+
+            {{-- Modal detail per stat card --}}
+            @foreach ($modalData as $key => $modal)
+                <div id="modal-{{ $key }}" class="fixed inset-0 z-50 items-center justify-center p-4" style="background-color:rgba(0,0,0,0.4); display:none;" onclick="closeModal('{{ $key }}')">
+                    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+                        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+                            <p class="font-semibold" style="color:#1E3A5F;">{{ $modal['title'] }}</p>
+                            <button type="button" onclick="closeModal('{{ $key }}')" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="overflow-y-auto flex-1 p-4 space-y-2">
+                            @forelse ($modal['items'] as $item)
+                                <div class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50">
+                                    <div>
+                                        <p class="text-sm font-semibold">{{ $item['komoditas'] }}</p>
+                                        <p class="text-xs text-slate-400">{{ $item['periode'] }} · Neraca: {{ number_format($item['nilai_neraca'], 0, ',', '.') }}</p>
+                                    </div>
+                                    <span class="text-xs font-medium px-2.5 py-1 rounded-full {{ $statusBadgeMap[$item['status']] ?? 'bg-slate-50 text-slate-600' }}">
+                                        ● {{ $statusLabelMap[$item['status']] ?? $item['status'] }}
+                                    </span>
+                                </div>
+                            @empty
+                                <p class="text-sm text-slate-400 text-center py-6">Tidak ada data.</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            @endforeach
 
             {{-- Data terbaru --}}
             <div class="bg-white rounded-xl border border-blue-100 shadow-sm">
@@ -331,6 +378,15 @@
 </div>
 
 <script>
+    function openModal(key) {
+        var el = document.getElementById('modal-' + key);
+        if (el) el.style.display = 'flex';
+    }
+    function closeModal(key) {
+        var el = document.getElementById('modal-' + key);
+        if (el) el.style.display = 'none';
+    }
+
     function tandaiNotifDibaca(el, url) {
         if (!url || el.dataset.done === '1') return;
         el.dataset.done = '1';

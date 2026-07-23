@@ -33,6 +33,7 @@ class DashboardController extends Controller
             'statusPie'   => $this->getStatusPie(),
             'stokBars'    => $this->getStokBars(),
             'aktivitas'   => $this->getAktivitas($adminId),
+            'cardItems'   => $this->getCardItems(),
             'notifCount'  => Notifikasi::where('user_id', $adminId)
                 ->where('dibaca', false)
                 ->count(),
@@ -113,6 +114,26 @@ class DashboardController extends Controller
             ->sortByDesc('nilai')
             ->take(8)
             ->values()
+            ->all();
+    }
+
+    /**
+     * Daftar data neraca pangan terbaru (lintas seluruh sistem), dipakai untuk
+     * mengisi modal "Lihat detail" pada tiap stat card di dashboard admin.
+     * Dibatasi 100 data terbaru agar query & payload tetap ringan.
+     */
+    private function getCardItems(): array
+    {
+        return NeracaPangan::with('komoditas')
+            ->latest('periode')
+            ->limit(100)
+            ->get()
+            ->map(fn ($item) => [
+                'komoditas'    => $item->komoditas->nama ?? '-',
+                'periode'      => (self::BULAN_INDO[(int) Carbon::parse($item->periode)->month] ?? '') . ' ' . Carbon::parse($item->periode)->year,
+                'nilai_neraca' => $item->nilai_neraca,
+                'status'       => $item->status,
+            ])
             ->all();
     }
 
