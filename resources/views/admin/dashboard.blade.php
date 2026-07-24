@@ -346,7 +346,7 @@
             {{-- Charts --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 <div class="lg:col-span-2 bg-white rounded-xl border border-blue-100 shadow-sm p-5">
-                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Tren Nilai Neraca Pangan – Kota Kediri</h3>
+                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Nilai Neraca Pangan – Kota Kediri</h3>
                     <canvas id="trendChart" height="90"></canvas>
                 </div>
 

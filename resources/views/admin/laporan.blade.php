@@ -410,7 +410,7 @@
 
                 {{-- Nilai neraca valid --}}
                 <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
-                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Nilai Neraca Komoditas Valid – Kota Kediri</h3>
+                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Neraca Komoditas Valid – Kota Kediri</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
                             <thead>
@@ -521,7 +521,7 @@
                 </div>
 
                 <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
-                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Perbandingan Nilai Neraca per Komoditas (Data Valid)</h3>
+                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Perbandingan Neraca per Komoditas (Data Valid)</h3>
                     <canvas id="chartPerbandingan" height="220"></canvas>
                 </div>
             </div>
