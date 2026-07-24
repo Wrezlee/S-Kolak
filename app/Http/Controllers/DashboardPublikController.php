@@ -101,6 +101,27 @@ class DashboardPublikController extends Controller
         $lastUpdated = $waktuTerbaru ? $this->formatTanggalWaktu($waktuTerbaru) : '-';
 
         // ===============================
+        // Response khusus untuk request AJAX (filter tanpa reload)
+        // ===============================
+        if ($request->ajax() || $request->wantsJson()) {
+            $html = view('public.partials.dashboard-content', compact(
+                'rows',
+                'summary',
+                'trendLabels',
+                'trendValues',
+                'detailData',
+                'lastUpdated',
+            ))->render();
+
+            return response()->json([
+                'html' => $html,
+                'trendLabels' => $trendLabels,
+                'trendValues' => $trendValues,
+                'detailData' => $detailData,
+            ]);
+        }
+
+        // ===============================
         // Data untuk Filter Dashboard
         // ===============================
 

@@ -337,10 +337,10 @@
                 <button type="button" data-tab="ringkasan" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-white shadow-sm" style="background-color:#2563EB;">
                     Ringkasan Eksekutif
                 </button>
-                <button type="button" data-tab="detail" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-slate-500 hover:text-blue-600">
+                <button type="button" data-tab="detail" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-slate-500 hover:bg-blue-100 hover:text-slate-600">
                     Laporan Detail
                 </button>
-                <button type="button" data-tab="grafik" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-slate-500 hover:text-blue-600">
+                <button type="button" data-tab="grafik" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-slate-500 hover:bg-blue-100 hover:text-slate-600">
                     Grafik &amp; Visualisasi
                 </button>
             </div>
