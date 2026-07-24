@@ -334,7 +334,7 @@
 
             {{-- Tabs --}}
             <div class="flex gap-1 bg-white rounded-xl border border-blue-100 shadow-sm p-1" id="tabNav">
-                <button type="button" data-tab="ringkasan" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-white shadow-sm" style="background-color:#2563EB;">
+                <button type="button" data-tab="ringkasan" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-white shadow-sm hover:bg-blue-100 hover:text-slate-600" style="background-color:#2563EB;">
                     Ringkasan Eksekutif
                 </button>
                 <button type="button" data-tab="detail" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-slate-500 hover:bg-blue-100 hover:text-slate-600">

@@ -412,7 +412,7 @@
                 @foreach ($fieldsTpl as $f)
                     <div class="rounded-xl p-3 border border-blue-50">
                         <p class="text-xs text-slate-400">{{ $f['label'] }}</p>
-                        <p class="angka-neraca text-base font-bold mt-0.5 text-black">{{ number_format($f['val'], 0, ',', '.') }}</p>
+                        <p class="angka-neraca text-base font-bold mt-0.5 text-black">{{ number_format($f['val'], 2, ',', '.') }}</p>
                     </div>
                 @endforeach
             </div>
@@ -421,7 +421,7 @@
         <div class="rounded-xl p-4 border-2" style="border-color:{{ $nilaiTpl > 0 ? '#86EFAC' : '#FCA5A5' }}; background-color:{{ $nilaiTpl > 0 ? '#F0FDF4' : '#FEF2F2' }};">
             <div class="flex items-center justify-between">
                 <p class="text-sm font-semibold text-slate-600">Nilai Neraca Pangan</p>
-                <p class="angka-neraca text-2xl font-bold text-black">{{ number_format($nilaiTpl, 0, ',', '.') }}</p>
+                <p class="angka-neraca text-2xl font-bold text-black">{{ number_format($nilaiTpl, 2, ',', '.') }}</p>
             </div>
         </div>
 
