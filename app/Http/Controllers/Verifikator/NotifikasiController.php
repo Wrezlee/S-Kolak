@@ -19,8 +19,9 @@ class NotifikasiController extends Controller
 
         $notifikasi = Notifikasi::where('user_id', $verifikatorId)
             ->orderByDesc('created_at')
-            ->get()
-            ->map(function ($n) {
+            ->paginate(10)
+            ->withQueryString()
+            ->through(function ($n) {
                 return [
                     'id'    => $n->id,
                     'pesan' => $n->pesan,

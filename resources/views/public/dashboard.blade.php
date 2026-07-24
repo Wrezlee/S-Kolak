@@ -286,6 +286,25 @@
             const params = new URLSearchParams(window.location.search);
             submitFilter(params);
         });
+
+        // Link pagination (di dalam tabel data) ikut lewat AJAX yang sama,
+        // supaya pindah halaman tabel tidak me-reload seluruh dashboard.
+        dashboardContent.addEventListener('click', function (e) {
+            const link = e.target.closest('a[href]');
+            if (!link) return;
+
+            let linkUrl;
+            try {
+                linkUrl = new URL(link.href, window.location.origin);
+            } catch (err) {
+                return;
+            }
+
+            if (linkUrl.pathname !== window.location.pathname) return;
+
+            e.preventDefault();
+            submitFilter(linkUrl.searchParams);
+        });
     </script>
 </body>
 </html>

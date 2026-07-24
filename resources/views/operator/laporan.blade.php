@@ -93,7 +93,7 @@
 
     // Normalisasi tiap baris (mendukung Eloquent Model \App\Models\NeracaPangan
     // maupun objek/array pratinjau) supaya template di bawah tidak perlu tahu sumber datanya.
-    $rows = collect($rawItems)->map(function ($n) {
+    $normalisasiBarisLaporan = function ($n) {
         $isModel = $n instanceof \App\Models\NeracaPangan;
 
         if ($isModel) {
@@ -107,10 +107,22 @@
         }
 
         return (array) $n;
-    });
+    };
 
-    $totalEntri = $rows->count();
-    $dataValid  = $rows->where('status', 'valid')->count();
+    // Jika $items sudah berupa hasil paginate() dari controller, pakai through() supaya
+    // info halaman (current page, total, dst.) tetap terjaga — collect()->map() akan
+    // membuangnya menjadi Collection biasa dan mematikan pagination.
+    if ($rawItems instanceof \Illuminate\Contracts\Pagination\Paginator) {
+        $rows = $rawItems->through($normalisasiBarisLaporan);
+    } else {
+        $rows = collect($rawItems)->map($normalisasiBarisLaporan);
+    }
+
+    // Total & jumlah valid selalu dihitung dari seluruh data yang cocok filter (bukan
+    // hanya baris di halaman aktif) — controller mengirim ini lewat $totalEntri/$dataValid;
+    // fallback di bawah hanya dipakai untuk pratinjau tampilan tanpa controller.
+    $totalEntri = $totalEntri ?? $rows->count();
+    $dataValid  = $dataValid ?? $rows->where('status', 'valid')->count();
 @endphp
 
 <div class="flex h-screen overflow-hidden">

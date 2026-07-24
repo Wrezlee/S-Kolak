@@ -21,7 +21,8 @@ class KomoditasController extends Controller
                 $query->where('nama', 'like', "%{$search}%");
             })
             ->orderBy('nama')
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.master-komoditas', [
             'komoditas'  => $komoditas,

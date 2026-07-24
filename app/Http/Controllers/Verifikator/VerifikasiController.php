@@ -29,7 +29,8 @@ class VerifikasiController extends Controller
                 });
             })
             ->orderBy('periode')
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         return view('verifikator.data-menunggu-verif', [
             'pending'    => $pending,
@@ -73,7 +74,8 @@ class VerifikasiController extends Controller
             })
             ->orderByDesc('periode')
             ->orderByDesc('id')
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         return view('verifikator.riwayat', [
             'riwayat'    => $riwayat,

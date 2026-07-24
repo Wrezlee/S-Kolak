@@ -44,11 +44,13 @@ class LaporanController extends Controller
             $query->where('komoditas_id', $filters['komoditas_id']);
         }
 
-        $items = $query->orderByDesc('periode')->orderByDesc('id')->get();
+        $items = (clone $query)->orderByDesc('periode')->orderByDesc('id')->paginate(15)->withQueryString();
 
         return view('operator.laporan', [
             'filters'        => $filters,
             'items'          => $items,
+            'totalEntri'     => (clone $query)->count(),
+            'dataValid'      => (clone $query)->where('status', 'valid')->count(),
             'komoditasList'  => Komoditas::where('status', 'Aktif')->orderBy('nama')->get(),
             'notifCount'     => Notifikasi::where('user_id', $operatorId)
                 ->where('dibaca', false)

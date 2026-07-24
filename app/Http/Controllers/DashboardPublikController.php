@@ -22,27 +22,7 @@ class DashboardPublikController extends Controller
     {
         $komoditasList = Komoditas::orderBy('nama')->pluck('nama');
 
-        $query = NeracaPangan::with('komoditas')
-            // Hanya data yang sudah diverifikasi (valid) yang ditampilkan ke publik
-            ->where('status', 'valid');
-
-        // Filter rentang periode (tahun awal/bulan awal - tahun akhir/bulan akhir)
-        if ($this->filterAktif($request, 'tahun_awal', 'bulan_awal')) {
-            $awal = $this->buatTanggalPeriode($request->tahun_awal, $request->bulan_awal);
-            $query->whereDate('periode', '>=', $awal->startOfMonth());
-        }
-
-        if ($this->filterAktif($request, 'tahun_akhir', 'bulan_akhir')) {
-            $akhir = $this->buatTanggalPeriode($request->tahun_akhir, $request->bulan_akhir);
-            $query->whereDate('periode', '<=', $akhir->endOfMonth());
-        }
-
-        // Filter komoditas
-        if ($request->filled('komoditas') && $request->komoditas !== 'Semua') {
-            $query->whereHas('komoditas', fn ($q) => $q->where('nama', $request->komoditas));
-        }
-
-        $records = $query->orderByDesc('periode')->get();
+        $records = $this->filteredQuery($request)->orderByDesc('periode')->get();
 
         // Susun baris tabel + hitung nilai neraca & status stok untuk masing-masing baris
         $rows = $records->values()->map(function (NeracaPangan $item, int $index) {
@@ -100,12 +80,37 @@ class DashboardPublikController extends Controller
         $waktuTerbaru = $records->max('updated_at');
         $lastUpdated = $waktuTerbaru ? $this->formatTanggalWaktu($waktuTerbaru) : '-';
 
+        // Baris tabel yang benar-benar ditampilkan ke pengguna — dipaginasi terpisah dari
+        // $records supaya ringkasan/tren/detail di atas tetap dihitung dari SELURUH data
+        // hasil filter, sementara tabelnya sendiri tidak menampilkan semuanya sekaligus.
+        $tablePage = $this->filteredQuery($request)->orderByDesc('periode')->paginate(15)->withQueryString();
+        $offset = $tablePage->firstItem() ?? 1;
+        $tableRows = $tablePage->through(function (NeracaPangan $item, int $index) use ($offset) {
+            $nilaiNeraca = $this->hitungNilaiNeraca($item);
+
+            return [
+                'no' => $offset + $index,
+                'periode' => $this->formatPeriode($item->periode),
+                'periode_key' => Carbon::parse($item->periode)->format('Y-m'),
+                'komoditas' => $item->komoditas->nama,
+                'stok_awal' => (float) $item->stok_awal,
+                'produksi' => (float) $item->produksi,
+                'masuk' => (float) $item->masuk,
+                'keluar' => (float) $item->keluar,
+                'keb_rt' => (float) $item->kebutuhan_rumah_tangga,
+                'keb_non_rt' => (float) $item->kebutuhan_non_rumah_tangga,
+                'nilai_neraca' => $nilaiNeraca,
+                'status' => $this->statusStok($nilaiNeraca, $item),
+            ];
+        });
+
         // ===============================
         // Response khusus untuk request AJAX (filter tanpa reload)
         // ===============================
         if ($request->ajax() || $request->wantsJson()) {
             $html = view('public.partials.dashboard-content', compact(
                 'rows',
+                'tableRows',
                 'summary',
                 'trendLabels',
                 'trendValues',
@@ -149,12 +154,43 @@ class DashboardPublikController extends Controller
             'tahunList',
             'q',
             'rows',
+            'tableRows',
             'summary',
             'trendLabels',
             'trendValues',
             'detailData',
             'lastUpdated',
         ));
+    }
+
+    /**
+     * Query dasar data publik (hanya status valid) dengan filter periode & komoditas
+     * yang sama diterapkan, dipakai baik untuk hitung ringkasan/tren (seluruh data)
+     * maupun untuk tabel yang dipaginasi.
+     */
+    private function filteredQuery(Request $request)
+    {
+        $query = NeracaPangan::with('komoditas')
+            // Hanya data yang sudah diverifikasi (valid) yang ditampilkan ke publik
+            ->where('status', 'valid');
+
+        // Filter rentang periode (tahun awal/bulan awal - tahun akhir/bulan akhir)
+        if ($this->filterAktif($request, 'tahun_awal', 'bulan_awal')) {
+            $awal = $this->buatTanggalPeriode($request->tahun_awal, $request->bulan_awal);
+            $query->whereDate('periode', '>=', $awal->startOfMonth());
+        }
+
+        if ($this->filterAktif($request, 'tahun_akhir', 'bulan_akhir')) {
+            $akhir = $this->buatTanggalPeriode($request->tahun_akhir, $request->bulan_akhir);
+            $query->whereDate('periode', '<=', $akhir->endOfMonth());
+        }
+
+        // Filter komoditas
+        if ($request->filled('komoditas') && $request->komoditas !== 'Semua') {
+            $query->whereHas('komoditas', fn ($q) => $q->where('nama', $request->komoditas));
+        }
+
+        return $query;
     }
 
     /**

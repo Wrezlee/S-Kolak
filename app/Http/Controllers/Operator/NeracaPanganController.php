@@ -17,20 +17,26 @@ class NeracaPanganController extends Controller
     {
         $operatorId = $request->user()->id;
 
-        $items = NeracaPangan::with(['komoditas', 'verifikator'])
-            ->where('diinput_oleh', $operatorId)
-            ->where('status', '!=', 'draft')
+        $baseQuery = NeracaPangan::where('diinput_oleh', $operatorId)
+            ->where('status', '!=', 'draft');
+
+        $items = (clone $baseQuery)
+            ->with(['komoditas', 'verifikator'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
                 $query->whereHas('komoditas', fn ($q) => $q->where('nama', 'like', "%{$search}%"));
             })
+            // Data "Perlu Revisi" selalu dinaikkan ke paling atas supaya langsung terlihat operator.
+            ->orderByRaw("CASE WHEN status = 'revisi' THEN 0 ELSE 1 END")
             ->orderByDesc('periode')
             ->orderByDesc('id')
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         return view('operator.data-neraca', [
-            'items'      => $items,
-            'notifCount' => Notifikasi::where('user_id', $operatorId)
+            'items'        => $items,
+            'jumlahRevisi' => (clone $baseQuery)->where('status', 'revisi')->count(),
+            'notifCount'   => Notifikasi::where('user_id', $operatorId)
                 ->where('dibaca', false)
                 ->count(),
         ]);

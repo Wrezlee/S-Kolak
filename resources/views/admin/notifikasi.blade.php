@@ -258,6 +258,12 @@
                 @endforelse
             </div>
 
+            @if (method_exists($notifikasi, 'hasPages') && $notifikasi->hasPages())
+                <div class="p-4 bg-white rounded-xl border border-blue-100 shadow-sm mt-3">
+                    {{ $notifikasi->links() }}
+                </div>
+            @endif
+
         
 <!-- ====== Modal & script khusus halaman ini (dipindah ke dalam #pageContent supaya ikut ter-refresh saat navigasi SPA - lihat runScripts() di spa-nav.js) ====== -->
 <script>

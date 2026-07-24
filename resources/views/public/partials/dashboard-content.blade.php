@@ -1,5 +1,7 @@
 @php
     $rowsCollection = collect($rows);
+    // $tableRows dipaginasi terpisah dari $rows — fallback ke $rows kalau controller lama belum mengirimnya.
+    $tableRows = $tableRows ?? $rows;
 
     $modalData = [
         'terpantau' => [
@@ -191,7 +193,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($rows as $row)
+                @forelse ($tableRows as $row)
                     @php
                         $badge = $statusBadgeMap[$row['status']] ?? 'bg-slate-50 text-slate-600 border border-slate-200';
                         $nilaiColor = $row['nilai_neraca'] < 0 ? 'text-red-600' : 'text-slate-800';
@@ -221,6 +223,12 @@
             </tbody>
         </table>
     </div>
+
+    @if (method_exists($tableRows, 'hasPages') && $tableRows->hasPages())
+        <div class="p-4 border-t border-slate-100">
+            {{ $tableRows->links() }}
+        </div>
+    @endif
 
     <div class="px-6 py-4 text-xs text-slate-400 border-t border-slate-100">
         Data diperbarui: {{ $lastUpdated }} · Sumber: Dinas Ketahanan Pangan dan Pertanian Kota Kediri

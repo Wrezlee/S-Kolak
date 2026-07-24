@@ -266,6 +266,12 @@
                     <div class="px-5 py-10 text-center text-slate-400 text-sm">Belum ada notifikasi.</div>
                 @endforelse
             </div>
+
+            @if (method_exists($notifikasi, 'hasPages') && $notifikasi->hasPages())
+                <div class="p-4 bg-white rounded-xl border border-blue-100 shadow-sm mt-3">
+                    {{ $notifikasi->links() }}
+                </div>
+            @endif
         
 <!-- ====== Modal & script khusus halaman ini (dipindah ke dalam #pageContent supaya ikut ter-refresh saat navigasi SPA - lihat runScripts() di spa-nav.js) ====== -->
 <script>

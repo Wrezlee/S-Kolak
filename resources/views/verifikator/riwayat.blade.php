@@ -317,6 +317,12 @@
                         </tbody>
                     </table>
                 </div>
+
+                @if (method_exists($riwayat, 'hasPages') && $riwayat->hasPages())
+                    <div class="p-4 border-t border-blue-50">
+                        {{ $riwayat->links() }}
+                    </div>
+                @endif
             </div>
 
         
