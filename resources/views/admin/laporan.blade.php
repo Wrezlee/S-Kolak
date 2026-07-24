@@ -435,7 +435,7 @@
                                     <tr class="border-t border-blue-50 hover:bg-blue-50/20">
                                         <td class="px-4 py-2.5 text-slate-500">{{ $n['periode'] }}</td>
                                         <td class="px-4 py-2.5 font-medium" style="color:#1E3A5F;">{{ $n['komoditas'] }}</td>
-                                        <td class="px-4 py-2.5 text-right font-mono font-bold text-black">{{ number_format($n['nilai'], 2, ',', '.') }}</td>
+                                        <td class="px-4 py-2.5 text-right font-mono font-bold text-black">{{ fmt_neraca($n['nilai']) }}</td>
                                         <td class="px-4 py-2.5">
                                             <span class="px-2 py-0.5 rounded-full text-xs font-medium border {{ $n['surplus'] ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-600 border-red-200' }}">
                                                 {{ $n['surplus'] ? '▲ Surplus' : '▼ Defisit' }}
@@ -491,13 +491,13 @@
                                         <td class="px-3 py-3 text-slate-400">{{ $detail->firstItem() + $i }}</td>
                                         <td class="px-3 py-3 font-medium" style="color:#1E3A5F;">{{ $periodeLabel }}</td>
                                         <td class="px-3 py-3">{{ $n->komoditas->nama ?? '-' }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->stok_awal, 2, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->produksi, 2, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->masuk, 2, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->keluar, 2, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->kebutuhan_rumah_tangga, 2, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->kebutuhan_non_rumah_tangga, 2, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono font-bold text-black">{{ number_format($nilai, 2, ',', '.') }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->stok_awal) }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->produksi) }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->masuk) }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->keluar) }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->kebutuhan_rumah_tangga) }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->kebutuhan_non_rumah_tangga) }}</td>
+                                        <td class="px-3 py-3 text-right font-mono font-bold text-black">{{ fmt_neraca($nilai) }}</td>
                                         <td class="px-3 py-3">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $badge['cls'] }}">{{ $badge['label'] }}</span>
                                         </td>

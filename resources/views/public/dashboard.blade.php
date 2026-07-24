@@ -253,7 +253,7 @@
                             <div class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50">
                                 <div>
                                     <p class="text-sm font-semibold">{{ $item['komoditas'] }}</p>
-                                    <p class="text-xs text-slate-400">{{ $item['periode'] }} · Neraca: {{ number_format($item['nilai_neraca'], 2, ',', '.') }}</p>
+                                    <p class="text-xs text-slate-400">{{ $item['periode'] }} · Neraca: {{ fmt_neraca($item['nilai_neraca']) }}</p>
                                 </div>
                                 <span class="text-xs font-medium px-2.5 py-1 rounded-full {{ $statusBadgeMap[$item['status']] ?? 'bg-slate-50 text-slate-600' }}">
                                     ● {{ $item['status'] }}
@@ -307,7 +307,7 @@
                     <div class="mt-4 rounded-xl bg-green-50 border border-green-200 p-4 flex items-center justify-between">
                         <div>
                             <p class="text-xs text-slate-500">Nilai Neraca</p>
-                            <p class="font-bold text-green-700">{{ number_format($detailData['nilai_neraca'], 2, ',', '.') }} Ton</p>
+                            <p class="font-bold text-green-700">{{ fmt_neraca($detailData['nilai_neraca']) }} Ton</p>
                         </div>
                         <div class="text-right">
                             <p class="text-xs text-slate-500">Ketahanan Pangan</p>
@@ -360,13 +360,13 @@
                                 <td class="px-6 py-3 text-slate-400">{{ $row['no'] }}</td>
                                 <td class="px-4 py-3 font-medium text-slate-700">{{ $row['periode'] }}</td>
                                 <td class="px-4 py-3 font-semibold text-slate-800">{{ $row['komoditas'] }}</td>
-                                <td class="px-4 py-3 text-right tabular-nums">{{ number_format($row['stok_awal'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-3 text-right tabular-nums">{{ number_format($row['produksi'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-3 text-right tabular-nums">{{ number_format($row['masuk'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-3 text-right tabular-nums">{{ number_format($row['keluar'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-3 text-right tabular-nums">{{ number_format($row['keb_rt'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-3 text-right tabular-nums">{{ number_format($row['keb_non_rt'], 2, ',', '.') }}</td>
-                                <td class="px-4 py-3 text-right tabular-nums font-bold {{ $nilaiColor }}">{{ number_format($row['nilai_neraca'], 2, ',', '.') }}</td>
+                                <td class="px-4 py-3 text-right tabular-nums">{{ fmt_neraca($row['stok_awal']) }}</td>
+                                <td class="px-4 py-3 text-right tabular-nums">{{ fmt_neraca($row['produksi']) }}</td>
+                                <td class="px-4 py-3 text-right tabular-nums">{{ fmt_neraca($row['masuk']) }}</td>
+                                <td class="px-4 py-3 text-right tabular-nums">{{ fmt_neraca($row['keluar']) }}</td>
+                                <td class="px-4 py-3 text-right tabular-nums">{{ fmt_neraca($row['keb_rt']) }}</td>
+                                <td class="px-4 py-3 text-right tabular-nums">{{ fmt_neraca($row['keb_non_rt']) }}</td>
+                                <td class="px-4 py-3 text-right tabular-nums font-bold {{ $nilaiColor }}">{{ fmt_neraca($row['nilai_neraca']) }}</td>
                                 <td class="px-4 py-3">
                                     <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full {{ $badge }}">
                                         ● {{ $row['status'] }}

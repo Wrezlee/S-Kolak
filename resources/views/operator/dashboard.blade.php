@@ -314,7 +314,7 @@
                                 <div class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50">
                                     <div>
                                         <p class="text-sm font-semibold">{{ $item['komoditas'] }}</p>
-                                        <p class="text-xs text-slate-400">{{ $item['periode'] }} · Neraca: {{ number_format($item['nilai_neraca'], 2, ',', '.') }}</p>
+                                        <p class="text-xs text-slate-400">{{ $item['periode'] }} · Neraca: {{ fmt_neraca($item['nilai_neraca']) }}</p>
                                     </div>
                                     <span class="text-xs font-medium px-2.5 py-1 rounded-full {{ $statusBadgeMap[$item['status']] ?? 'bg-slate-50 text-slate-600' }}">
                                         ● {{ $statusLabelMap[$item['status']] ?? $item['status'] }}
@@ -359,7 +359,7 @@
                                 <tr class="border-t border-blue-50 hover:bg-blue-50/30 transition-colors">
                                     <td class="px-4 py-3 font-medium" style="color:#1E3A5F;">{{ $periodeLabel }}</td>
                                     <td class="px-4 py-3">{{ $komoditasNama }}</td>
-                                    <td class="px-4 py-3 text-right font-mono font-bold text-black">{{ number_format($nilai, 2, ',', '.') }}</td>
+                                    <td class="px-4 py-3 text-right font-mono font-bold text-black">{{ fmt_neraca($nilai) }}</td>
                                     <td class="px-4 py-3">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $badge['cls'] }}">{{ $badge['label'] }}</span>
                                     </td>

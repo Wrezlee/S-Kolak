@@ -297,7 +297,7 @@
                                 <div class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50">
                                     <div>
                                         <p class="text-sm font-semibold">{{ $item['komoditas'] }}</p>
-                                        <p class="text-xs text-slate-400">{{ $item['periode'] }} · Neraca: {{ number_format($item['nilai_neraca'], 2, ',', '.') }}</p>
+                                        <p class="text-xs text-slate-400">{{ $item['periode'] }} · Neraca: {{ fmt_neraca($item['nilai_neraca']) }}</p>
                                     </div>
                                     <span class="text-xs font-medium px-2.5 py-1 rounded-full {{ $statusBadgeMap[$item['status']] ?? 'bg-slate-50 text-slate-600' }}">
                                         ● {{ $statusLabelMap[$item['status']] ?? $item['status'] }}

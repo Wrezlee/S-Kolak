@@ -519,7 +519,7 @@
     const operatorDataBaseUrl = @json(url('operator/data'));
 
     function fmtNumber(n) {
-        return Number(n).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return Number(n).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
     }
 
     // ---------- Modal Detail (read-only) ----------

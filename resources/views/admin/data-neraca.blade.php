@@ -292,7 +292,7 @@
                                     <td class="px-3 py-3 text-slate-400">{{ $items->firstItem() + $i }}</td>
                                     <td class="px-3 py-3 font-medium" style="color:#1E3A5F;">{{ $periodeLabel }}</td>
                                     <td class="px-3 py-3" style="color:#1E3A5F;">{{ $n->komoditas->nama ?? '-' }}</td>
-                                    <td class="px-3 py-3 text-right font-mono font-bold text-black">{{ number_format($nilaiNeraca, 2, ',', '.') }}</td>
+                                    <td class="px-3 py-3 text-right font-mono font-bold text-black">{{ fmt_neraca($nilaiNeraca) }}</td>
                                     <td class="px-3 py-3">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $badge['cls'] }}">
                                             {{ $badge['label'] }}
@@ -339,7 +339,7 @@
                     const dataBaseUrl = @json(url('admin/data'));
 
                     function fmtNumber(n) {
-                        return Number(n).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        return Number(n).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
                     }
 
                     window.openDetail = function (d) {
