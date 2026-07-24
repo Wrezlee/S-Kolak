@@ -312,6 +312,15 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-slate-400">Status</label>
+                        <select name="status" class="px-3 py-2 rounded-lg border border-blue-100 text-xs text-slate-700 bg-white outline-none focus:border-blue-400 min-w-[110px]">
+                            <option value="">Semua</option>
+                            <option value="valid"    @selected($filters['status'] == 'valid')>Valid</option>
+                            <option value="menunggu" @selected($filters['status'] == 'menunggu')>Menunggu</option>
+                            <option value="revisi"   @selected($filters['status'] == 'revisi')>Revisi</option>
+                        </select>
+                    </div>
                     <button type="submit" class="px-4 py-2 rounded-lg text-xs text-white font-semibold flex items-center gap-1.5 hover:shadow-md transition-all" style="background-color:#2563EB;">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-[13px] h-[13px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"/></svg>
                         Terapkan Filter
@@ -325,13 +334,13 @@
 
             {{-- Tabs --}}
             <div class="flex gap-1 bg-white rounded-xl border border-blue-100 shadow-sm p-1" id="tabNav">
-                <button type="button" data-tab="ringkasan" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-white shadow-sm hover:bg-blue-100 hover:text-slate-600" style="background-color:#2563EB;">
+                <button type="button" data-tab="ringkasan" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-white shadow-sm" style="background-color:#2563EB;">
                     Ringkasan Eksekutif
                 </button>
-                <button type="button" data-tab="detail" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-slate-500 hover:bg-blue-100 hover:text-slate-600">
+                <button type="button" data-tab="detail" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-slate-500 hover:text-blue-600">
                     Laporan Detail
                 </button>
-                <button type="button" data-tab="grafik" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-slate-500 hover:bg-blue-100 hover:text-slate-600">
+                <button type="button" data-tab="grafik" class="tab-btn flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-slate-500 hover:text-blue-600">
                     Grafik &amp; Visualisasi
                 </button>
             </div>
@@ -410,7 +419,7 @@
 
                 {{-- Nilai neraca valid --}}
                 <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
-                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Neraca Komoditas Valid – Kota Kediri</h3>
+                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Nilai Neraca Komoditas Valid – Kota Kediri</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
                             <thead>
@@ -426,7 +435,7 @@
                                     <tr class="border-t border-blue-50 hover:bg-blue-50/20">
                                         <td class="px-4 py-2.5 text-slate-500">{{ $n['periode'] }}</td>
                                         <td class="px-4 py-2.5 font-medium" style="color:#1E3A5F;">{{ $n['komoditas'] }}</td>
-                                        <td class="px-4 py-2.5 text-right font-mono font-bold text-black">{{ number_format($n['nilai'], 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2.5 text-right font-mono font-bold text-black">{{ number_format($n['nilai'], 2, ',', '.') }}</td>
                                         <td class="px-4 py-2.5">
                                             <span class="px-2 py-0.5 rounded-full text-xs font-medium border {{ $n['surplus'] ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-600 border-red-200' }}">
                                                 {{ $n['surplus'] ? '▲ Surplus' : '▼ Defisit' }}
@@ -482,13 +491,13 @@
                                         <td class="px-3 py-3 text-slate-400">{{ $detail->firstItem() + $i }}</td>
                                         <td class="px-3 py-3 font-medium" style="color:#1E3A5F;">{{ $periodeLabel }}</td>
                                         <td class="px-3 py-3">{{ $n->komoditas->nama ?? '-' }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->stok_awal, 0, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->produksi, 0, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->masuk, 0, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->keluar, 0, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->kebutuhan_rumah_tangga, 0, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->kebutuhan_non_rumah_tangga, 0, ',', '.') }}</td>
-                                        <td class="px-3 py-3 text-right font-mono font-bold text-black">{{ number_format($nilai, 0, ',', '.') }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->stok_awal, 2, ',', '.') }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->produksi, 2, ',', '.') }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->masuk, 2, ',', '.') }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->keluar, 2, ',', '.') }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->kebutuhan_rumah_tangga, 2, ',', '.') }}</td>
+                                        <td class="px-3 py-3 text-right font-mono">{{ number_format($n->kebutuhan_non_rumah_tangga, 2, ',', '.') }}</td>
+                                        <td class="px-3 py-3 text-right font-mono font-bold text-black">{{ number_format($nilai, 2, ',', '.') }}</td>
                                         <td class="px-3 py-3">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $badge['cls'] }}">{{ $badge['label'] }}</span>
                                         </td>
@@ -521,7 +530,7 @@
                 </div>
 
                 <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
-                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Perbandingan Neraca per Komoditas (Data Valid)</h3>
+                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Perbandingan Nilai Neraca per Komoditas (Data Valid)</h3>
                     <canvas id="chartPerbandingan" height="220"></canvas>
                 </div>
             </div>

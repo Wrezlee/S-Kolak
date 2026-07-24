@@ -79,7 +79,7 @@
 
     // Normalisasi setiap baris (mendukung Eloquent Model \App\Models\NeracaPangan maupun objek/array pratinjau)
     // supaya template di bawah tidak perlu tahu sumber datanya.
-    $normalisasiBaris = function ($n) {
+    $rows = collect($rawItems)->map(function ($n) {
         $isModel = $n instanceof \App\Models\NeracaPangan;
 
         if ($isModel) {
@@ -107,27 +107,15 @@
                - ($n['keluar'] ?? 0) - ($n['keb_rt'] ?? 0) - ($n['keb_non_rt'] ?? 0);
 
         return array_merge($n, ['nilai_neraca' => $nilai]);
-    };
+    });
 
-    // Jika $items sudah berupa hasil paginate() dari controller, pakai through() supaya
-    // info halaman (current page, total, dst.) tetap terjaga — collect()->map() akan
-    // membuangnya menjadi Collection biasa dan mematikan pagination.
-    if ($rawItems instanceof \Illuminate\Contracts\Pagination\Paginator) {
-        $rows = $rawItems->through($normalisasiBaris);
+    // Draft belum diajukan untuk verifikasi — tidak relevan ditampilkan di halaman ini.
+    $rows = $rows->reject(fn ($r) => $r['status'] === 'draft');
 
-        // Draft sudah difilter di query controller; total & badge pakai jumlah sungguhan (semua halaman).
-        $totalRows = $rawItems->total();
-    } else {
-        $rows = collect($rawItems)->map($normalisasiBaris)
-            ->reject(fn ($r) => $r['status'] === 'draft')
-            ->sortByDesc(fn ($r) => $r['status'] === 'revisi' ? 1 : 0)
-            ->values();
+    // Data "Perlu Revisi" selalu dinaikkan ke paling atas supaya langsung terlihat operator.
+    $rows = $rows->sortByDesc(fn ($r) => $r['status'] === 'revisi' ? 1 : 0)->values();
 
-        $totalRows = $rows->count();
-        $jumlahRevisi = $jumlahRevisi ?? $rows->where('status', 'revisi')->count();
-    }
-
-    $jumlahRevisi = $jumlahRevisi ?? 0;
+    $jumlahRevisi = $rows->where('status', 'revisi')->count();
 @endphp
 
 <div class="flex h-screen overflow-hidden">
@@ -164,7 +152,7 @@
                 $menuItems = [
                     ['key' => 'dashboard',  'label' => 'Dashboard',           'route' => 'operator.dashboard',  'badge' => null],
                     ['key' => 'input',      'label' => 'Input Neraca Pangan', 'route' => 'operator.input',      'badge' => null],
-                    ['key' => 'data',       'label' => 'Data Neraca Saya',    'route' => 'operator.data',       'badge' => $totalRows],
+                    ['key' => 'data',       'label' => 'Data Neraca Saya',    'route' => 'operator.data',       'badge' => $rows->count()],
                     ['key' => 'laporan',    'label' => 'Laporan',             'route' => 'operator.laporan',    'badge' => null],
                     ['key' => 'notifikasi', 'label' => 'Notifikasi',          'route' => 'operator.notifikasi', 'badge' => $notifCount],
                 ];
@@ -531,7 +519,7 @@
     const operatorDataBaseUrl = @json(url('operator/data'));
 
     function fmtNumber(n) {
-        return Number(n).toLocaleString('id-ID');
+        return Number(n).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     // ---------- Modal Detail (read-only) ----------

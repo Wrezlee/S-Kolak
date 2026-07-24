@@ -329,7 +329,7 @@
                                 <div class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50">
                                     <div>
                                         <p class="text-sm font-semibold">{{ $item['komoditas'] }}</p>
-                                        <p class="text-xs text-slate-400">{{ $item['periode'] }} · Neraca: {{ number_format($item['nilai_neraca'], 0, ',', '.') }}</p>
+                                        <p class="text-xs text-slate-400">{{ $item['periode'] }} · Neraca: {{ number_format($item['nilai_neraca'], 2, ',', '.') }}</p>
                                     </div>
                                     <span class="text-xs font-medium px-2.5 py-1 rounded-full {{ $statusBadgeMap[$item['status']] ?? 'bg-slate-50 text-slate-600' }}">
                                         ● {{ $statusLabelMap[$item['status']] ?? $item['status'] }}
@@ -346,7 +346,7 @@
             {{-- Charts --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 <div class="lg:col-span-2 bg-white rounded-xl border border-blue-100 shadow-sm p-5">
-                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Nilai Neraca Pangan – Kota Kediri</h3>
+                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Tren Nilai Neraca Pangan – Kota Kediri</h3>
                     <canvas id="trendChart" height="90"></canvas>
                 </div>
 
