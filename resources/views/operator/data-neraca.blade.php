@@ -106,14 +106,16 @@
         $nilai = ($n['stok_awal'] ?? 0) + ($n['produksi'] ?? 0) + ($n['masuk'] ?? 0)
                - ($n['keluar'] ?? 0) - ($n['keb_rt'] ?? 0) - ($n['keb_non_rt'] ?? 0);
 
+        $n['status'] = $n['status'] ?? 'menunggu';
+
         return array_merge($n, ['nilai_neraca' => $nilai]);
     });
 
     // Draft belum diajukan untuk verifikasi — tidak relevan ditampilkan di halaman ini.
-    $rows = $rows->reject(fn ($r) => $r['status'] === 'draft');
+    $rows = $rows->reject(fn ($r) => ($r['status'] ?? null) === 'draft');
 
     // Data "Perlu Revisi" selalu dinaikkan ke paling atas supaya langsung terlihat operator.
-    $rows = $rows->sortByDesc(fn ($r) => $r['status'] === 'revisi' ? 1 : 0)->values();
+    $rows = $rows->sortByDesc(fn ($r) => ($r['status'] ?? null) === 'revisi' ? 1 : 0)->values();
 
     $jumlahRevisi = $rows->where('status', 'revisi')->count();
 @endphp
@@ -315,8 +317,8 @@
                         <tbody>
                             @forelse ($rows as $i => $n)
                                 @php
-                                    $badge = $statusBadge[$n['status']] ?? ['label' => ucfirst($n['status']), 'cls' => 'bg-slate-50 text-slate-600 border-slate-200'];
-                                    $isRevisi = $n['status'] === 'revisi';
+                                    $badge = $statusBadge[$n['status'] ?? 'menunggu'] ?? ['label' => ucfirst($n['status'] ?? '-'), 'cls' => 'bg-slate-50 text-slate-600 border-slate-200'];
+                                    $isRevisi = ($n['status'] ?? null) === 'revisi';
 
                                     // json_encode manual (bukan @json()) — directive @json() Blade rusak
                                     // untuk array dengan lebih dari satu key (di-explode berdasarkan koma).
