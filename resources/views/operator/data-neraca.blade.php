@@ -77,9 +77,17 @@
         (object) ['id'=>10,'periode'=>'Apr 2025', 'komoditas'=>'Gula Konsumsi','satuan'=>'Kg',  'stok_awal'=>7450, 'produksi'=>0,   'masuk'=>6000,'keluar'=>2300,'keb_rt'=>4400, 'keb_non_rt'=>1600,'status'=>'draft',    'verifikator'=>null,                 'keterangan'=>null, 'tanggal_input'=>'14 Apr 2025'],
     ]);
 
+    // Kalau $rawItems adalah paginator (hasil ->paginate() dari controller), ambil isi datanya
+    // via getCollection(). Kalau langsung di-collect(), Laravel akan memanggil toArray() pada
+    // paginator dan menghasilkan array meta pagination (current_page, data, last_page, dst)
+    // bukan baris data neraca — inilah yang menyebabkan key 'id' hilang & error 500.
+    $sourceItems = $rawItems instanceof \Illuminate\Contracts\Pagination\Paginator
+        ? $rawItems->getCollection()
+        : $rawItems;
+
     // Normalisasi setiap baris (mendukung Eloquent Model \App\Models\NeracaPangan maupun objek/array pratinjau)
     // supaya template di bawah tidak perlu tahu sumber datanya.
-    $rows = collect($rawItems)->map(function ($n) {
+    $rows = collect($sourceItems)->map(function ($n) {
         $isModel = $n instanceof \App\Models\NeracaPangan;
 
         if ($isModel) {
@@ -377,9 +385,9 @@
                     </table>
                 </div>
 
-                @if (method_exists($rows, 'hasPages') && $rows->hasPages())
+                @if ($rawItems instanceof \Illuminate\Contracts\Pagination\Paginator && $rawItems->hasPages())
                     <div class="p-4 border-t border-blue-50">
-                        {{ $rows->links() }}
+                        {{ $rawItems->withQueryString()->links() }}
                     </div>
                 @endif
             </div>
