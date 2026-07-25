@@ -22,9 +22,10 @@ class DashboardPublikController extends Controller
     {
         $komoditasList = Komoditas::orderBy('nama')->pluck('nama');
 
-        // Data publik baru dimuat setelah pengguna benar-benar menerapkan
-        // filter (rentang periode dan/atau komoditas). Sebelum itu, tabel,
-        // kartu ringkasan, grafik, dan detail sengaja dikosongkan.
+        // Data publik baru benar-benar dimuat setelah pengguna menerapkan filter
+        // (rentang periode dan/atau komoditas). Sebelum itu, kartu/grafik/tabel
+        // tetap ditampilkan strukturnya tapi kosong, dan pengguna diberi tahu
+        // lewat notifikasi supaya menerapkan filter terlebih dahulu.
         $hasFilter = $this->hasFilterAktif($request);
 
         if ($hasFilter) {

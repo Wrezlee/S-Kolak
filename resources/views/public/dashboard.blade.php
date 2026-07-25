@@ -192,18 +192,6 @@
 
     <main class="max-w-7xl mx-auto px-6 pb-16">
 
-        @unless ($hasFilter)
-            <div class="mt-8 bg-white rounded-2xl shadow-sm border border-slate-100 py-16 flex flex-col items-center justify-center text-center">
-                <div class="h-12 w-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                </div>
-                <p class="font-semibold text-slate-700">Belum ada filter diterapkan</p>
-                <p class="text-sm text-slate-400 mt-1 max-w-sm">Gunakan filter periode atau komoditas di atas untuk menampilkan ringkasan, grafik, dan tabel data neraca pangan.</p>
-            </div>
-        @else
-
         {{-- Summary cards — square icon badges + matching border colors, same
              palette used in the Figma Make version (blue / green / yellow / red) --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
@@ -420,8 +408,6 @@
                 Data diperbarui: {{ $lastUpdated }} · Dinas Ketahanan Pangan dan Pertanian Kota Kediri
             </div>
         </div>
-
-        @endif
     </main>
 
     {{-- Footer --}}
