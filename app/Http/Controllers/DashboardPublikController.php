@@ -22,93 +22,108 @@ class DashboardPublikController extends Controller
     {
         $komoditasList = Komoditas::orderBy('nama')->pluck('nama');
 
-        // Status ini dipakai hanya untuk keperluan UI kecil (mis. menonaktifkan
-        // tombol Reset), bukan lagi untuk menyembunyikan data. Tabel, kartu
-        // ringkasan, dan grafik selalu ditampilkan — kosong hanya jika memang
-        // tidak ada data yang cocok dengan filter (atau belum ada data sama sekali).
+        // Data publik baru benar-benar dimuat setelah pengguna menerapkan filter
+        // (rentang periode dan/atau komoditas). Sebelum itu, kartu/grafik/tabel
+        // tetap ditampilkan strukturnya tapi kosong, dan pengguna diberi tahu
+        // lewat notifikasi supaya menerapkan filter terlebih dahulu.
         $hasFilter = $this->hasFilterAktif($request);
 
-        $records = $this->filteredQuery($request)->orderByDesc('periode')->get();
+        if ($hasFilter) {
+            $records = $this->filteredQuery($request)->orderByDesc('periode')->get();
 
-        // Susun baris tabel + hitung nilai neraca & status stok untuk masing-masing baris
-        $rows = $records->values()->map(function (NeracaPangan $item, int $index) {
-            $nilaiNeraca = $this->hitungNilaiNeraca($item);
+            // Susun baris tabel + hitung nilai neraca & status stok untuk masing-masing baris
+            $rows = $records->values()->map(function (NeracaPangan $item, int $index) {
+                $nilaiNeraca = $this->hitungNilaiNeraca($item);
 
-            return [
-                'no' => $index + 1,
-                'periode' => $this->formatPeriode($item->periode),
-                'periode_key' => Carbon::parse($item->periode)->format('Y-m'),
-                'komoditas' => $item->komoditas->nama,
-                'stok_awal' => (float) $item->stok_awal,
-                'produksi' => (float) $item->produksi,
-                'masuk' => (float) $item->masuk,
-                'keluar' => (float) $item->keluar,
-                'keb_rt' => (float) $item->kebutuhan_rumah_tangga,
-                'keb_non_rt' => (float) $item->kebutuhan_non_rumah_tangga,
-                'nilai_neraca' => $nilaiNeraca,
-                'status' => $this->statusStok($nilaiNeraca, $item),
+                return [
+                    'no' => $index + 1,
+                    'periode' => $this->formatPeriode($item->periode),
+                    'periode_key' => Carbon::parse($item->periode)->format('Y-m'),
+                    'komoditas' => $item->komoditas->nama,
+                    'stok_awal' => (float) $item->stok_awal,
+                    'produksi' => (float) $item->produksi,
+                    'masuk' => (float) $item->masuk,
+                    'keluar' => (float) $item->keluar,
+                    'keb_rt' => (float) $item->kebutuhan_rumah_tangga,
+                    'keb_non_rt' => (float) $item->kebutuhan_non_rumah_tangga,
+                    'nilai_neraca' => $nilaiNeraca,
+                    'status' => $this->statusStok($nilaiNeraca, $item),
+                ];
+            });
+
+            // Kartu ringkasan
+            $summary = [
+                'total_komoditas' => $rows->pluck('komoditas')->unique()->count(),
+                'aman' => $rows->where('status', 'Aman')->count(),
+                'waspada' => $rows->where('status', 'Waspada')->count(),
+                'rentan' => $rows->where('status', 'Rentan')->count(),
             ];
-        });
 
-        // Kartu ringkasan
-        $summary = [
-            'total_komoditas' => $rows->pluck('komoditas')->unique()->count(),
-            'aman' => $rows->where('status', 'Aman')->count(),
-            'waspada' => $rows->where('status', 'Waspada')->count(),
-            'rentan' => $rows->where('status', 'Rentan')->count(),
-        ];
+            // Data untuk grafik tren (kumulatif nilai neraca seluruh komoditas per periode)
+            [$trendLabels, $trendValues] = $this->hitungTren($records);
 
-        // Data untuk grafik tren (kumulatif nilai neraca seluruh komoditas per periode)
-        [$trendLabels, $trendValues] = $this->hitungTren($records);
+            // Detail data terbaru untuk kartu & grafik detail di sisi kanan
+            $detailData = null;
+            $terbaru = $records->sortByDesc('periode')->first();
 
-        // Detail data terbaru untuk kartu & grafik detail di sisi kanan
-        $detailData = null;
-        $terbaru = $records->sortByDesc('periode')->first();
+            if ($terbaru) {
+                $nilaiNeraca = $this->hitungNilaiNeraca($terbaru);
 
-        if ($terbaru) {
-            $nilaiNeraca = $this->hitungNilaiNeraca($terbaru);
+                $detailData = [
+                    'komoditas' => $terbaru->komoditas->nama,
+                    'periode' => $this->formatPeriode($terbaru->periode),
+                    'status' => $this->statusStok($nilaiNeraca, $terbaru),
+                    'stok_awal' => (float) $terbaru->stok_awal,
+                    'produksi' => (float) $terbaru->produksi,
+                    'masuk' => (float) $terbaru->masuk,
+                    'keluar' => (float) $terbaru->keluar,
+                    'keb_rt' => (float) $terbaru->kebutuhan_rumah_tangga,
+                    'keb_non_rt' => (float) $terbaru->kebutuhan_non_rumah_tangga,
+                    'nilai_neraca' => $nilaiNeraca,
+                    'ketahanan_hari' => $this->hitungKetahananHari($nilaiNeraca, $terbaru),
+                ];
+            }
 
-            $detailData = [
-                'komoditas' => $terbaru->komoditas->nama,
-                'periode' => $this->formatPeriode($terbaru->periode),
-                'status' => $this->statusStok($nilaiNeraca, $terbaru),
-                'stok_awal' => (float) $terbaru->stok_awal,
-                'produksi' => (float) $terbaru->produksi,
-                'masuk' => (float) $terbaru->masuk,
-                'keluar' => (float) $terbaru->keluar,
-                'keb_rt' => (float) $terbaru->kebutuhan_rumah_tangga,
-                'keb_non_rt' => (float) $terbaru->kebutuhan_non_rumah_tangga,
-                'nilai_neraca' => $nilaiNeraca,
-                'ketahanan_hari' => $this->hitungKetahananHari($nilaiNeraca, $terbaru),
-            ];
+            $waktuTerbaru = $records->max('updated_at');
+            $lastUpdated = $waktuTerbaru ? $this->formatTanggalWaktu($waktuTerbaru) : '-';
+
+            // Baris tabel yang benar-benar ditampilkan ke pengguna — dipaginasi terpisah dari
+            // $records supaya ringkasan/tren/detail di atas tetap dihitung dari SELURUH data
+            // hasil filter, sementara tabelnya sendiri tidak menampilkan semuanya sekaligus.
+            $tablePage = $this->filteredQuery($request)->orderBy('periode')->orderBy('id')->paginate(15)->withQueryString();
+            $offset = $tablePage->firstItem() ?? 1;
+            $tableRows = $tablePage->through(function (NeracaPangan $item, int $index) use ($offset) {
+                $nilaiNeraca = $this->hitungNilaiNeraca($item);
+
+                return [
+                    'no' => $offset + $index,
+                    'periode' => $this->formatPeriode($item->periode),
+                    'periode_key' => Carbon::parse($item->periode)->format('Y-m'),
+                    'komoditas' => $item->komoditas->nama,
+                    'stok_awal' => (float) $item->stok_awal,
+                    'produksi' => (float) $item->produksi,
+                    'masuk' => (float) $item->masuk,
+                    'keluar' => (float) $item->keluar,
+                    'keb_rt' => (float) $item->kebutuhan_rumah_tangga,
+                    'keb_non_rt' => (float) $item->kebutuhan_non_rumah_tangga,
+                    'nilai_neraca' => $nilaiNeraca,
+                    'status' => $this->statusStok($nilaiNeraca, $item),
+                ];
+            });
+        } else {
+            // Belum ada filter yang diterapkan — jangan query data sama sekali,
+            // cukup kosongkan semuanya. Kartu, grafik, dan tabel tetap
+            // ditampilkan strukturnya (isinya kosong/0), dan notifikasi
+            // "harus filter dulu" ditampilkan di view.
+            $rows = collect();
+            $summary = ['total_komoditas' => 0, 'aman' => 0, 'waspada' => 0, 'rentan' => 0];
+            $trendLabels = [];
+            $trendValues = [];
+            $detailData = null;
+            $lastUpdated = '-';
+            $tablePage = NeracaPangan::whereRaw('1 = 0')->paginate(15)->withQueryString();
+            $tableRows = $tablePage;
         }
-
-        $waktuTerbaru = $records->max('updated_at');
-        $lastUpdated = $waktuTerbaru ? $this->formatTanggalWaktu($waktuTerbaru) : '-';
-
-        // Baris tabel yang benar-benar ditampilkan ke pengguna — dipaginasi terpisah dari
-        // $records supaya ringkasan/tren/detail di atas tetap dihitung dari SELURUH data
-        // hasil filter, sementara tabelnya sendiri tidak menampilkan semuanya sekaligus.
-        $tablePage = $this->filteredQuery($request)->orderBy('periode')->orderBy('id')->paginate(15)->withQueryString();
-        $offset = $tablePage->firstItem() ?? 1;
-        $tableRows = $tablePage->through(function (NeracaPangan $item, int $index) use ($offset) {
-            $nilaiNeraca = $this->hitungNilaiNeraca($item);
-
-            return [
-                'no' => $offset + $index,
-                'periode' => $this->formatPeriode($item->periode),
-                'periode_key' => Carbon::parse($item->periode)->format('Y-m'),
-                'komoditas' => $item->komoditas->nama,
-                'stok_awal' => (float) $item->stok_awal,
-                'produksi' => (float) $item->produksi,
-                'masuk' => (float) $item->masuk,
-                'keluar' => (float) $item->keluar,
-                'keb_rt' => (float) $item->kebutuhan_rumah_tangga,
-                'keb_non_rt' => (float) $item->kebutuhan_non_rumah_tangga,
-                'nilai_neraca' => $nilaiNeraca,
-                'status' => $this->statusStok($nilaiNeraca, $item),
-            ];
-        });
 
         // ===============================
         // Response khusus untuk request AJAX (filter tanpa reload)

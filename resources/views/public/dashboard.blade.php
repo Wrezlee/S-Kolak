@@ -148,6 +148,17 @@
         </div>
     </section>
 
+    @unless ($hasFilter)
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mt-6 flex items-center gap-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm px-4 py-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                </svg>
+                <span>Silakan pilih filter periode atau komoditas terlebih dahulu, lalu klik <strong>Terapkan Filter</strong> untuk menampilkan data neraca pangan.</span>
+            </div>
+        </div>
+    @endunless
+
     @php
 
     $rowsCollection = collect($rows);
@@ -268,8 +279,12 @@
                 <p class="font-semibold text-slate-800">Neraca Seluruh Komoditas</p>
                 <p class="text-xs text-slate-500 mb-4">Sumbu X: Periode (bulan) · Sumbu Y: Nilai neraca (kumulatif)</p>
                 @if (count($trendLabels) === 0)
-                    <div class="flex items-center justify-center h-[220px] text-slate-400 text-sm">
-                        Tidak ada data sesuai filter.
+                    <div class="flex items-center justify-center h-[220px] text-slate-400 text-sm text-center px-6">
+                        @unless ($hasFilter)
+                            Silakan pilih filter terlebih dahulu untuk menampilkan grafik.
+                        @else
+                            Data belum tersedia untuk filter yang dipilih.
+                        @endunless
                     </div>
                 @else
                     <canvas id="trendChart" height="220"></canvas>
@@ -370,7 +385,13 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="text-center py-10 text-slate-400 text-sm">Tidak ada data sesuai filter.</td>
+                                <td colspan="11" class="text-center py-10 text-slate-400 text-sm">
+                                    @unless ($hasFilter)
+                                        Silakan pilih filter periode atau komoditas terlebih dahulu.
+                                    @else
+                                        Data belum tersedia untuk filter yang dipilih.
+                                    @endunless
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>

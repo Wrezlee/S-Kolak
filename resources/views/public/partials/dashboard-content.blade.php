@@ -115,8 +115,12 @@
         <p class="font-semibold text-slate-800">Neraca Seluruh Komoditas</p>
         <p class="text-xs text-slate-500 mb-4">Sumbu X: Periode (bulan) · Sumbu Y: Nilai neraca (kumulatif)</p>
         @if (count($trendLabels) === 0)
-            <div class="flex items-center justify-center h-[220px] text-slate-400 text-sm">
-                Tidak ada data sesuai filter.
+            <div class="flex items-center justify-center h-[220px] text-slate-400 text-sm text-center px-6">
+                @unless ($hasFilter)
+                    Silakan pilih filter terlebih dahulu untuk menampilkan grafik.
+                @else
+                    Data belum tersedia untuk filter yang dipilih.
+                @endunless
             </div>
         @else
             <canvas id="trendChart" height="220"></canvas>
@@ -217,7 +221,13 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="11" class="text-center py-10 text-slate-400 text-sm">Tidak ada data sesuai filter.</td>
+                        <td colspan="11" class="text-center py-10 text-slate-400 text-sm">
+                            @unless ($hasFilter)
+                                Silakan pilih filter periode atau komoditas terlebih dahulu.
+                            @else
+                                Data belum tersedia untuk filter yang dipilih.
+                            @endunless
+                        </td>
                     </tr>
                 @endforelse
             </tbody>
