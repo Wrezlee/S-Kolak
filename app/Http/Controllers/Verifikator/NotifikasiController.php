@@ -78,7 +78,7 @@ class NotifikasiController extends Controller
             return 'warning';
         }
 
-        if (Str::contains($pesanLower, ['divalidasi', 'valid', 'disetujui'])) {
+        if (Str::contains($pesanLower, ['diverifikasi', 'valid', 'disetujui'])) {
             return 'success';
         }
 
