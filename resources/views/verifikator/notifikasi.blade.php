@@ -131,7 +131,7 @@
         </nav>
 
         <div class="p-3 border-t border-blue-50">
-            <form method="POST" action="{{ Route::has('logout') ? route('logout') : '#' }}">
+            <form method="POST" action="{{ Route::has('logout') ? route('logout') : '#' }}" data-no-spa>
                 @csrf
                 <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-100 hover:text-red-700 hover:shadow-sm hover:translate-x-0.5 transition-all">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-[17px] h-[17px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
