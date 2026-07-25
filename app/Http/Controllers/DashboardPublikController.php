@@ -22,16 +22,9 @@ class DashboardPublikController extends Controller
     {
         $komoditasList = Komoditas::orderBy('nama')->pluck('nama');
 
-<<<<<<< HEAD
-        // Data publik baru benar-benar dimuat setelah pengguna menerapkan filter
-        // (rentang periode dan/atau komoditas). Sebelum itu, kartu/grafik/tabel
-        // tetap ditampilkan strukturnya tapi kosong, dan pengguna diberi tahu
-        // lewat notifikasi supaya menerapkan filter terlebih dahulu.
-=======
         // Data publik baru dimuat setelah pengguna benar-benar menerapkan
         // filter (rentang periode dan/atau komoditas). Sebelum itu, tabel,
         // kartu ringkasan, grafik, dan detail sengaja dikosongkan.
->>>>>>> parent of a69de17 (refactor: simplify dashboard rendering by removing unused filter messages)
         $hasFilter = $this->hasFilterAktif($request);
 
         if ($hasFilter) {
@@ -117,14 +110,10 @@ class DashboardPublikController extends Controller
                 ];
             });
         } else {
-<<<<<<< HEAD
             // Belum ada filter yang diterapkan — jangan query data sama sekali,
             // cukup kosongkan semuanya. Kartu, grafik, dan tabel tetap
             // ditampilkan strukturnya (isinya kosong/0), dan notifikasi
             // "harus filter dulu" ditampilkan di view.
-=======
-            // Belum ada filter yang diterapkan — kosongkan semuanya, jangan query data sama sekali.
->>>>>>> parent of a69de17 (refactor: simplify dashboard rendering by removing unused filter messages)
             $rows = collect();
             $summary = ['total_komoditas' => 0, 'aman' => 0, 'waspada' => 0, 'rentan' => 0];
             $trendLabels = [];
