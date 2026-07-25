@@ -29,6 +29,7 @@ class VerifikasiController extends Controller
                 });
             })
             ->orderBy('periode')
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 
@@ -72,8 +73,8 @@ class VerifikasiController extends Controller
                       ->orWhereHas('operator', fn ($q2) => $q2->where('name', 'like', "%{$search}%"));
                 });
             })
-            ->orderByDesc('periode')
-            ->orderByDesc('id')
+            ->orderBy('periode')
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 

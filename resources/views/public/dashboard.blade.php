@@ -63,11 +63,6 @@
          background, so the blue extends all the way down past the filter card. --}}
     <section class="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 text-white">
         <div class="max-w-7xl mx-auto px-6 pt-12 pb-10">
-            <span class="inline-flex items-center gap-2 text-xs">
-                <span class="rounded-full bg-white/15 px-3 py-1 font-medium">Dashboard Publik</span>
-                <span class="text-blue-100">Data terverifikasi · Kota Kediri</span>
-            </span>
-
             <h1 class="mt-4 text-4xl md:text-5xl font-bold leading-tight max-w-2xl">
                 Sistem Ketersediaan Stok dan Laporan Aktual
             </h1>
@@ -383,7 +378,7 @@
             </div>
 
             <div class="px-6 py-4 text-xs text-slate-400 border-t border-slate-100">
-                Data diperbarui: {{ $lastUpdated }} · Sumber: Dinas Ketahanan Pangan dan Pertanian Kota Kediri
+                Data diperbarui: {{ $lastUpdated }} · Dinas Ketahanan Pangan dan Pertanian Kota Kediri
             </div>
         </div>
     </main>
@@ -393,11 +388,11 @@
         <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between text-sm">
             <div class="flex items-center gap-3">
                 <div>
-                    <p class="font-semibold text-slate-800">S-KOLAK · Kota Kediri</p>
-                    <p class="text-xs text-slate-500">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
+                    <p class="font-semibold text-slate-800">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
+                    <p class="text-xs text-slate-500">Bidang Ketahanan Pangan</p>
                 </div>
             </div>
-            <p class="text-xs text-slate-500">© {{ date('Y') }} Pemerintah Kota Kediri. Seluruh data bersumber dari sistem neraca pangan resmi.</p>
+            <p class="text-xs text-slate-500">© {{ date('Y') }} Pemerintah Kota Kediri.</p>
         </div>
     </footer>
 

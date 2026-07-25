@@ -312,15 +312,6 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-xs text-slate-400">Status</label>
-                        <select name="status" class="px-3 py-2 rounded-lg border border-blue-100 text-xs text-slate-700 bg-white outline-none focus:border-blue-400 min-w-[110px]">
-                            <option value="">Semua</option>
-                            <option value="valid"    @selected($filters['status'] == 'valid')>Valid</option>
-                            <option value="menunggu" @selected($filters['status'] == 'menunggu')>Menunggu</option>
-                            <option value="revisi"   @selected($filters['status'] == 'revisi')>Revisi</option>
-                        </select>
-                    </div>
                     <button type="submit" class="px-4 py-2 rounded-lg text-xs text-white font-semibold flex items-center gap-1.5 hover:shadow-md transition-all" style="background-color:#2563EB;">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-[13px] h-[13px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"/></svg>
                         Terapkan Filter

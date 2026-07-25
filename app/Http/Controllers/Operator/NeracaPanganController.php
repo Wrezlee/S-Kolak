@@ -28,8 +28,8 @@ class NeracaPanganController extends Controller
             })
             // Data "Perlu Revisi" selalu dinaikkan ke paling atas supaya langsung terlihat operator.
             ->orderByRaw("CASE WHEN status = 'revisi' THEN 0 ELSE 1 END")
-            ->orderByDesc('periode')
-            ->orderByDesc('id')
+            ->orderBy('periode')
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 

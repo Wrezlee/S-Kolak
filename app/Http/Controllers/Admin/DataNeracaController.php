@@ -30,8 +30,8 @@ class DataNeracaController extends Controller
     public function index(Request $request)
     {
         $items = $this->filteredQuery($request)
-            ->orderByDesc('periode')
-            ->orderByDesc('id')
+            ->orderBy('periode')
+            ->orderBy('id')
             ->paginate(10)
             ->withQueryString();
 

@@ -83,7 +83,7 @@ class DashboardPublikController extends Controller
         // Baris tabel yang benar-benar ditampilkan ke pengguna — dipaginasi terpisah dari
         // $records supaya ringkasan/tren/detail di atas tetap dihitung dari SELURUH data
         // hasil filter, sementara tabelnya sendiri tidak menampilkan semuanya sekaligus.
-        $tablePage = $this->filteredQuery($request)->orderByDesc('periode')->paginate(15)->withQueryString();
+        $tablePage = $this->filteredQuery($request)->orderBy('periode')->orderBy('id')->paginate(15)->withQueryString();
         $offset = $tablePage->firstItem() ?? 1;
         $tableRows = $tablePage->through(function (NeracaPangan $item, int $index) use ($offset) {
             $nilaiNeraca = $this->hitungNilaiNeraca($item);
