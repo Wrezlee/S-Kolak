@@ -148,17 +148,6 @@
         </div>
     </section>
 
-    @unless ($hasFilter)
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="mt-6 flex items-center gap-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm px-4 py-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                </svg>
-                <span>Silakan pilih filter periode atau komoditas terlebih dahulu, lalu klik <strong>Terapkan Filter</strong> untuk menampilkan data neraca pangan.</span>
-            </div>
-        </div>
-    @endunless
-
     @php
 
     $rowsCollection = collect($rows);
@@ -191,18 +180,6 @@
     @endphp
 
     <main class="max-w-7xl mx-auto px-6 pb-16">
-
-        @unless ($hasFilter)
-            <div class="mt-8 bg-white rounded-2xl shadow-sm border border-slate-100 py-16 flex flex-col items-center justify-center text-center">
-                <div class="h-12 w-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                </div>
-                <p class="font-semibold text-slate-700">Belum ada filter diterapkan</p>
-                <p class="text-sm text-slate-400 mt-1 max-w-sm">Gunakan filter periode atau komoditas di atas untuk menampilkan ringkasan, grafik, dan tabel data neraca pangan.</p>
-            </div>
-        @else
 
         {{-- Summary cards — square icon badges + matching border colors, same
              palette used in the Figma Make version (blue / green / yellow / red) --}}
@@ -410,8 +387,6 @@
                 Data diperbarui: {{ $lastUpdated }} · Dinas Ketahanan Pangan dan Pertanian Kota Kediri
             </div>
         </div>
-
-        @endif
     </main>
 
     {{-- Footer --}}
