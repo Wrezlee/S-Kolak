@@ -25,7 +25,8 @@ class UserController extends Controller
                 });
             })
             ->when($request->filled('role'), fn ($query) => $query->where('role', $request->string('role')))
-            ->orderBy('name')
+            ->orderBy('role', 'asc')
+            ->orderBy('name', 'asc')
             ->paginate(10)
             ->withQueryString();
 
