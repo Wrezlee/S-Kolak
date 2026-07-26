@@ -6,25 +6,25 @@
 <body>
     <table border="1" cellspacing="0" cellpadding="4">
         <tr>
-            <td colspan="11" style="font-size:11px; font-weight:bold;">PEMERINTAH KOTA KEDIRI</td>
+            <td colspan="10" style="font-size:11px; font-weight:bold;">PEMERINTAH KOTA KEDIRI</td>
         </tr>
         <tr>
-            <td colspan="11" style="font-size:14px; font-weight:bold; background-color:#2563EB; color:#ffffff;">
+            <td colspan="10" style="font-size:14px; font-weight:bold; background-color:#2563EB; color:#ffffff;">
                 DINAS KETAHANAN PANGAN DAN PERTANIAN
             </td>
         </tr>
         <tr>
-            <td colspan="11" style="font-size:11px; color:#475569;">Bidang Ketahanan Pangan</td>
+            <td colspan="10" style="font-size:11px; color:#475569;">Bidang Ketahanan Pangan</td>
         </tr>
         <tr>
-            <td colspan="11" style="font-size:13px; font-weight:bold;">DATA NERACA PANGAN &middot; TAHUN {{ $tahun }}</td>
+            <td colspan="10" style="font-size:13px; font-weight:bold;">DATA NERACA PANGAN &middot; TAHUN {{ $tahun }}</td>
         </tr>
         <tr>
-            <td colspan="11" style="font-size:11px; color:#475569;">
+            <td colspan="10" style="font-size:11px; color:#475569;">
                 Diunduh {{ $generatedAt }}
             </td>
         </tr>
-        <tr><td colspan="11"></td></tr>
+        <tr><td colspan="10"></td></tr>
         <tr style="background-color:#DBEAFE; font-weight:bold;">
             <td>No</td>
             <td>Komoditas</td>
@@ -36,7 +36,6 @@
             <td>Keb. Rumah Tangga</td>
             <td>Keb. Non-RT</td>
             <td>Nilai Neraca</td>
-            <td>Status</td>
         </tr>
         @forelse ($rows as $r)
             <tr>
@@ -50,14 +49,13 @@
                 <td style="mso-number-format:'#,##0';">{{ $r['keb_rt'] }}</td>
                 <td style="mso-number-format:'#,##0';">{{ $r['keb_non_rt'] }}</td>
                 <td style="mso-number-format:'#,##0';font-weight:bold;">{{ $r['nilai_neraca'] }}</td>
-                <td>{{ $r['status'] }}</td>
             </tr>
         @empty
-            <tr><td colspan="11">Tidak ada data neraca pangan untuk filter yang dipilih.</td></tr>
+            <tr><td colspan="10">Tidak ada data neraca pangan untuk filter yang dipilih.</td></tr>
         @endforelse
-        <tr><td colspan="11"></td></tr>
+        <tr><td colspan="10"></td></tr>
         <tr>
-            <td colspan="11" style="font-size:11px;">Diunduh oleh: {{ $dicetakOleh }}</td>
+            <td colspan="10" style="font-size:11px;">Diunduh oleh: {{ $dicetakOleh }}</td>
         </tr>
     </table>
 </body>

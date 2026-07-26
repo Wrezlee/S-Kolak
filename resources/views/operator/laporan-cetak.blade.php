@@ -70,33 +70,17 @@
                 <th>No</th>
                 <th>Komoditas</th>
                 <th>Periode</th>
-                <th>Status</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($items as $i => $n)
-                @php
-                    $statusCls = match ($n->status) {
-                        'valid'    => 'badge-valid',
-                        'menunggu' => 'badge-menunggu',
-                        'revisi'   => 'badge-revisi',
-                        default    => '',
-                    };
-                    $statusLabel = match ($n->status) {
-                        'valid'    => 'Valid',
-                        'menunggu' => 'Menunggu Verifikasi',
-                        'revisi'   => 'Perlu Revisi',
-                        default    => ucfirst($n->status),
-                    };
-                @endphp
                 <tr>
                     <td>{{ $i + 1 }}</td>
                     <td>{{ $n->komoditas->nama ?? '-' }}</td>
                     <td>{{ \App\Http\Controllers\Admin\DataNeracaController::formatPeriode($n->periode) }}</td>
-                    <td><span class="badge {{ $statusCls }}">{{ $statusLabel }}</span></td>
                 </tr>
             @empty
-                <tr><td colspan="4" style="text-align:center;color:#94A3B8;">Tidak ada data sesuai filter.</td></tr>
+                <tr><td colspan="3" style="text-align:center;color:#94A3B8;">Tidak ada data sesuai filter.</td></tr>
             @endforelse
         </tbody>
     </table>

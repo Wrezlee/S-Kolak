@@ -91,14 +91,10 @@
                 <th>Keb. Rumah Tangga</th>
                 <th>Keb. Non-RT</th>
                 <th>Nilai Neraca</th>
-                <th>Status</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($rows as $r)
-                @php
-                    $statusCls = 'badge-' . \Illuminate\Support\Str::slug($r['status']);
-                @endphp
                 <tr>
                     <td>{{ $r['no'] }}</td>
                     <td>{{ $r['komoditas'] }}</td>
@@ -110,10 +106,9 @@
                     <td class="num">{{ number_format($r['keb_rt'], 0, ',', '.') }}</td>
                     <td class="num">{{ number_format($r['keb_non_rt'], 0, ',', '.') }}</td>
                     <td class="num" style="font-weight:700;">{{ number_format($r['nilai_neraca'], 0, ',', '.') }}</td>
-                    <td><span class="badge {{ $statusCls }}">{{ $r['status'] }}</span></td>
                 </tr>
             @empty
-                <tr><td colspan="11" style="text-align:center;color:#94A3B8;">Tidak ada data sesuai filter yang dipilih.</td></tr>
+                <tr><td colspan="10" style="text-align:center;color:#94A3B8;">Tidak ada data sesuai filter yang dipilih.</td></tr>
             @endforelse
         </tbody>
     </table>
