@@ -6,27 +6,27 @@
 <body>
     <table border="1" cellspacing="0" cellpadding="4">
         <tr>
-            <td colspan="13" style="font-size:11px; font-weight:bold;">PEMERINTAH KOTA KEDIRI</td>
+            <td colspan="11" style="font-size:11px; font-weight:bold;">PEMERINTAH KOTA KEDIRI</td>
         </tr>
         <tr>
-            <td colspan="13" style="font-size:14px; font-weight:bold; background-color:#2563EB; color:#ffffff;">
+            <td colspan="11" style="font-size:14px; font-weight:bold; background-color:#2563EB; color:#ffffff;">
                 DINAS KETAHANAN PANGAN DAN PERTANIAN
             </td>
         </tr>
         <tr>
-            <td colspan="13" style="font-size:11px; color:#475569;">Bidang Ketahanan Pangan</td>
+            <td colspan="11" style="font-size:11px; color:#475569;">Bidang Ketahanan Pangan</td>
         </tr>
         <tr>
-            <td colspan="13" style="font-size:13px; font-weight:bold;">LAPORAN NERACA PANGAN &middot; TAHUN {{ $tahun }}</td>
+            <td colspan="11" style="font-size:13px; font-weight:bold;">LAPORAN NERACA PANGAN &middot; TAHUN {{ $tahun }}</td>
         </tr>
         <tr>
-            <td colspan="13" style="font-size:11px; color:#475569;">
+            <td colspan="11" style="font-size:11px; color:#475569;">
                 Diunduh {{ $generatedAt }}
             </td>
         </tr>
         @if ($filters['tahun_awal'] || $filters['tahun_akhir'] || $filters['status'])
             <tr>
-                <td colspan="13" style="font-size:11px; color:#475569;">
+                <td colspan="11" style="font-size:11px; color:#475569;">
                     Filter:
                     @if ($filters['tahun_awal'] && $filters['bulan_awal'])
                         Periode {{ $filters['bulan_awal'] }} {{ $filters['tahun_awal'] }}
@@ -40,7 +40,7 @@
                 </td>
             </tr>
         @endif
-        <tr><td colspan="13"></td></tr>
+        <tr><td colspan="11"></td></tr>
         <tr style="background-color:#DBEAFE; font-weight:bold;">
             <td>No</td>
             <td>Komoditas</td>
@@ -53,8 +53,6 @@
             <td>Keb. Non-RT</td>
             <td>Nilai Neraca</td>
             <td>Status</td>
-            <td>Operator</td>
-            <td>Verifikator</td>
         </tr>
         @forelse ($rows as $r)
             <tr>
@@ -69,15 +67,13 @@
                 <td style="mso-number-format:'#,##0';">{{ $r['keb_non_rt'] }}</td>
                 <td style="mso-number-format:'#,##0';font-weight:bold;">{{ $r['nilai_neraca'] }}</td>
                 <td>{{ $r['status'] }}</td>
-                <td>{{ $r['operator'] }}</td>
-                <td>{{ $r['verifikator'] }}</td>
             </tr>
         @empty
-            <tr><td colspan="13">Tidak ada data sesuai filter yang dipilih.</td></tr>
+            <tr><td colspan="11">Tidak ada data sesuai filter yang dipilih.</td></tr>
         @endforelse
-        <tr><td colspan="13"></td></tr>
+        <tr><td colspan="11"></td></tr>
         <tr>
-            <td colspan="13" style="font-size:11px;">Diunduh oleh: {{ $dicetakOleh }}</td>
+            <td colspan="11" style="font-size:11px;">Diunduh oleh: {{ $dicetakOleh }}</td>
         </tr>
     </table>
 </body>

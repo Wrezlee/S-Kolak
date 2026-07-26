@@ -9,10 +9,13 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; color: #1E3A5F; margin: 0; padding: 24px; font-size: 11px; }
 
         .letterhead { text-align: center; border-bottom: 3px double #2563EB; padding-bottom: 10px; margin-bottom: 16px; }
+        .letterhead-top { display: flex; align-items: center; justify-content: center; gap: 14px; }
+        .letterhead-logo { width: 54px; height: 54px; object-fit: contain; flex-shrink: 0; }
+        .letterhead-text { text-align: left; }
         .letterhead .lembaga { margin: 0; font-size: 11px; letter-spacing: 0.5px; color: #475569; }
         .letterhead h1 { margin: 2px 0 0; font-size: 15px; letter-spacing: 0.3px; }
-        .letterhead .bidang { margin: 1px 0 8px; font-size: 11px; color: #475569; }
-        .letterhead h2 { margin: 4px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .letterhead .bidang { margin: 1px 0 0; font-size: 11px; color: #475569; }
+        .letterhead h2 { margin: 8px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
         .letterhead .tahun { margin: 2px 0 0; font-size: 11px; font-weight: 600; }
 
         .meta { margin-bottom: 16px; font-size: 11px; color: #475569; }
@@ -44,16 +47,22 @@
     </div>
 
     <div class="letterhead">
-        <p class="lembaga">PEMERINTAH KOTA KEDIRI</p>
-        <h1>Dinas Ketahanan Pangan dan Pertanian</h1>
-        <p class="bidang">Bidang Ketahanan Pangan</p>
+        <div class="letterhead-top">
+            @if (file_exists(public_path('images/logo-kediri.png')))
+                <img src="{{ asset('images/logo-kediri.png') }}" alt="Logo Kota Kediri" class="letterhead-logo">
+            @endif
+            <div class="letterhead-text">
+                <p class="lembaga">PEMERINTAH KOTA KEDIRI</p>
+                <h1>Dinas Ketahanan Pangan dan Pertanian</h1>
+                <p class="bidang">Bidang Ketahanan Pangan</p>
+            </div>
+        </div>
         <h2>Laporan Neraca Pangan Saya</h2>
         <p class="tahun">Tahun {{ $tahun }}</p>
     </div>
 
     <div class="meta">
         <p>Dicetak pada: {{ \Illuminate\Support\Carbon::now('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i') }} WIB</p>
-        <p>Total entri: {{ $items->count() }}</p>
     </div>
 
     <table>
@@ -63,8 +72,6 @@
                 <th>Komoditas</th>
                 <th>Periode</th>
                 <th>Status</th>
-                <th>Verifikator</th>
-                <th>Tanggal Input</th>
             </tr>
         </thead>
         <tbody>
@@ -88,11 +95,9 @@
                     <td>{{ $n->komoditas->nama ?? '-' }}</td>
                     <td>{{ \App\Http\Controllers\Admin\DataNeracaController::formatPeriode($n->periode) }}</td>
                     <td><span class="badge {{ $statusCls }}">{{ $statusLabel }}</span></td>
-                    <td>{{ $n->verifikator->name ?? '—' }}</td>
-                    <td>{{ optional($n->created_at)->translatedFormat('d M Y') }}</td>
                 </tr>
             @empty
-                <tr><td colspan="6" style="text-align:center;color:#94A3B8;">Tidak ada data sesuai filter.</td></tr>
+                <tr><td colspan="4" style="text-align:center;color:#94A3B8;">Tidak ada data sesuai filter.</td></tr>
             @endforelse
         </tbody>
     </table>
