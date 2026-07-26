@@ -8,15 +8,12 @@
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; color: #1E3A5F; margin: 0; padding: 24px; font-size: 10.5px; }
 
-        .letterhead { text-align: center; border-bottom: 3px double #2563EB; padding-bottom: 10px; margin-bottom: 14px; }
-        .letterhead-top { display: flex; align-items: center; justify-content: center; gap: 14px; }
-        .letterhead-logo { width: 54px; height: 54px; object-fit: contain; flex-shrink: 0; }
-        .letterhead-text { text-align: left; }
-        .letterhead .lembaga { margin: 0; font-size: 11px; letter-spacing: 0.5px; color: #475569; }
-        .letterhead h1 { margin: 2px 0 0; font-size: 15px; letter-spacing: 0.3px; }
-        .letterhead .bidang { margin: 1px 0 0; font-size: 11px; color: #475569; }
-        .letterhead h2 { margin: 8px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .letterhead .tahun { margin: 2px 0 0; font-size: 11px; font-weight: 600; }
+        header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #2563EB; padding-bottom: 12px; margin-bottom: 16px; }
+        header h1 { font-size: 16px; margin: 0 0 2px; }
+        header p { margin: 0; color: #64748B; font-size: 11px; }
+        header .brand { display: flex; align-items: center; gap: 8px; }
+        header .brand img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+        header .brand-text { text-align: right; }
 
         .meta { margin-bottom: 14px; font-size: 10.5px; color: #475569; }
         table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
@@ -46,20 +43,22 @@
         </button>
     </div>
 
-    <div class="letterhead">
-        <div class="letterhead-top">
+    <header>
+        <div>
+            <h1>Data Neraca Pangan</h1>
+            <p>Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
+            <p>Bidang Ketahanan Pangan &middot; Tahun {{ $tahun }}</p>
+        </div>
+        <div class="brand">
             @if (file_exists(public_path('images/logo-kediri.png')))
-                <img src="{{ asset('images/logo-kediri.png') }}" alt="Logo Kota Kediri" class="letterhead-logo">
+                <img src="{{ asset('images/logo-kediri.png') }}" alt="Logo Kota Kediri">
             @endif
-            <div class="letterhead-text">
-                <p class="lembaga">PEMERINTAH KOTA KEDIRI</p>
-                <h1>Dinas Ketahanan Pangan dan Pertanian</h1>
-                <p class="bidang">Bidang Ketahanan Pangan</p>
+            <div class="brand-text">
+                <p><strong>S-KOLAK</strong></p>
+                <p>Kota Kediri</p>
             </div>
         </div>
-        <h2>Data Neraca Pangan</h2>
-        <p class="tahun">Tahun {{ $tahun }}</p>
-    </div>
+    </header>
 
     <div class="meta">
         <p>Dicetak pada: {{ $generatedAt }} WIB</p>
