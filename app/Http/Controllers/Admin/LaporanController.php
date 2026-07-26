@@ -60,7 +60,7 @@ class LaporanController extends Controller
         });
 
         // ── Laporan Detail (mengikuti filter) ──
-        $detail = $this->filteredDetailQuery($filters)->paginate(15)->withQueryString();
+        $detail = $this->filteredDetailQuery($filters)->orderByDesc('periode')->orderByDesc('id')->paginate(15)->withQueryString();
 
         // ── Grafik & Visualisasi (dari seluruh data, seperti pada desain) ──
         $komoditasList = Komoditas::orderBy('nama')->pluck('nama', 'id');
@@ -225,7 +225,7 @@ class LaporanController extends Controller
             }
         }
 
-        $query = NeracaPangan::with(['komoditas', 'operator', 'verifikator'])->orderByDesc('periode');
+        $query = NeracaPangan::with(['komoditas', 'operator', 'verifikator']);
 
         if ($startDate) {
             $query->where('periode', '>=', $startDate);
@@ -245,7 +245,7 @@ class LaporanController extends Controller
      */
     private function exportRows(array $filters): array
     {
-        $items = $this->filteredDetailQuery($filters)->orderByDesc('id')->get();
+        $items = $this->filteredDetailQuery($filters)->orderBy('periode')->orderBy('id')->get();
 
         $statusLabel = [
             'valid'    => 'Valid',

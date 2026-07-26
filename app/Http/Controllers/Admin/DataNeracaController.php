@@ -82,8 +82,8 @@ class DataNeracaController extends Controller
     private function exportRows(Request $request): array
     {
         $items = $this->filteredQuery($request)
-            ->orderByDesc('periode')
-            ->orderByDesc('id')
+            ->orderBy('periode')
+            ->orderBy('id')
             ->get();
 
         return $items->map(function (NeracaPangan $n, $i) {

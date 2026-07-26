@@ -88,7 +88,7 @@ class LaporanController extends Controller
             $query->where('komoditas_id', $filters['komoditas_id']);
         }
 
-        $items = $query->orderByDesc('periode')->orderByDesc('id')->get();
+        $items = $query->orderBy('periode')->orderBy('id')->get();
 
         return view('operator.laporan-cetak', [
             'namaOperator'  => $request->user()->name,
