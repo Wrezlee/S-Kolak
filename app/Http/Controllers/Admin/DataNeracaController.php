@@ -123,6 +123,8 @@ class DataNeracaController extends Controller
         $html = view('admin.exports.data-neraca-excel', [
             'rows'        => $rows,
             'generatedAt' => $generatedAt,
+            'tahun'       => $this->resolveTahun($request),
+            'dicetakOleh' => $request->user()->name,
         ])->render();
 
         $filename = 'data-neraca-pangan-' . now()->format('Y-m-d_His') . '.xls';
@@ -149,7 +151,22 @@ class DataNeracaController extends Controller
         return view('admin.exports.data-neraca-cetak', [
             'rows'        => $rows,
             'generatedAt' => $generatedAt,
+            'tahun'       => $this->resolveTahun($request),
+            'dicetakOleh' => $request->user()->name,
         ]);
+    }
+
+    /**
+     * Tentukan label "Tahun" untuk kop cetak/export: mengikuti filter periode
+     * (bulan-tahun) jika dipilih, jika tidak memakai tahun berjalan.
+     */
+    private function resolveTahun(Request $request): string
+    {
+        if ($request->filled('periode')) {
+            return (string) Carbon::parse($request->input('periode'))->year;
+        }
+
+        return (string) now()->year;
     }
 
     /**

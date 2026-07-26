@@ -6,13 +6,22 @@
 <body>
     <table border="1" cellspacing="0" cellpadding="4">
         <tr>
+            <td colspan="13" style="font-size:11px; font-weight:bold;">PEMERINTAH KOTA KEDIRI</td>
+        </tr>
+        <tr>
             <td colspan="13" style="font-size:14px; font-weight:bold; background-color:#2563EB; color:#ffffff;">
-                LAPORAN NERACA PANGAN - S-KOLAK KOTA KEDIRI
+                DINAS KETAHANAN PANGAN DAN PERTANIAN
             </td>
         </tr>
         <tr>
+            <td colspan="13" style="font-size:11px; color:#475569;">Bidang Ketahanan Pangan</td>
+        </tr>
+        <tr>
+            <td colspan="13" style="font-size:13px; font-weight:bold;">LAPORAN NERACA PANGAN &middot; TAHUN {{ $tahun }}</td>
+        </tr>
+        <tr>
             <td colspan="13" style="font-size:11px; color:#475569;">
-                Dinas Ketahanan Pangan dan Pertanian Kota Kediri &middot; Diunduh {{ $generatedAt }}
+                Diunduh {{ $generatedAt }}
             </td>
         </tr>
         @if ($filters['tahun_awal'] || $filters['tahun_akhir'] || $filters['status'])
@@ -34,8 +43,8 @@
         <tr><td colspan="13"></td></tr>
         <tr style="background-color:#DBEAFE; font-weight:bold;">
             <td>No</td>
-            <td>Periode</td>
             <td>Komoditas</td>
+            <td>Periode</td>
             <td>Stok Awal</td>
             <td>Produksi</td>
             <td>Masuk</td>
@@ -50,8 +59,8 @@
         @forelse ($rows as $r)
             <tr>
                 <td>{{ $r['no'] }}</td>
-                <td style="mso-number-format:'\@';">{{ $r['periode'] }}</td>
                 <td>{{ $r['komoditas'] }}</td>
+                <td style="mso-number-format:'\@';">{{ $r['periode'] }}</td>
                 <td style="mso-number-format:'#,##0';">{{ $r['stok_awal'] }}</td>
                 <td style="mso-number-format:'#,##0';">{{ $r['produksi'] }}</td>
                 <td style="mso-number-format:'#,##0';">{{ $r['masuk'] }}</td>
@@ -66,6 +75,10 @@
         @empty
             <tr><td colspan="13">Tidak ada data sesuai filter yang dipilih.</td></tr>
         @endforelse
+        <tr><td colspan="13"></td></tr>
+        <tr>
+            <td colspan="13" style="font-size:11px;">Diunduh oleh: {{ $dicetakOleh }}</td>
+        </tr>
     </table>
 </body>
 </html>

@@ -94,7 +94,32 @@ class LaporanController extends Controller
             'namaOperator'  => $request->user()->name,
             'loginIdCetak'  => $request->user()->login_id,
             'items'         => $items,
+            'tahun'         => $this->resolveTahun($filters),
         ]);
+    }
+
+    /**
+     * Tentukan label "Tahun" untuk kop cetak: memakai rentang tahun_awal-tahun_akhir
+     * jika filter periode aktif & berbeda, satu tahun jika sama, atau tahun berjalan jika tidak difilter.
+     */
+    private function resolveTahun(array $filters): string
+    {
+        $awal = $filters['tahun_awal'] ?? '';
+        $akhir = $filters['tahun_akhir'] ?? '';
+
+        if ($awal && $akhir && $awal !== $akhir) {
+            return "{$awal} - {$akhir}";
+        }
+
+        if ($awal) {
+            return (string) $awal;
+        }
+
+        if ($akhir) {
+            return (string) $akhir;
+        }
+
+        return (string) now()->year;
     }
 
     private function buildPeriodeAwal(?string $tahun, ?string $bulan): ?Carbon

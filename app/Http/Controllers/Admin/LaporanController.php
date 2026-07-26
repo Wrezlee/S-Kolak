@@ -132,6 +132,8 @@ class LaporanController extends Controller
             'rows'        => $rows,
             'filters'     => $filters,
             'generatedAt' => $generatedAt,
+            'tahun'       => $this->resolveTahun($filters),
+            'dicetakOleh' => $request->user()->name,
         ])->render();
 
         $filename = 'laporan-neraca-pangan-' . now()->format('Y-m-d_His') . '.xls';
@@ -158,7 +160,33 @@ class LaporanController extends Controller
             'rows'        => $rows,
             'filters'     => $filters,
             'generatedAt' => $generatedAt,
+            'tahun'       => $this->resolveTahun($filters),
+            'dicetakOleh' => $request->user()->name,
         ]);
+    }
+
+    /**
+     * Tentukan label "Tahun" untuk kop cetak/export: memakai rentang tahun_awal-tahun_akhir
+     * jika filter periode aktif & berbeda, satu tahun jika sama, atau tahun berjalan jika tidak difilter.
+     */
+    private function resolveTahun(array $filters): string
+    {
+        $awal = $filters['tahun_awal'] ?? '';
+        $akhir = $filters['tahun_akhir'] ?? '';
+
+        if ($awal && $akhir && $awal !== $akhir) {
+            return "{$awal} - {$akhir}";
+        }
+
+        if ($awal) {
+            return (string) $awal;
+        }
+
+        if ($akhir) {
+            return (string) $akhir;
+        }
+
+        return (string) now()->year;
     }
 
     /**
