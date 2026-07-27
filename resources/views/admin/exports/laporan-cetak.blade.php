@@ -150,12 +150,9 @@
     <footer>
         <div class="cetak-oleh">
             <p>Dicetak pada: {{ $generatedAt }} WIB</p>
-            <p><strong>{{ $dicetakOleh }}</strong></p>
+            <p><strong>{{ $dicetakOleh }} - S-KOLAK</strong></p>
             <p>Sistem Ketersediaan Stok dan Laporan Aktual</p>
         </div>
-        <p class="footer-note">
-            Dokumen ini dihasilkan otomatis oleh S-KOLAK — Sistem Ketersediaan Stok dan Laporan Aktual, Kota Kediri.
-        </p>
     </footer>
 
 </body>
