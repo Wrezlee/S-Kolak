@@ -445,6 +445,11 @@
                 <div class="flex justify-between"><span>Verifikator</span><span id="detailVerifikator" class="font-medium text-slate-700"></span></div>
                 <div class="flex justify-between"><span>Tanggal Input</span><span id="detailTanggal" class="font-medium text-slate-700"></span></div>
             </div>
+
+            <div id="detailKeteranganBox" class="hidden rounded-xl p-3 bg-slate-50 border border-slate-100">
+                <p class="text-xs text-slate-400 mb-1">Keterangan Verifikator</p>
+                <p id="detailKeterangan" class="text-sm text-slate-600"></p>
+            </div>
         </div>
     </div>
 </div>
@@ -554,6 +559,14 @@
 
         document.getElementById('detailVerifikator').textContent = d.verifikator || '—';
         document.getElementById('detailTanggal').textContent = d.tanggalInput;
+
+        const ketBox = document.getElementById('detailKeteranganBox');
+        if (d.keterangan) {
+            document.getElementById('detailKeterangan').textContent = d.keterangan;
+            ketBox.classList.remove('hidden');
+        } else {
+            ketBox.classList.add('hidden');
+        }
 
         document.getElementById('modalDetail').classList.remove('hidden');
     };
