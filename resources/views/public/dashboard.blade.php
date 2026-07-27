@@ -59,8 +59,7 @@
         </div>
     </header>
 
-    {{-- Hero + Filter — everything inside this <section> shares the same blue
-         background, so the blue extends all the way down past the filter card. --}}
+    {{-- Hero --}}
     <section class="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 text-white">
         <div class="max-w-7xl mx-auto px-6 pt-12 pb-10">
             <h1 class="mt-4 text-4xl md:text-5xl font-bold leading-tight max-w-2xl">
@@ -71,93 +70,8 @@
                 sKOLAK adalah Sistem Informasi Neraca Pangan berdasarkan analisis prognosa data stok pangan di Kota Kediri. 
                 Data disajikan bersumber dari hasil perekaman pemantauan data stok pangan dari pelaku usaha pangan di Kota Kediri.
             </p>
-
-            {{-- Filter card, still inside the blue section so the blue background
-                 continues underneath and around it --}}
-            <form method="GET" class="mt-8 bg-white text-slate-800 rounded-2xl shadow-lg p-6">
-                <div class="flex items-center gap-2 text-slate-700 font-semibold mb-5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                    Filter Data
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Tahun Awal</label>
-                        <select name="tahun_awal" class="skolak-select w-full rounded-lg border border-blue-100 bg-blue-50/30 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
-                            <option value="Semua" {{ empty($q['tahun_awal'] ?? null) || ($q['tahun_awal'] ?? '') === 'Semua' ? 'selected' : '' }}>Semua</option>
-                            @foreach ($tahunList as $t)
-                                <option value="{{ $t }}" {{ ($q['tahun_awal'] ?? '') == $t ? 'selected' : '' }}>{{ $t }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Bulan Awal</label>
-                        <select name="bulan_awal" class="skolak-select w-full rounded-lg border border-blue-100 bg-blue-50/30 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
-                            <option value="Semua" {{ empty($q['bulan_awal'] ?? null) || ($q['bulan_awal'] ?? '') === 'Semua' ? 'selected' : '' }}>Semua</option>
-                            @foreach ($bulanList as $b)
-                                <option value="{{ $b }}" {{ ($q['bulan_awal'] ?? '') === $b ? 'selected' : '' }}>{{ $b }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Tahun Akhir</label>
-                        <select name="tahun_akhir" class="skolak-select w-full rounded-lg border border-blue-100 bg-blue-50/30 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
-                            <option value="Semua" {{ empty($q['tahun_akhir'] ?? null) || ($q['tahun_akhir'] ?? '') === 'Semua' ? 'selected' : '' }}>Semua</option>
-                            @foreach ($tahunList as $t)
-                                <option value="{{ $t }}" {{ ($q['tahun_akhir'] ?? '') == $t ? 'selected' : '' }}>{{ $t }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Bulan Akhir</label>
-                        <select name="bulan_akhir" class="skolak-select w-full rounded-lg border border-blue-100 bg-blue-50/30 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
-                            <option value="Semua" {{ empty($q['bulan_akhir'] ?? null) || ($q['bulan_akhir'] ?? '') === 'Semua' ? 'selected' : '' }}>Semua</option>
-                            @foreach ($bulanList as $b)
-                                <option value="{{ $b }}" {{ ($q['bulan_akhir'] ?? '') === $b ? 'selected' : '' }}>{{ $b }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Komoditas</label>
-                        <select name="komoditas" class="skolak-select w-full rounded-lg border border-blue-100 bg-blue-50/30 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
-                            <option value="Semua" {{ empty(request('komoditas')) || request('komoditas') === 'Semua' ? 'selected' : '' }}>Semua</option>
-                            @foreach ($komoditasList as $k)
-                                <option value="{{ $k }}" {{ request('komoditas') === $k ? 'selected' : '' }}>{{ $k }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                <div class="mt-5 flex gap-2">
-                    <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 hover:shadow-md active:scale-[0.98] transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                        </svg>
-                        Terapkan Filter
-                    </button>
-                    <a href="{{ url()->current() }}" class="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 px-4 py-2.5 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Reset
-                    </a>
-                </div>
-            </form>
         </div>
     </section>
-
-    @unless ($hasFilter)
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="mt-6 flex items-center gap-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm px-4 py-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                </svg>
-                <span>Silakan pilih filter periode atau komoditas terlebih dahulu, lalu klik <strong>Terapkan Filter</strong> untuk menampilkan data neraca pangan.</span>
-            </div>
-        </div>
-    @endunless
 
     @php
 
@@ -241,6 +155,88 @@
                 </button>
             @endforeach
         </div>
+
+        {{-- Filter card — sekarang di bawah 4 kotak ringkasan --}}
+        <form method="GET" class="mt-6 bg-white text-slate-800 rounded-2xl shadow-lg border border-slate-100 p-6">
+            <div class="flex items-center gap-2 text-slate-700 font-semibold mb-5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filter Data
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Tahun Awal</label>
+                    <select name="tahun_awal" class="skolak-select w-full rounded-lg border border-blue-100 bg-blue-50/30 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
+                        <option value="Semua" {{ empty($q['tahun_awal'] ?? null) || ($q['tahun_awal'] ?? '') === 'Semua' ? 'selected' : '' }}>Semua</option>
+                        @foreach ($tahunList as $t)
+                            <option value="{{ $t }}" {{ ($q['tahun_awal'] ?? '') == $t ? 'selected' : '' }}>{{ $t }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Bulan Awal</label>
+                    <select name="bulan_awal" class="skolak-select w-full rounded-lg border border-blue-100 bg-blue-50/30 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
+                        <option value="Semua" {{ empty($q['bulan_awal'] ?? null) || ($q['bulan_awal'] ?? '') === 'Semua' ? 'selected' : '' }}>Semua</option>
+                        @foreach ($bulanList as $b)
+                            <option value="{{ $b }}" {{ ($q['bulan_awal'] ?? '') === $b ? 'selected' : '' }}>{{ $b }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Tahun Akhir</label>
+                    <select name="tahun_akhir" class="skolak-select w-full rounded-lg border border-blue-100 bg-blue-50/30 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
+                        <option value="Semua" {{ empty($q['tahun_akhir'] ?? null) || ($q['tahun_akhir'] ?? '') === 'Semua' ? 'selected' : '' }}>Semua</option>
+                        @foreach ($tahunList as $t)
+                            <option value="{{ $t }}" {{ ($q['tahun_akhir'] ?? '') == $t ? 'selected' : '' }}>{{ $t }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Bulan Akhir</label>
+                    <select name="bulan_akhir" class="skolak-select w-full rounded-lg border border-blue-100 bg-blue-50/30 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
+                        <option value="Semua" {{ empty($q['bulan_akhir'] ?? null) || ($q['bulan_akhir'] ?? '') === 'Semua' ? 'selected' : '' }}>Semua</option>
+                        @foreach ($bulanList as $b)
+                            <option value="{{ $b }}" {{ ($q['bulan_akhir'] ?? '') === $b ? 'selected' : '' }}>{{ $b }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Komoditas</label>
+                    <select name="komoditas" class="skolak-select w-full rounded-lg border border-blue-100 bg-blue-50/30 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-colors">
+                        <option value="Semua" {{ empty(request('komoditas')) || request('komoditas') === 'Semua' ? 'selected' : '' }}>Semua</option>
+                        @foreach ($komoditasList as $k)
+                            <option value="{{ $k }}" {{ request('komoditas') === $k ? 'selected' : '' }}>{{ $k }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-5 flex gap-2">
+                <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 hover:shadow-md active:scale-[0.98] transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Terapkan Filter
+                </button>
+                <a href="{{ url()->current() }}" class="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 px-4 py-2.5 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Reset
+                </a>
+            </div>
+        </form>
+
+        @unless ($hasFilter)
+            <div class="mt-6 flex items-center gap-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm px-4 py-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                </svg>
+                <span>Silakan pilih filter periode atau komoditas terlebih dahulu, lalu klik <strong>Terapkan Filter</strong> untuk menampilkan data neraca pangan.</span>
+            </div>
+        @endunless
 
         {{-- Modal daftar komoditas per status --}}
         @foreach ($modalData as $key => $modal)

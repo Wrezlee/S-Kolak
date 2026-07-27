@@ -197,14 +197,22 @@ class DashboardPublikController extends Controller
             // Hanya data yang sudah diverifikasi (valid) yang ditampilkan ke publik
             ->where('status', 'valid');
 
-        // Filter rentang periode (tahun awal/bulan awal - tahun akhir/bulan akhir)
-        if ($this->filterAktif($request, 'tahun_awal', 'bulan_awal')) {
-            $awal = $this->buatTanggalPeriode($request->tahun_awal, $request->bulan_awal);
+        // Filter rentang periode (tahun awal/bulan awal - tahun akhir/bulan akhir).
+        // Tahun adalah syarat utama; bulan sifatnya opsional (default Januari untuk
+        // batas awal, Desember untuk batas akhir) supaya filter "tahun saja" tetap jalan.
+        if ($this->filterAktif($request, 'tahun_awal')) {
+            $bulanAwal = $request->filled('bulan_awal') && $request->bulan_awal !== 'Semua'
+                ? $request->bulan_awal
+                : self::BULAN[1];
+            $awal = $this->buatTanggalPeriode($request->tahun_awal, $bulanAwal);
             $query->whereDate('periode', '>=', $awal->startOfMonth());
         }
 
-        if ($this->filterAktif($request, 'tahun_akhir', 'bulan_akhir')) {
-            $akhir = $this->buatTanggalPeriode($request->tahun_akhir, $request->bulan_akhir);
+        if ($this->filterAktif($request, 'tahun_akhir')) {
+            $bulanAkhir = $request->filled('bulan_akhir') && $request->bulan_akhir !== 'Semua'
+                ? $request->bulan_akhir
+                : self::BULAN[12];
+            $akhir = $this->buatTanggalPeriode($request->tahun_akhir, $bulanAkhir);
             $query->whereDate('periode', '<=', $akhir->endOfMonth());
         }
 
@@ -217,12 +225,13 @@ class DashboardPublikController extends Controller
     }
 
     /**
-     * Cek apakah pasangan filter tahun+bulan aktif (bukan kosong / "Semua").
+     * Cek apakah filter tahun aktif (bukan kosong / "Semua"). Bulan pendampingnya
+     * (bulan_awal/bulan_akhir) tidak disyaratkan di sini — dianggap opsional dan
+     * ditangani terpisah saat membangun query (default Januari/Desember).
      */
-    private function filterAktif(Request $request, string $tahunKey, string $bulanKey): bool
+    private function filterAktif(Request $request, string $tahunKey): bool
     {
-        return $request->filled($tahunKey) && $request->$tahunKey !== 'Semua'
-            && $request->filled($bulanKey) && $request->$bulanKey !== 'Semua';
+        return $request->filled($tahunKey) && $request->$tahunKey !== 'Semua';
     }
 
     /**
@@ -232,8 +241,8 @@ class DashboardPublikController extends Controller
      */
     private function hasFilterAktif(Request $request): bool
     {
-        return $this->filterAktif($request, 'tahun_awal', 'bulan_awal')
-            || $this->filterAktif($request, 'tahun_akhir', 'bulan_akhir')
+        return $this->filterAktif($request, 'tahun_awal')
+            || $this->filterAktif($request, 'tahun_akhir')
             || ($request->filled('komoditas') && $request->komoditas !== 'Semua');
     }
 
