@@ -33,7 +33,7 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
     @php
         $cards = [
-            ['key' => 'terpantau', 'label' => 'Total Komoditas Terpantau', 'value' => $summary['total_komoditas'], 'color' => 'blue',  'icon' => 'box'],
+            ['key' => 'terpantau', 'label' => 'Neraca Seluruh Komoditas', 'value' => $summary['total_komoditas'], 'color' => 'blue',  'icon' => 'box', 'detail_label' => 'Status Neraca'],
             ['key' => 'aman',      'label' => 'Komoditas Stok Aman',       'value' => $summary['aman'],            'color' => 'green', 'icon' => 'check'],
             ['key' => 'waspada',   'label' => 'Komoditas Stok Waspada',    'value' => $summary['waspada'],         'color' => 'yellow','icon' => 'warning'],
             ['key' => 'rentan',    'label' => 'Komoditas Stok Rentan',     'value' => $summary['rentan'],          'color' => 'red',    'icon' => 'x'],
@@ -72,7 +72,7 @@
             <p class="text-xs text-slate-500 mb-0.5">{{ $card['label'] }}</p>
             <p class="text-2xl font-bold text-slate-900">{{ $card['value'] }}</p>
             <span class="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold {{ $cc['link'] }}">
-                Lihat detail →
+                {{ $card['detail_label'] ?? 'Lihat detail' }} →
             </span>
         </button>
     @endforeach

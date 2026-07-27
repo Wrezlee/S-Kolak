@@ -133,14 +133,19 @@ class VerifikasiController extends Controller
             'tanggal_verifikasi'  => now(),
         ]);
 
-        // Notifikasi ke operator yang menginput data ini.
         if ($neracaPangan->diinput_oleh) {
+            $pesanOperator = $validated['status'] === 'valid'
+                ? "Data {$neracaPangan->komoditas->nama} telah divalidasi oleh verifikator."
+                : "Data {$neracaPangan->komoditas->nama} dikembalikan untuk revisi.";
+
+            if (!empty($validated['catatan'])) {
+                $pesanOperator .= " Catatan verifikator: \"{$validated['catatan']}\"";
+            }
+
             Notifikasi::create([
                 'user_id' => $neracaPangan->diinput_oleh,
                 'judul'   => $validated['status'] === 'valid' ? 'Data divalidasi' : 'Data dikembalikan untuk revisi',
-                'pesan'   => $validated['status'] === 'valid'
-                    ? "Data {$neracaPangan->komoditas->nama} telah divalidasi oleh verifikator."
-                    : "Data {$neracaPangan->komoditas->nama} dikembalikan untuk revisi.",
+                'pesan'   => $pesanOperator,
                 'dibaca'  => false,
             ]);
         }
