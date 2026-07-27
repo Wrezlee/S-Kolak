@@ -64,7 +64,7 @@ class NeracaPanganController extends Controller
             'tahun'                      => ['required', 'integer', 'min:2000', 'max:2100'],
             'bulan'                      => ['required', 'integer', 'min:1', 'max:12'],
             'komoditas_id'               => ['required', 'exists:komoditas,id'],
-            'stok_awal'                  => ['required', 'numeric', 'min:0'],
+            'stok_awal'                  => ['required', 'numeric'],
             'produksi'                   => ['required', 'numeric', 'min:0'],
             'masuk'                      => ['required', 'numeric', 'min:0'],
             'keluar'                     => ['required', 'numeric', 'min:0'],
@@ -107,7 +107,7 @@ class NeracaPanganController extends Controller
             ->with('justSubmitted', true);
     }
 
- 
+
     private function notifikasiPengajuanBaru(NeracaPangan $neracaPangan, string $namaOperator): void
     {
         $komoditasNama = $neracaPangan->komoditas->nama ?? optional(Komoditas::find($neracaPangan->komoditas_id))->nama ?? 'data neraca pangan';
@@ -124,7 +124,7 @@ class NeracaPanganController extends Controller
         }
     }
 
-  
+
     public function update(Request $request, NeracaPangan $neracaPangan)
     {
         abort_unless($neracaPangan->diinput_oleh === $request->user()->id, 403);
@@ -134,7 +134,7 @@ class NeracaPanganController extends Controller
         }
 
         $validated = $request->validate([
-            'stok_awal'                  => ['required', 'numeric', 'min:0'],
+            'stok_awal'                  => ['required', 'numeric'],
             'produksi'                   => ['required', 'numeric', 'min:0'],
             'masuk'                      => ['required', 'numeric', 'min:0'],
             'keluar'                     => ['required', 'numeric', 'min:0'],
@@ -187,4 +187,4 @@ class NeracaPanganController extends Controller
             'periode'   => DataNeracaController::formatPeriode($dataSebelumnya->periode),
         ]);
     }
-}   
+}
