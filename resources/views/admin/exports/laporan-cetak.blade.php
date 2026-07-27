@@ -113,7 +113,7 @@
         <div class="meta">
             <p>Tahun: {{ $filters['tahun'] }}</p>
         </div>
-        <p class="catatan">(Datanya rata-rata dari Januari - Desember)</p>
+        <p class="catatan">(Datanya rata-rata tahun {{ $filters['tahun'] }}) </p>
 
         <table>
             <thead>
