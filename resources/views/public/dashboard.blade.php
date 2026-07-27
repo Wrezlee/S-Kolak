@@ -70,6 +70,57 @@
                 sKOLAK adalah Sistem Informasi Neraca Pangan berdasarkan analisis prognosa data stok pangan di Kota Kediri. 
                 Data disajikan bersumber dari hasil perekaman pemantauan data stok pangan dari pelaku usaha pangan di Kota Kediri.
             </p>
+
+            {{-- Summary cards — square icon badges + matching border colors, same
+                 palette used in the Figma Make version (blue / green / yellow / red).
+                 Tetap di dalam section biru supaya gradiennya menyambung ke bawah kotak. --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                @php
+                    $cards = [
+                        ['key' => 'terpantau', 'label' => 'Total Komoditas Terpantau', 'value' => $summary['total_komoditas'], 'color' => 'blue',  'icon' => 'box'],
+                        ['key' => 'aman',      'label' => 'Komoditas Stok Aman',       'value' => $summary['aman'],            'color' => 'green', 'icon' => 'check'],
+                        ['key' => 'waspada',   'label' => 'Komoditas Stok Waspada',    'value' => $summary['waspada'],         'color' => 'yellow','icon' => 'warning'],
+                        ['key' => 'rentan',    'label' => 'Komoditas Stok Rentan',     'value' => $summary['rentan'],          'color' => 'red',    'icon' => 'x'],
+                    ];
+                    $cardColorMap = [
+                        'blue'   => ['card' => 'bg-blue-50 border-blue-200',   'icon' => 'bg-blue-100 text-blue-600',   'link' => 'text-blue-600'],
+                        'green'  => ['card' => 'bg-green-50 border-green-200', 'icon' => 'bg-green-100 text-green-600', 'link' => 'text-green-600'],
+                        'yellow' => ['card' => 'bg-yellow-50 border-yellow-200','icon' => 'bg-yellow-100 text-yellow-600','link' => 'text-yellow-600'],
+                        'red'    => ['card' => 'bg-red-50 border-red-200',     'icon' => 'bg-red-100 text-red-600',     'link' => 'text-red-600'],
+                    ];
+                @endphp
+
+                @foreach ($cards as $card)
+                    @php $cc = $cardColorMap[$card['color']]; @endphp
+                    <button type="button" onclick="openModal('{{ $card['key'] }}')"
+                            class="text-left w-full {{ $cc['card'] }} border rounded-xl shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 hover:brightness-100 transition-all">
+                        <div class="h-9 w-9 rounded-lg flex items-center justify-center {{ $cc['icon'] }} mb-3">
+                            @if ($card['icon'] === 'box')
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-8.25-4.5-8.25 4.5m16.5 0l-8.25 4.5m8.25-4.5v9l-8.25 4.5m0-9L3.75 7.5m8.25 4.5v9M3.75 7.5v9l8.25 4.5" />
+                                </svg>
+                            @elseif ($card['icon'] === 'check')
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25 4.5-4.5m4.5 2.25a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            @elseif ($card['icon'] === 'warning')
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.007M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L13.71 3.86a1 1 0 00-1.72 0z" />
+                                </svg>
+                            @else
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            @endif
+                        </div>
+                        <p class="text-xs text-slate-500 mb-0.5">{{ $card['label'] }}</p>
+                        <p class="text-2xl font-bold text-slate-900">{{ $card['value'] }}</p>
+                        <span class="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold {{ $cc['link'] }}">
+                            Lihat detail →
+                        </span>
+                    </button>
+                @endforeach
+            </div>
         </div>
     </section>
 
@@ -106,58 +157,8 @@
 
     <main class="max-w-7xl mx-auto px-6 pb-16">
 
-        {{-- Summary cards — square icon badges + matching border colors, same
-             palette used in the Figma Make version (blue / green / yellow / red) --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-            @php
-                $cards = [
-                    ['key' => 'terpantau', 'label' => 'Total Komoditas Terpantau', 'value' => $summary['total_komoditas'], 'color' => 'blue',  'icon' => 'box'],
-                    ['key' => 'aman',      'label' => 'Komoditas Stok Aman',       'value' => $summary['aman'],            'color' => 'green', 'icon' => 'check'],
-                    ['key' => 'waspada',   'label' => 'Komoditas Stok Waspada',    'value' => $summary['waspada'],         'color' => 'yellow','icon' => 'warning'],
-                    ['key' => 'rentan',    'label' => 'Komoditas Stok Rentan',     'value' => $summary['rentan'],          'color' => 'red',    'icon' => 'x'],
-                ];
-                $cardColorMap = [
-                    'blue'   => ['card' => 'bg-blue-50 border-blue-200',   'icon' => 'bg-blue-100 text-blue-600',   'link' => 'text-blue-600'],
-                    'green'  => ['card' => 'bg-green-50 border-green-200', 'icon' => 'bg-green-100 text-green-600', 'link' => 'text-green-600'],
-                    'yellow' => ['card' => 'bg-yellow-50 border-yellow-200','icon' => 'bg-yellow-100 text-yellow-600','link' => 'text-yellow-600'],
-                    'red'    => ['card' => 'bg-red-50 border-red-200',     'icon' => 'bg-red-100 text-red-600',     'link' => 'text-red-600'],
-                ];
-            @endphp
-
-            @foreach ($cards as $card)
-                @php $cc = $cardColorMap[$card['color']]; @endphp
-                <button type="button" onclick="openModal('{{ $card['key'] }}')"
-                        class="text-left w-full {{ $cc['card'] }} border rounded-xl shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 hover:brightness-100 transition-all">
-                    <div class="h-9 w-9 rounded-lg flex items-center justify-center {{ $cc['icon'] }} mb-3">
-                        @if ($card['icon'] === 'box')
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-8.25-4.5-8.25 4.5m16.5 0l-8.25 4.5m8.25-4.5v9l-8.25 4.5m0-9L3.75 7.5m8.25 4.5v9M3.75 7.5v9l8.25 4.5" />
-                            </svg>
-                        @elseif ($card['icon'] === 'check')
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25 4.5-4.5m4.5 2.25a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        @elseif ($card['icon'] === 'warning')
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.007M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L13.71 3.86a1 1 0 00-1.72 0z" />
-                            </svg>
-                        @else
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        @endif
-                    </div>
-                    <p class="text-xs text-slate-500 mb-0.5">{{ $card['label'] }}</p>
-                    <p class="text-2xl font-bold text-slate-900">{{ $card['value'] }}</p>
-                    <span class="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold {{ $cc['link'] }}">
-                        Lihat detail →
-                    </span>
-                </button>
-            @endforeach
-        </div>
-
         {{-- Filter card — sekarang di bawah 4 kotak ringkasan --}}
-        <form method="GET" class="mt-6 bg-white text-slate-800 rounded-2xl shadow-lg border border-slate-100 p-6">
+        <form method="GET" class="mt-8 bg-white text-slate-800 rounded-2xl shadow-lg border border-slate-100 p-6">
             <div class="flex items-center gap-2 text-slate-700 font-semibold mb-5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -229,15 +230,6 @@
             </div>
         </form>
 
-        @unless ($hasFilter)
-            <div class="mt-6 flex items-center gap-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm px-4 py-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                </svg>
-                <span>Silakan pilih filter periode atau komoditas terlebih dahulu, lalu klik <strong>Terapkan Filter</strong> untuk menampilkan data neraca pangan.</span>
-            </div>
-        @endunless
-
         {{-- Modal daftar komoditas per status --}}
         @foreach ($modalData as $key => $modal)
             <div id="modal-{{ $key }}" class="fixed inset-0 z-50 items-center justify-center p-4" style="background-color:rgba(0,0,0,0.4); display:none;" onclick="closeModal('{{ $key }}')">
@@ -276,11 +268,7 @@
                 <p class="text-xs text-slate-500 mb-4">Sumbu X: Periode (bulan) · Sumbu Y: Nilai neraca (kumulatif)</p>
                 @if (count($trendLabels) === 0)
                     <div class="flex items-center justify-center h-[220px] text-slate-400 text-sm text-center px-6">
-                        @unless ($hasFilter)
-                            Silakan pilih filter terlebih dahulu untuk menampilkan grafik.
-                        @else
-                            Data belum tersedia untuk filter yang dipilih.
-                        @endunless
+                        Data belum tersedia untuk filter yang dipilih.
                     </div>
                 @else
                     <canvas id="trendChart" height="220"></canvas>
@@ -382,11 +370,7 @@
                         @empty
                             <tr>
                                 <td colspan="11" class="text-center py-10 text-slate-400 text-sm">
-                                    @unless ($hasFilter)
-                                        Silakan pilih filter periode atau komoditas terlebih dahulu.
-                                    @else
-                                        Data belum tersedia untuk filter yang dipilih.
-                                    @endunless
+                                    Data belum tersedia untuk filter yang dipilih.
                                 </td>
                             </tr>
                         @endforelse
