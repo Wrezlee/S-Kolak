@@ -67,8 +67,7 @@
             </h1>
 
             <p class="mt-4 max-w-2xl text-blue-100 text-sm md:text-base">
-                sKOLAK adalah Sistem Informasi Neraca Pangan berdasarkan analisis prognosa data stok pangan di Kota Kediri. 
-                Data disajikan bersumber dari hasil perekaman pemantauan data stok pangan dari pelaku usaha pangan di Kota Kediri.
+                (Skolak) adalah Sistem Perekaman dan penyajian Neraca Pangan berdasarkan analisis prognosa data stok dari perilaku usaha pangan di Kota Kediri. 
             </p>
 
             {{-- Summary cards — square icon badges + matching border colors, same
