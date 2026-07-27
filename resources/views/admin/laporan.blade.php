@@ -30,7 +30,7 @@
 
 @php
     // Nilai default apabila controller belum mengirim data.
-    $filters = $filters ?? ['tahun_awal' => '', 'bulan_awal' => '', 'tahun_akhir' => '', 'bulan_akhir' => '', 'status' => ''];
+    $filters = $filters ?? ['tahun' => (string) now()->year, 'bulan' => ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'][now()->month - 1]];
 
     $ringkasan = $ringkasan ?? ['totalValid' => 33, 'surplus' => 29, 'defisit' => 4, 'totalEntri' => 37];
 
@@ -50,7 +50,13 @@
     ]);
 
     $nilaiValidTable = $nilaiValidTable ?? collect([]);
-    $detail = $detail ?? null;
+
+    $bulanLengkap = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    $bulanAbbrList = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+    $bulanLabel = $bulanLabel ?? $bulanLengkap[array_search($filters['bulan'], $bulanAbbrList) ?: 0];
+
+    $laporanBulanan = $laporanBulanan ?? [];
+    $laporanTahunan = $laporanTahunan ?? [];
 
     $entriPerKomoditas = $entriPerKomoditas ?? [
         'labels'   => $rekapKomoditas->pluck('nama')->all(),
@@ -277,38 +283,18 @@
                 </div>
                 <div class="flex flex-wrap gap-3 items-end">
                     <div class="flex flex-col gap-1">
-                        <label class="text-xs text-slate-400">Tahun Awal</label>
-                        <select name="tahun_awal" class="px-3 py-2 rounded-lg border border-blue-100 text-xs text-slate-700 bg-white outline-none focus:border-blue-400 min-w-[100px]">
-                            <option value="">Semua</option>
+                        <label class="text-xs text-slate-400">Tahun</label>
+                        <select name="tahun" class="px-3 py-2 rounded-lg border border-blue-100 text-xs text-slate-700 bg-white outline-none focus:border-blue-400 min-w-[100px]">
                             @foreach ($tahunList as $t)
-                                <option value="{{ $t }}" @selected($filters['tahun_awal'] == $t)>{{ $t }}</option>
+                                <option value="{{ $t }}" @selected($filters['tahun'] == $t)>{{ $t }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="flex flex-col gap-1">
-                        <label class="text-xs text-slate-400">Bulan Awal</label>
-                        <select name="bulan_awal" class="px-3 py-2 rounded-lg border border-blue-100 text-xs text-slate-700 bg-white outline-none focus:border-blue-400 min-w-[100px]">
-                            <option value="">Semua</option>
+                        <label class="text-xs text-slate-400">Bulan</label>
+                        <select name="bulan" class="px-3 py-2 rounded-lg border border-blue-100 text-xs text-slate-700 bg-white outline-none focus:border-blue-400 min-w-[100px]">
                             @foreach ($bulanList as $b)
-                                <option value="{{ $b }}" @selected($filters['bulan_awal'] == $b)>{{ $b }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-xs text-slate-400">Tahun Akhir</label>
-                        <select name="tahun_akhir" class="px-3 py-2 rounded-lg border border-blue-100 text-xs text-slate-700 bg-white outline-none focus:border-blue-400 min-w-[100px]">
-                            <option value="">Semua</option>
-                            @foreach ($tahunList as $t)
-                                <option value="{{ $t }}" @selected($filters['tahun_akhir'] == $t)>{{ $t }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-xs text-slate-400">Bulan Akhir</label>
-                        <select name="bulan_akhir" class="px-3 py-2 rounded-lg border border-blue-100 text-xs text-slate-700 bg-white outline-none focus:border-blue-400 min-w-[100px]">
-                            <option value="">Semua</option>
-                            @foreach ($bulanList as $b)
-                                <option value="{{ $b }}" @selected($filters['bulan_akhir'] == $b)>{{ $b }}</option>
+                                <option value="{{ $b }}" @selected($filters['bulan'] == $b)>{{ $b }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -443,67 +429,94 @@
             </div>
 
             {{-- ===================== TAB: LAPORAN DETAIL ===================== --}}
-            <div id="tab-detail" class="tab-panel space-y-4 hidden">
+            <div id="tab-detail" class="tab-panel space-y-5 hidden">
+
+                @php
+                    $laporanKolom = [
+                        ['key' => 'stok_awal',  'label' => 'Stok Awal'],
+                        ['key' => 'produksi',   'label' => 'Produksi'],
+                        ['key' => 'masuk',      'label' => 'Masuk'],
+                        ['key' => 'keluar',     'label' => 'Keluar'],
+                        ['key' => 'keb_rt',     'label' => 'Keb. Rumah Tangga'],
+                        ['key' => 'keb_non_rt', 'label' => 'Keb. Non-RT'],
+                        ['key' => 'nilai_neraca', 'label' => 'Nilai Neraca'],
+                    ];
+                @endphp
+
+                {{-- Tabel 1: sesuai filter Bulan & Tahun --}}
                 <div class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden">
                     <div class="p-4 border-b border-blue-50">
-                        <p class="text-xs text-slate-500">
-                            @if ($detail)
-                                Menampilkan {{ $detail->count() }} dari {{ $detail->total() }} entri sesuai filter
-                            @else
-                                Menampilkan seluruh entri sesuai filter
-                            @endif
-                        </p>
+                        <h3 class="text-sm font-bold" style="color:#1E3A5F;">Laporan &middot; Bulan {{ $bulanLabel }} {{ $filters['tahun'] }}</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
                             <thead>
                                 <tr style="background-color:#F0F7FF;">
                                     <th class="px-3 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">No</th>
-                                    <th class="px-3 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Periode</th>
                                     <th class="px-3 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Komoditas</th>
-                                    <th class="px-3 py-3 text-right font-semibold text-slate-600 whitespace-nowrap">Stok Awal</th>
-                                    <th class="px-3 py-3 text-right font-semibold text-slate-600 whitespace-nowrap">Produksi</th>
-                                    <th class="px-3 py-3 text-right font-semibold text-slate-600 whitespace-nowrap">Masuk</th>
-                                    <th class="px-3 py-3 text-right font-semibold text-slate-600 whitespace-nowrap">Keluar</th>
-                                    <th class="px-3 py-3 text-right font-semibold text-slate-600 whitespace-nowrap">Keb. RT</th>
-                                    <th class="px-3 py-3 text-right font-semibold text-slate-600 whitespace-nowrap">Keb. Non-RT</th>
-                                    <th class="px-3 py-3 text-right font-semibold text-slate-600 whitespace-nowrap">Nilai Neraca</th>
-                                    <th class="px-3 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Status</th>
+                                    @foreach ($laporanKolom as $kol)
+                                        <th class="px-3 py-3 text-right font-semibold text-slate-600 whitespace-nowrap">{{ $kol['label'] }}</th>
+                                    @endforeach
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse (($detail->items() ?? []) as $i => $n)
-                                    @php
-                                        $nilai = \App\Http\Controllers\Admin\DataNeracaController::hitungNilaiNeraca($n);
-                                        $periodeLabel = \App\Http\Controllers\Admin\DataNeracaController::formatPeriode($n->periode);
-                                        $badge = $statusBadge[$n->status] ?? ['label' => ucfirst($n->status), 'cls' => 'bg-slate-50 text-slate-600 border-slate-200'];
-                                    @endphp
+                                @forelse ($laporanBulanan as $i => $r)
                                     <tr class="border-t border-blue-50 hover:bg-blue-50/20">
-                                        <td class="px-3 py-3 text-slate-400">{{ $detail->firstItem() + $i }}</td>
-                                        <td class="px-3 py-3 font-medium" style="color:#1E3A5F;">{{ $periodeLabel }}</td>
-                                        <td class="px-3 py-3">{{ $n->komoditas->nama ?? '-' }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->stok_awal) }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->produksi) }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->masuk) }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->keluar) }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->kebutuhan_rumah_tangga) }}</td>
-                                        <td class="px-3 py-3 text-right font-mono">{{ fmt_neraca($n->kebutuhan_non_rumah_tangga) }}</td>
-                                        <td class="px-3 py-3 text-right font-mono font-bold text-black">{{ fmt_neraca($nilai) }}</td>
-                                        <td class="px-3 py-3">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $badge['cls'] }}">{{ $badge['label'] }}</span>
-                                        </td>
+                                        <td class="px-3 py-3 text-slate-400">{{ $i + 1 }}</td>
+                                        <td class="px-3 py-3 font-medium" style="color:#1E3A5F;">{{ $r['nama'] }}</td>
+                                        @if ($r['tersedia'])
+                                            @foreach ($laporanKolom as $kol)
+                                                <td class="px-3 py-3 text-right font-mono {{ $kol['key'] === 'nilai_neraca' ? 'font-bold text-black' : '' }}">{{ fmt_neraca($r[$kol['key']]) }}</td>
+                                            @endforeach
+                                        @else
+                                            <td colspan="{{ count($laporanKolom) }}" class="px-3 py-3 text-center text-slate-400">Belum tersedia</td>
+                                        @endif
                                     </tr>
                                 @empty
-                                    <tr><td colspan="11" class="px-4 py-10 text-center text-slate-400">Tidak ada data sesuai filter.</td></tr>
+                                    <tr><td colspan="{{ count($laporanKolom) + 2 }}" class="px-4 py-10 text-center text-slate-400">Belum ada komoditas terdaftar.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
-                    @if ($detail && $detail->hasPages())
-                        <div class="p-4 border-t border-blue-50">
-                            {{ $detail->links() }}
-                        </div>
-                    @endif
+                </div>
+
+                {{-- Tabel 2: rata-rata tahunan --}}
+                <div class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden">
+                    <div class="p-4 border-b border-blue-50">
+                        <h3 class="text-sm font-bold" style="color:#1E3A5F;">Laporan &middot; Tahun {{ $filters['tahun'] }}</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Datanya berupa rata-rata tahunan (rata-rata dari Januari &ndash; Desember)</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr style="background-color:#F0F7FF;">
+                                    <th class="px-3 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">No</th>
+                                    <th class="px-3 py-3 text-left font-semibold text-slate-600 whitespace-nowrap">Komoditas</th>
+                                    @foreach ($laporanKolom as $kol)
+                                        <th class="px-3 py-3 text-right font-semibold text-slate-600 whitespace-nowrap">{{ $kol['label'] }}</th>
+                                    @endforeach
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($laporanTahunan as $i => $r)
+                                    <tr class="border-t border-blue-50 hover:bg-blue-50/20">
+                                        <td class="px-3 py-3 text-slate-400">{{ $i + 1 }}</td>
+                                        <td class="px-3 py-3 font-medium" style="color:#1E3A5F;">{{ $r['nama'] }}</td>
+                                        @if ($r['tersedia'])
+                                            @foreach ($laporanKolom as $kol)
+                                                <td class="px-3 py-3 text-right font-mono {{ $kol['key'] === 'nilai_neraca' ? 'font-bold text-black' : '' }}">{{ fmt_neraca($r[$kol['key']]) }}</td>
+                                            @endforeach
+                                        @else
+                                            <td colspan="{{ count($laporanKolom) }}" class="px-3 py-3 text-center text-slate-400">Belum tersedia</td>
+                                        @endif
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="{{ count($laporanKolom) + 2 }}" class="px-4 py-10 text-center text-slate-400">Belum ada komoditas terdaftar.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 

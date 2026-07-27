@@ -17,15 +17,15 @@ class LaporanController extends Controller
         7 => 'Jul', 8 => 'Agt', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des',
     ];
 
+    /** Nama bulan Indonesia (lengkap), dipakai untuk judul/kop Laporan. */
+    private const BULAN_LENGKAP = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
+        7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+    ];
+
     public function index(Request $request)
     {
-        $filters = [
-            'tahun_awal'  => $request->input('tahun_awal', ''),
-            'bulan_awal'  => $request->input('bulan_awal', ''),
-            'tahun_akhir' => $request->input('tahun_akhir', ''),
-            'bulan_akhir' => $request->input('bulan_akhir', ''),
-            'status'      => $request->input('status', ''),
-        ];
+        $filters = $this->readFilters($request);
 
         $allItems = NeracaPangan::with('komoditas')->orderByDesc('periode')->get();
 
@@ -59,8 +59,9 @@ class LaporanController extends Controller
             ];
         });
 
-        // ── Laporan Detail (mengikuti filter) ──
-        $detail = $this->filteredDetailQuery($filters)->orderByDesc('periode')->orderByDesc('id')->paginate(15)->withQueryString();
+        // ── Laporan Detail (2 tabel: sesuai filter bulan/tahun, & rata-rata tahunan) ──
+        $laporanBulanan = $this->buildLaporanPeriode($filters['tahun'], $filters['bulan']);
+        $laporanTahunan = $this->buildLaporanRataRata($filters['tahun']);
 
         // ── Grafik & Visualisasi (dari seluruh data, seperti pada desain) ──
         $komoditasList = Komoditas::orderBy('nama')->pluck('nama', 'id');
@@ -108,7 +109,8 @@ class LaporanController extends Controller
             'ringkasan'         => $ringkasan,
             'rekapKomoditas'    => $rekapKomoditas,
             'nilaiValidTable'   => $nilaiValidTable,
-            'detail'            => $detail,
+            'laporanBulanan'    => $laporanBulanan,
+            'laporanTahunan'    => $laporanTahunan,
             'entriPerKomoditas' => $entriPerKomoditas,
             'trenBulanan'       => $trenBulanan,
             'perbandinganNilai' => $perbandinganNilai,
@@ -119,21 +121,21 @@ class LaporanController extends Controller
     }
 
     /**
-     * Export Laporan Detail (sesuai filter aktif) ke file Excel (.xls).
+     * Export Laporan (sesuai filter tahun/bulan aktif) ke file Excel (.xls).
      * Tanpa dependensi tambahan: tabel HTML disajikan dengan header MIME Excel.
      */
     public function exportExcel(Request $request)
     {
         $filters = $this->readFilters($request);
-        $rows = $this->exportRows($filters);
         $generatedAt = DataNeracaController::formatTanggalIndo(now(), true);
 
         $html = view('admin.exports.laporan-excel', [
-            'rows'        => $rows,
-            'filters'     => $filters,
-            'generatedAt' => $generatedAt,
-            'tahun'       => $this->resolveTahun($filters),
-            'dicetakOleh' => $request->user()->name,
+            'filters'        => $filters,
+            'bulanLabel'     => self::BULAN_LENGKAP[array_search($filters['bulan'], self::BULAN_ABBR)] ?? $filters['bulan'],
+            'generatedAt'    => $generatedAt,
+            'laporanBulanan' => $this->buildLaporanPeriode($filters['tahun'], $filters['bulan']),
+            'laporanTahunan' => $this->buildLaporanRataRata($filters['tahun']),
+            'dicetakOleh'    => $request->user()->name,
         ])->render();
 
         $filename = 'laporan-neraca-pangan-' . now()->format('Y-m-d_His') . '.xls';
@@ -153,124 +155,111 @@ class LaporanController extends Controller
     public function cetak(Request $request)
     {
         $filters = $this->readFilters($request);
-        $rows = $this->exportRows($filters);
         $generatedAt = DataNeracaController::formatTanggalIndo(now(), true);
 
         return view('admin.exports.laporan-cetak', [
-            'rows'        => $rows,
-            'filters'     => $filters,
-            'generatedAt' => $generatedAt,
-            'tahun'       => $this->resolveTahun($filters),
-            'dicetakOleh' => $request->user()->name,
+            'filters'        => $filters,
+            'bulanLabel'     => self::BULAN_LENGKAP[array_search($filters['bulan'], self::BULAN_ABBR)] ?? $filters['bulan'],
+            'generatedAt'    => $generatedAt,
+            'laporanBulanan' => $this->buildLaporanPeriode($filters['tahun'], $filters['bulan']),
+            'laporanTahunan' => $this->buildLaporanRataRata($filters['tahun']),
+            'dicetakOleh'    => $request->user()->name,
         ]);
     }
 
     /**
-     * Tentukan label "Tahun" untuk kop cetak/export: memakai rentang tahun_awal-tahun_akhir
-     * jika filter periode aktif & berbeda, satu tahun jika sama, atau tahun berjalan jika tidak difilter.
-     */
-    private function resolveTahun(array $filters): string
-    {
-        $awal = $filters['tahun_awal'] ?? '';
-        $akhir = $filters['tahun_akhir'] ?? '';
-
-        if ($awal && $akhir && $awal !== $akhir) {
-            return "{$awal} - {$akhir}";
-        }
-
-        if ($awal) {
-            return (string) $awal;
-        }
-
-        if ($akhir) {
-            return (string) $akhir;
-        }
-
-        return (string) now()->year;
-    }
-
-    /**
-     * Ambil & normalisasi filter dari query string (tahun/bulan awal-akhir & status).
+     * Ambil & normalisasi filter dari query string. Laporan hanya mengenal 2 filter:
+     * tahun & bulan (tidak ada lagi rentang awal-akhir maupun status). Default ke
+     * bulan & tahun berjalan supaya halaman selalu tampil dengan data yang relevan.
      */
     private function readFilters(Request $request): array
     {
         return [
-            'tahun_awal'  => $request->input('tahun_awal', ''),
-            'bulan_awal'  => $request->input('bulan_awal', ''),
-            'tahun_akhir' => $request->input('tahun_akhir', ''),
-            'bulan_akhir' => $request->input('bulan_akhir', ''),
-            'status'      => $request->input('status', ''),
+            'tahun' => (string) $request->input('tahun', now()->year),
+            'bulan' => (string) $request->input('bulan', self::BULAN_ABBR[(int) now()->month]),
         ];
     }
 
     /**
-     * Query Laporan Detail dengan filter yang sama dipakai index(), exportExcel(), dan cetak().
+     * Susun baris Laporan untuk satu periode (bulan+tahun) persis seperti dipilih di
+     * filter — satu baris per komoditas (semua komoditas master ditampilkan, walau
+     * belum ada datanya untuk periode tsb).
      */
-    private function filteredDetailQuery(array $filters)
+    private function buildLaporanPeriode(string $tahun, string $bulan): array
     {
-        $startDate = null;
-        $endDate = null;
+        $bulanNum = array_search($bulan, self::BULAN_ABBR);
 
-        if ($filters['tahun_awal'] && $filters['bulan_awal']) {
-            $bulanNum = array_search($filters['bulan_awal'], self::BULAN_ABBR);
-            if ($bulanNum) {
-                $startDate = Carbon::create((int) $filters['tahun_awal'], $bulanNum, 1)->startOfMonth();
+        $items = collect();
+        if ($tahun && $bulanNum) {
+            $awal = Carbon::create((int) $tahun, (int) $bulanNum, 1)->startOfMonth();
+            $akhir = $awal->copy()->endOfMonth();
+
+            $items = NeracaPangan::where('status', 'valid')
+                ->whereBetween('periode', [$awal, $akhir])
+                ->get();
+        }
+
+        return Komoditas::orderBy('nama')->get()->map(function (Komoditas $k) use ($items) {
+            $data = $items->firstWhere('komoditas_id', $k->id);
+
+            if (! $data) {
+                return ['nama' => $k->nama, 'tersedia' => false];
             }
-        }
 
-        if ($filters['tahun_akhir'] && $filters['bulan_akhir']) {
-            $bulanNum = array_search($filters['bulan_akhir'], self::BULAN_ABBR);
-            if ($bulanNum) {
-                $endDate = Carbon::create((int) $filters['tahun_akhir'], $bulanNum, 1)->endOfMonth();
-            }
-        }
-
-        $query = NeracaPangan::with(['komoditas', 'operator', 'verifikator']);
-
-        if ($startDate) {
-            $query->where('periode', '>=', $startDate);
-        }
-        if ($endDate) {
-            $query->where('periode', '<=', $endDate);
-        }
-        if ($filters['status']) {
-            $query->where('status', $filters['status']);
-        }
-
-        return $query;
+            return $this->baris($k->nama, [
+                'stok_awal'  => (float) $data->stok_awal,
+                'produksi'   => (float) $data->produksi,
+                'masuk'      => (float) $data->masuk,
+                'keluar'     => (float) $data->keluar,
+                'keb_rt'     => (float) $data->kebutuhan_rumah_tangga,
+                'keb_non_rt' => (float) $data->kebutuhan_non_rumah_tangga,
+            ]);
+        })->values()->all();
     }
 
     /**
-     * Susun baris Laporan Detail (format array datar) untuk keperluan export Excel & cetak PDF.
+     * Susun baris Laporan rata-rata tahunan — satu baris per komoditas, tiap kolom
+     * dirata-rata dari seluruh entri valid komoditas tsb sepanjang tahun terpilih
+     * (Januari s.d. Desember).
      */
-    private function exportRows(array $filters): array
+    private function buildLaporanRataRata(string $tahun): array
     {
-        $items = $this->filteredDetailQuery($filters)->orderBy('periode')->orderBy('id')->get();
+        $items = collect();
+        if ($tahun) {
+            $items = NeracaPangan::where('status', 'valid')
+                ->whereYear('periode', $tahun)
+                ->get();
+        }
 
-        $statusLabel = [
-            'valid'    => 'Valid',
-            'menunggu' => 'Menunggu Verifikasi',
-            'revisi'   => 'Perlu Revisi',
-        ];
+        return Komoditas::orderBy('nama')->get()->map(function (Komoditas $k) use ($items) {
+            $milik = $items->where('komoditas_id', $k->id);
 
-        return $items->map(function (NeracaPangan $n, $i) use ($statusLabel) {
-            $nilai = DataNeracaController::hitungNilaiNeraca($n);
+            if ($milik->isEmpty()) {
+                return ['nama' => $k->nama, 'tersedia' => false];
+            }
 
-            return [
-                'no'           => $i + 1,
-                'periode'      => DataNeracaController::formatPeriode($n->periode),
-                'komoditas'    => $n->komoditas->nama ?? '-',
-                'stok_awal'    => (float) $n->stok_awal,
-                'produksi'     => (float) $n->produksi,
-                'masuk'        => (float) $n->masuk,
-                'keluar'       => (float) $n->keluar,
-                'keb_rt'       => (float) $n->kebutuhan_rumah_tangga,
-                'keb_non_rt'   => (float) $n->kebutuhan_non_rumah_tangga,
-                'nilai_neraca' => (float) $nilai,
-                'status'       => $statusLabel[$n->status] ?? ucfirst($n->status),
-                'operator'     => $n->operator->name ?? '-',
-                'verifikator'  => $n->verifikator->name ?? '-',
-            ];
-        })->all();
+            return $this->baris($k->nama, [
+                'stok_awal'  => (float) $milik->avg('stok_awal'),
+                'produksi'   => (float) $milik->avg('produksi'),
+                'masuk'      => (float) $milik->avg('masuk'),
+                'keluar'     => (float) $milik->avg('keluar'),
+                'keb_rt'     => (float) $milik->avg('kebutuhan_rumah_tangga'),
+                'keb_non_rt' => (float) $milik->avg('kebutuhan_non_rumah_tangga'),
+            ]);
+        })->values()->all();
+    }
+
+    /**
+     * Bentuk satu baris tabel Laporan (dipakai baik untuk baris per-periode maupun
+     * baris rata-rata tahunan) sekaligus menghitung Nilai Neraca-nya.
+     */
+    private function baris(string $nama, array $nilai): array
+    {
+        $nilaiNeraca = $nilai['stok_awal'] + $nilai['produksi'] + $nilai['masuk']
+            - $nilai['keluar'] - $nilai['keb_rt'] - $nilai['keb_non_rt'];
+
+        return array_merge(['nama' => $nama, 'tersedia' => true], $nilai, [
+            'nilai_neraca' => $nilaiNeraca,
+        ]);
     }
 }

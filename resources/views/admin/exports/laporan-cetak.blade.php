@@ -16,14 +16,16 @@
         header .brand-text { text-align: right; }
 
         .meta { margin-bottom: 14px; font-size: 10.5px; color: #475569; }
+        .meta p { margin: 2px 0; }
+        section + section { margin-top: 26px; }
+        section h2 { font-size: 13px; margin: 0 0 4px; }
+        section .catatan { font-size: 9.5px; color: #94A3B8; font-style: italic; margin: 2px 0 8px; }
+
         table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
         th, td { border: 1px solid #DBEAFE; padding: 4px 6px; text-align: left; }
         th { background-color: #EFF6FF; font-weight: 600; }
         td.num { text-align: right; font-variant-numeric: tabular-nums; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 600; }
-        .badge-valid { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
-        .badge-menunggu-verifikasi { background: #FFF7ED; color: #EA580C; border: 1px solid #FED7AA; }
-        .badge-perlu-revisi { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+        td.belum-tersedia { text-align: center; color: #94A3B8; }
         .no-print { margin-bottom: 16px; }
 
         footer { margin-top: 28px; }
@@ -45,9 +47,8 @@
 
     <header>
         <div>
-            <h1>Laporan Neraca Pangan</h1>
+            <h1>Laporan</h1>
             <p>Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
-            <p>Bidang Ketahanan Pangan &middot; Tahun {{ $tahun }}</p>
         </div>
         <div class="brand">
             @if (file_exists(public_path('images/logo-kediri.png')))
@@ -60,58 +61,93 @@
         </div>
     </header>
 
-    <div class="meta">
-        <p>Dicetak pada: {{ $generatedAt }} WIB</p>
-        @if ($filters['tahun_awal'] || $filters['tahun_akhir'] || $filters['status'])
-            <p>
-                Filter:
-                @if ($filters['tahun_awal'] && $filters['bulan_awal'])
-                    Periode {{ $filters['bulan_awal'] }} {{ $filters['tahun_awal'] }}
-                    @if ($filters['tahun_akhir'] && $filters['bulan_akhir'])
-                        s.d. {{ $filters['bulan_akhir'] }} {{ $filters['tahun_akhir'] }}
-                    @endif
-                @endif
-                @if ($filters['status'])
-                    &middot; Status: {{ ucfirst($filters['status']) }}
-                @endif
-            </p>
-        @endif
-    </div>
+    {{-- ===================== TABEL 1: SESUAI FILTER BULAN/TAHUN ===================== --}}
+    <section>
+        <div class="meta">
+            <p>Bulan: {{ $bulanLabel }}</p>
+            <p>Tahun: {{ $filters['tahun'] }}</p>
+            <p>Dicetak pada: {{ $generatedAt }} WIB</p>
+        </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Komoditas</th>
-                <th>Periode</th>
-                <th>Stok Awal</th>
-                <th>Produksi</th>
-                <th>Masuk</th>
-                <th>Keluar</th>
-                <th>Keb. Rumah Tangga</th>
-                <th>Keb. Non-RT</th>
-                <th>Nilai Neraca</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($rows as $r)
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ $r['no'] }}</td>
-                    <td>{{ $r['komoditas'] }}</td>
-                    <td>{{ $r['periode'] }}</td>
-                    <td class="num">{{ number_format($r['stok_awal'], 0, ',', '.') }}</td>
-                    <td class="num">{{ number_format($r['produksi'], 0, ',', '.') }}</td>
-                    <td class="num">{{ number_format($r['masuk'], 0, ',', '.') }}</td>
-                    <td class="num">{{ number_format($r['keluar'], 0, ',', '.') }}</td>
-                    <td class="num">{{ number_format($r['keb_rt'], 0, ',', '.') }}</td>
-                    <td class="num">{{ number_format($r['keb_non_rt'], 0, ',', '.') }}</td>
-                    <td class="num" style="font-weight:700;">{{ number_format($r['nilai_neraca'], 0, ',', '.') }}</td>
+                    <th>No</th>
+                    <th>Komoditas</th>
+                    <th>Stok Awal</th>
+                    <th>Produksi</th>
+                    <th>Masuk</th>
+                    <th>Keluar</th>
+                    <th>Keb. Rumah Tangga</th>
+                    <th>Keb. Non-RT</th>
+                    <th>Nilai Neraca</th>
                 </tr>
-            @empty
-                <tr><td colspan="10" style="text-align:center;color:#94A3B8;">Tidak ada data sesuai filter yang dipilih.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach ($laporanBulanan as $i => $r)
+                    <tr>
+                        <td>{{ $i + 1 }}</td>
+                        <td>{{ $r['nama'] }}</td>
+                        @if ($r['tersedia'])
+                            <td class="num">{{ number_format($r['stok_awal'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['produksi'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['masuk'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keluar'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keb_rt'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keb_non_rt'], 0, ',', '.') }}</td>
+                            <td class="num" style="font-weight:700;">{{ number_format($r['nilai_neraca'], 0, ',', '.') }}</td>
+                        @else
+                            <td colspan="7" class="belum-tersedia">Belum tersedia</td>
+                        @endif
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </section>
+
+    {{-- ===================== TABEL 2: RATA-RATA TAHUNAN ===================== --}}
+    <section>
+        <div class="meta">
+            <p>Tahun: {{ $filters['tahun'] }} — datanya berupa rata-rata tahunan</p>
+            <p>Dicetak pada: {{ $generatedAt }} WIB</p>
+        </div>
+        <p class="catatan">(Datanya rata-rata dari Januari - Desember)</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Komoditas</th>
+                    <th>Stok Awal</th>
+                    <th>Produksi</th>
+                    <th>Masuk</th>
+                    <th>Keluar</th>
+                    <th>Keb. Rumah Tangga</th>
+                    <th>Keb. Non-RT</th>
+                    <th>Nilai Neraca</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($laporanTahunan as $i => $r)
+                    <tr>
+                        <td>{{ $i + 1 }}</td>
+                        <td>{{ $r['nama'] }}</td>
+                        @if ($r['tersedia'])
+                            <td class="num">{{ number_format($r['stok_awal'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['produksi'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['masuk'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keluar'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keb_rt'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keb_non_rt'], 0, ',', '.') }}</td>
+                            <td class="num" style="font-weight:700;">{{ number_format($r['nilai_neraca'], 0, ',', '.') }}</td>
+                        @else
+                            <td colspan="7" class="belum-tersedia">Belum tersedia</td>
+                        @endif
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </section>
 
     <footer>
         <div class="cetak-oleh">
