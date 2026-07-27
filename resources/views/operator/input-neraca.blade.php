@@ -378,16 +378,20 @@
 
         const angkaFields = document.querySelectorAll('.angka-neraca');
 
-        // Hanya izinkan digit dan satu tanda titik desimal — tanpa tombol naik/turun
-        // karena input pakai type="text", bukan type="number".
+      
         angkaFields.forEach(function (el) {
+            const izinkanMinus = el.id === 'stok_awal';
+
             el.addEventListener('input', function () {
+                const negatif = izinkanMinus && el.value.trim().charAt(0) === '-';
+
                 let v = el.value.replace(/[^0-9.]/g, '');
                 const firstDot = v.indexOf('.');
                 if (firstDot !== -1) {
                     v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
                 }
-                el.value = v;
+
+                el.value = negatif ? '-' + v : v;
             });
             el.addEventListener('focus', function () {
                 if (el.value === '0') el.value = '';
@@ -397,8 +401,6 @@
             });
         });
 
-        // Auto-isi Stok Awal dari nilai neraca (stok akhir) bulan sebelumnya,
-        // untuk komoditas yang sama — dipanggil setiap kali tahun/bulan/komoditas berubah.
         function ambilStokAwalSebelumnya() {
             const tahun = fieldTahun.value;
             const bulan = fieldBulan.value;
