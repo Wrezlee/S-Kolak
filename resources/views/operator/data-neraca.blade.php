@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Data Neraca Saya - S-KOLAK Kota Kediri</title>
+    <title>Data Neraca - S-KOLAK Kota Kediri</title>
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -162,7 +162,7 @@
                 $menuItems = [
                     ['key' => 'dashboard',  'label' => 'Dashboard',           'route' => 'operator.dashboard',  'badge' => null],
                     ['key' => 'input',      'label' => 'Input Neraca Pangan', 'route' => 'operator.input',      'badge' => null],
-                    ['key' => 'data',       'label' => 'Data Neraca Saya',    'route' => 'operator.data',       'badge' => $rows->count()],
+                    ['key' => 'data',       'label' => 'Data Neraca',    'route' => 'operator.data',       'badge' => $rows->count()],
                     ['key' => 'laporan',    'label' => 'Laporan',             'route' => 'operator.laporan',    'badge' => null],
                     ['key' => 'notifikasi', 'label' => 'Notifikasi',          'route' => 'operator.notifikasi', 'badge' => $notifCount],
                 ];
@@ -214,7 +214,7 @@
         {{-- Topbar --}}
         <header class="h-14 border-b border-blue-100 bg-white flex items-center px-4 gap-3 flex-shrink-0 shadow-sm">
             <div class="flex-1">
-                <h2 id="pageHeaderTitle" class="text-sm font-bold" style="color:#1E3A5F;">Data Neraca Saya</h2>
+                <h2 id="pageHeaderTitle" class="text-sm font-bold" style="color:#1E3A5F;">Data Neraca</h2>
                 <p class="text-xs text-slate-400">Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
             </div>
             <div class="flex items-center gap-2">
@@ -279,7 +279,7 @@
             @endif
 
             <div>
-                <h1 class="text-xl font-bold" style="color:#1E3A5F;">Data Neraca Saya</h1>
+                <h1 class="text-xl font-bold" style="color:#1E3A5F;">Data Neraca</h1>
                 <p class="text-sm text-slate-500">Seluruh data neraca pangan yang telah Anda ajukan · Kota Kediri</p>
             </div>
 

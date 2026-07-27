@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Operator;
 
+use App\Http\Controllers\Admin\DataNeracaController;
 use App\Http\Controllers\Controller;
 use App\Models\Komoditas;
 use App\Models\NeracaPangan;
@@ -90,11 +91,30 @@ class LaporanController extends Controller
 
         $items = $query->orderBy('periode')->orderBy('id')->get();
 
+        // Samakan dengan Laporan Cetak Admin: setiap baris menampilkan rincian
+        // stok/produksi/masuk/keluar/kebutuhan beserta Nilai Neraca yang dihitung,
+        // bukan sekadar daftar periode & komoditas.
+        $rows = $items->map(function (NeracaPangan $n) {
+            return [
+                'komoditas'    => $n->komoditas->nama ?? '-',
+                'periode'      => DataNeracaController::formatPeriode($n->periode),
+                'status'       => $n->status,
+                'stok_awal'    => (float) $n->stok_awal,
+                'produksi'     => (float) $n->produksi,
+                'masuk'        => (float) $n->masuk,
+                'keluar'       => (float) $n->keluar,
+                'keb_rt'       => (float) $n->kebutuhan_rumah_tangga,
+                'keb_non_rt'   => (float) $n->kebutuhan_non_rumah_tangga,
+                'nilai_neraca' => DataNeracaController::hitungNilaiNeraca($n),
+            ];
+        })->values();
+
         return view('operator.laporan-cetak', [
-            'namaOperator'  => $request->user()->name,
-            'loginIdCetak'  => $request->user()->login_id,
-            'items'         => $items,
-            'tahun'         => $this->resolveTahun($filters),
+            'namaOperator' => $request->user()->name,
+            'loginIdCetak' => $request->user()->login_id,
+            'items'        => $rows,
+            'tahun'        => $this->resolveTahun($filters),
+            'generatedAt'  => DataNeracaController::formatTanggalIndo(now(), true),
         ]);
     }
 

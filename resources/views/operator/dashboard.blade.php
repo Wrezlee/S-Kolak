@@ -111,7 +111,7 @@
                 $menuItems = [
                     ['key' => 'dashboard',  'label' => 'Dashboard',           'route' => 'operator.dashboard',  'badge' => null],
                     ['key' => 'input',      'label' => 'Input Neraca Pangan', 'route' => 'operator.input',      'badge' => null],
-                    ['key' => 'data',       'label' => 'Data Neraca Saya',    'route' => 'operator.data',       'badge' => $totalEntri],
+                    ['key' => 'data',       'label' => 'Data Neraca',    'route' => 'operator.data',       'badge' => $totalEntri],
                     ['key' => 'laporan',    'label' => 'Laporan',             'route' => 'operator.laporan',    'badge' => null],
                     ['key' => 'notifikasi', 'label' => 'Notifikasi',          'route' => 'operator.notifikasi', 'badge' => $notifCount],
                 ];
@@ -240,7 +240,7 @@
             {{-- Stat cards --}}
             @php
                 $statCards = [
-                    ['key' => 'total',    'label' => 'Total Data Saya',       'value' => $summary['total'],    'sub' => 'semua status',    'color' => 'blue',   'icon' => 'database'],
+                    ['key' => 'total',    'label' => 'Total Data',       'value' => $summary['total'],    'sub' => 'semua status',    'color' => 'blue',   'icon' => 'database'],
                     ['key' => 'valid',    'label' => 'Sudah Valid',           'value' => $summary['valid'],    'sub' => 'terverifikasi',   'color' => 'green',  'icon' => 'check'],
                     ['key' => 'menunggu', 'label' => 'Menunggu Verifikasi',   'value' => $summary['menunggu'], 'sub' => 'dalam antrian',   'color' => 'yellow', 'icon' => 'clock'],
                     ['key' => 'revisi',   'label' => 'Perlu Revisi',          'value' => $summary['revisi'],   'sub' => 'dikembalikan',    'color' => 'red',    'icon' => 'warning'],
@@ -262,7 +262,7 @@
                 // tiap card, dengan pola yang sama seperti dashboard publik.
                 $cardItemsCollection = collect($cardItems ?? []);
                 $modalData = [
-                    'total'    => ['title' => 'Semua Data Saya',           'items' => $cardItemsCollection->values()],
+                    'total'    => ['title' => 'Semua Data',           'items' => $cardItemsCollection->values()],
                     'valid'    => ['title' => 'Data Sudah Valid',          'items' => $cardItemsCollection->where('status', 'valid')->values()],
                     'menunggu' => ['title' => 'Data Menunggu Verifikasi',  'items' => $cardItemsCollection->where('status', 'menunggu')->values()],
                     'revisi'   => ['title' => 'Data Perlu Revisi',         'items' => $cardItemsCollection->where('status', 'revisi')->values()],
@@ -331,7 +331,7 @@
             {{-- Data terbaru --}}
             <div class="bg-white rounded-xl border border-blue-100 shadow-sm">
                 <div class="p-4 border-b border-blue-50 flex items-center justify-between">
-                    <h3 class="text-sm font-bold" style="color:#1E3A5F;">Data Neraca Terbaru Saya</h3>
+                    <h3 class="text-sm font-bold" style="color:#1E3A5F;">Data Neraca Terbaru</h3>
                     <span class="text-xs text-slate-400">{{ $totalEntri }} entri</span>
                 </div>
                 <div class="overflow-x-auto">

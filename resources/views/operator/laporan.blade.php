@@ -158,7 +158,7 @@
                 $menuItems = [
                     ['key' => 'dashboard',  'label' => 'Dashboard',           'route' => 'operator.dashboard',  'badge' => null],
                     ['key' => 'input',      'label' => 'Input Neraca Pangan', 'route' => 'operator.input',      'badge' => null],
-                    ['key' => 'data',       'label' => 'Data Neraca Saya',    'route' => 'operator.data',       'badge' => $totalEntriSaya ?? 0],
+                    ['key' => 'data',       'label' => 'Data Neraca',    'route' => 'operator.data',       'badge' => $totalEntriSaya ?? 0],
                     ['key' => 'laporan',    'label' => 'Laporan',             'route' => 'operator.laporan',    'badge' => null],
                     ['key' => 'notifikasi', 'label' => 'Notifikasi',          'route' => 'operator.notifikasi', 'badge' => $notifCount],
                 ];
@@ -270,7 +270,7 @@
             {{-- Header + tombol cetak --}}
             <div class="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                    <h1 class="text-xl font-bold" style="color:#1E3A5F;">Laporan Neraca Saya</h1>
+                    <h1 class="text-xl font-bold" style="color:#1E3A5F;">Laporan Neraca</h1>
                     <p class="text-sm text-slate-500">Data yang diinput oleh {{ $firstName }}</p>
                 </div>
                 <a href="{{ Route::has('operator.laporan.cetak') ? route('operator.laporan.cetak', request()->query()) : '#' }}"

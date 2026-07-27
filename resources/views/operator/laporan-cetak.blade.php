@@ -26,6 +26,7 @@
         .badge-valid { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
         .badge-menunggu { background: #FFF7ED; color: #EA580C; border: 1px solid #FED7AA; }
         .badge-revisi { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+        td.num { text-align: center; font-variant-numeric: tabular-nums; }
         .no-print { margin-bottom: 16px; }
 
         footer { margin-top: 28px; }
@@ -39,10 +40,6 @@
     </style>
 </head>
 <body>
-
-    @php
-        $generatedAt = \Illuminate\Support\Carbon::now('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i');
-    @endphp
 
     <div class="no-print">
         <button onclick="window.print()" style="padding:8px 16px;background:#2563EB;color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;">
@@ -67,6 +64,14 @@
         </div>
     </header>
 
+    @php
+        $statusBadge = [
+            'valid'    => ['label' => 'Valid',              'cls' => 'badge-valid'],
+            'menunggu' => ['label' => 'Menunggu Verifikasi', 'cls' => 'badge-menunggu'],
+            'revisi'   => ['label' => 'Perlu Revisi',        'cls' => 'badge-revisi'],
+        ];
+    @endphp
+
     <div class="meta">
         <p>Tahun: {{ $tahun }}</p>
     </div>
@@ -77,17 +82,36 @@
                 <th>No</th>
                 <th>Komoditas</th>
                 <th>Periode</th>
+                <th>Status</th>
+                <th>Stok Awal</th>
+                <th>Produksi</th>
+                <th>Masuk</th>
+                <th>Keluar</th>
+                <th>Keb. Rumah Tangga</th>
+                <th>Keb. Non-RT</th>
+                <th>Neraca</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($items as $i => $n)
+                @php
+                    $badge = $statusBadge[$n['status']] ?? ['label' => ucfirst($n['status']), 'cls' => ''];
+                @endphp
                 <tr>
                     <td>{{ $i + 1 }}</td>
-                    <td>{{ $n->komoditas->nama ?? '-' }}</td>
-                    <td>{{ \App\Http\Controllers\Admin\DataNeracaController::formatPeriode($n->periode) }}</td>
+                    <td>{{ $n['komoditas'] }}</td>
+                    <td>{{ $n['periode'] }}</td>
+                    <td><span class="badge {{ $badge['cls'] }}">{{ $badge['label'] }}</span></td>
+                    <td class="num">{{ number_format($n['stok_awal'], 0, ',', '.') }}</td>
+                    <td class="num">{{ number_format($n['produksi'], 0, ',', '.') }}</td>
+                    <td class="num">{{ number_format($n['masuk'], 0, ',', '.') }}</td>
+                    <td class="num">{{ number_format($n['keluar'], 0, ',', '.') }}</td>
+                    <td class="num">{{ number_format($n['keb_rt'], 0, ',', '.') }}</td>
+                    <td class="num">{{ number_format($n['keb_non_rt'], 0, ',', '.') }}</td>
+                    <td class="num" style="font-weight:700;">{{ number_format($n['nilai_neraca'], 0, ',', '.') }}</td>
                 </tr>
             @empty
-                <tr><td colspan="3" style="text-align:center;color:#94A3B8;">Tidak ada data sesuai filter.</td></tr>
+                <tr><td colspan="11" style="text-align:center;color:#94A3B8;">Tidak ada data sesuai filter.</td></tr>
             @endforelse
         </tbody>
     </table>

@@ -129,7 +129,7 @@
 
     $modalData = [
         'terpantau' => [
-            'title' => 'Semua Komoditas Terpantau',
+            'title' => 'Status neraca',
             'items' => $rowsCollection->unique('komoditas')->values()
         ],
         'aman' => [
