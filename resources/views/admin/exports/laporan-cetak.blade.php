@@ -61,12 +61,15 @@
         </div>
     </header>
 
+    <div class="meta">
+        <p>Dicetak pada: {{ $generatedAt }} WIB</p>
+    </div>
+
     {{-- ===================== TABEL 1: SESUAI FILTER BULAN/TAHUN ===================== --}}
     <section>
         <div class="meta">
             <p>Bulan: {{ $bulanLabel }}</p>
             <p>Tahun: {{ $filters['tahun'] }}</p>
-            <p>Dicetak pada: {{ $generatedAt }} WIB</p>
         </div>
 
         <table>
@@ -108,8 +111,7 @@
     {{-- ===================== TABEL 2: RATA-RATA TAHUNAN ===================== --}}
     <section>
         <div class="meta">
-            <p>Tahun: {{ $filters['tahun'] }} — datanya berupa rata-rata tahunan</p>
-            <p>Dicetak pada: {{ $generatedAt }} WIB</p>
+            <p>Tahun: {{ $filters['tahun'] }}</p>
         </div>
         <p class="catatan">(Datanya rata-rata dari Januari - Desember)</p>
 
@@ -151,7 +153,7 @@
 
     <footer>
         <div class="cetak-oleh">
-            Dicetak oleh: <strong>{{ $dicetakOleh }}</strong>
+            Dicetak oleh: <strong>{{ $dicetakOleh }}</strong> &middot; Bidang Ketahanan Pangan
         </div>
         <p class="footer-note">
             Dokumen ini dihasilkan otomatis oleh S-KOLAK — Sistem Ketersediaan Stok dan Laporan Aktual, Kota Kediri.

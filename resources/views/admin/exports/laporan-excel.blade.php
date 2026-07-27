@@ -68,10 +68,7 @@
         {{-- ===================== TABEL 2: RATA-RATA TAHUNAN ===================== --}}
         <tr>
             <td style="font-size:11px; color:#475569;">Tahun</td>
-            <td colspan="8" style="font-size:11px;">{{ $filters['tahun'] }} datanya berupa rata rata tahunan</td>
-        </tr>
-        <tr>
-            <td colspan="9" style="font-size:11px; color:#475569;">Dicetak pada {{ $generatedAt }}</td>
+            <td colspan="8" style="font-size:11px;">{{ $filters['tahun'] }}</td>
         </tr>
         <tr>
             <td colspan="9" style="font-size:10px; color:#475569; font-style:italic;">(Datanya rata-rata dari Januari - Desember)</td>
@@ -107,7 +104,7 @@
 
         <tr><td colspan="9"></td></tr>
         <tr>
-            <td colspan="9" style="font-size:11px;">Diunduh oleh: {{ $dicetakOleh }}</td>
+            <td colspan="9" style="font-size:11px;">Diunduh oleh: {{ $dicetakOleh }} &middot; Bidang Ketahanan Pangan</td>
         </tr>
     </table>
 </body>
