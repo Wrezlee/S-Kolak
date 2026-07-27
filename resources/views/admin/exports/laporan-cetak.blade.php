@@ -17,19 +17,21 @@
 
         .meta { margin-bottom: 14px; font-size: 10.5px; color: #475569; }
         .meta p { margin: 2px 0; }
-        section + section { margin-top: 26px; }
+        section + section { margin-top: 22px; }
         section h2 { font-size: 13px; margin: 0 0 4px; }
-        section .catatan { font-size: 9.5px; color: #94A3B8; font-style: italic; margin: 2px 0 8px; }
+        section .rata-rata-label { font-size: 12px; font-weight: 700; color: #1E3A5F; margin: 0 0 8px; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
-        th, td { border: 1px solid #DBEAFE; padding: 4px 6px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; font-size: 9.5px; table-layout: fixed; }
+        th, td { border: 1px solid #DBEAFE; padding: 3px 4px; text-align: center; overflow-wrap: break-word; }
         th { background-color: #EFF6FF; font-weight: 600; }
-        td.num { text-align: right; font-variant-numeric: tabular-nums; }
+        td:nth-child(2) { text-align: left; }
+        td.num { text-align: center; font-variant-numeric: tabular-nums; }
         td.belum-tersedia { text-align: center; color: #94A3B8; }
         .no-print { margin-bottom: 16px; }
 
         footer { margin-top: 28px; }
         .cetak-oleh { border-top: 1px solid #DBEAFE; padding-top: 10px; font-size: 11px; }
+        .cetak-oleh p { margin: 2px 0; }
         .footer-note { margin-top: 12px; font-size: 9.5px; color: #94A3B8; text-align: center; }
 
         @media print {
@@ -47,8 +49,9 @@
 
     <header>
         <div>
-            <h1>Laporan</h1>
+            <h1>Neraca Pangan Kota Kediri</h1>
             <p>Dinas Ketahanan Pangan dan Pertanian Kota Kediri</p>
+            <p>Bidang Ketahanan Pangan</p>
         </div>
         <div class="brand">
             @if (file_exists(public_path('images/logo-kediri.png')))
@@ -60,10 +63,6 @@
             </div>
         </div>
     </header>
-
-    <div class="meta">
-        <p>Dicetak pada: {{ $generatedAt }} WIB</p>
-    </div>
 
     {{-- ===================== TABEL 1: SESUAI FILTER BULAN/TAHUN ===================== --}}
     <section>
@@ -83,7 +82,7 @@
                     <th>Keluar</th>
                     <th>Keb. Rumah Tangga</th>
                     <th>Keb. Non-RT</th>
-                    <th>Nilai Neraca</th>
+                    <th>Neraca</th>
                 </tr>
             </thead>
             <tbody>
@@ -110,10 +109,7 @@
 
     {{-- ===================== TABEL 2: RATA-RATA TAHUNAN ===================== --}}
     <section>
-        <div class="meta">
-            <p>Tahun: {{ $filters['tahun'] }}</p>
-        </div>
-        <p class="catatan">(Datanya rata-rata tahun {{ $filters['tahun'] }}) </p>
+        <p class="rata-rata-label">Neraca rata-rata tahun {{ $filters['tahun'] }}</p>
 
         <table>
             <thead>
@@ -126,7 +122,7 @@
                     <th>Keluar</th>
                     <th>Keb. Rumah Tangga</th>
                     <th>Keb. Non-RT</th>
-                    <th>Nilai Neraca</th>
+                    <th>Neraca</th>
                 </tr>
             </thead>
             <tbody>
@@ -153,7 +149,9 @@
 
     <footer>
         <div class="cetak-oleh">
-            Dicetak oleh: <strong>{{ $dicetakOleh }}</strong> &middot; Bidang Ketahanan Pangan
+            <p>Dicetak pada: {{ $generatedAt }} WIB</p>
+            <p><strong>{{ $dicetakOleh }}</strong></p>
+            <p>Sistem Ketersediaan Stok dan Laporan Aktual</p>
         </div>
         <p class="footer-note">
             Dokumen ini dihasilkan otomatis oleh S-KOLAK — Sistem Ketersediaan Stok dan Laporan Aktual, Kota Kediri.
