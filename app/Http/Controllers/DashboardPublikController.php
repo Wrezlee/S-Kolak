@@ -382,7 +382,7 @@ class DashboardPublikController extends Controller
         $perBulan = $records
             ->groupBy(fn (NeracaPangan $item) => Carbon::parse($item->periode)->format('Y-m'))
             ->sortKeys()
-            ->map(fn ($group) => $group->sum(fn (NeracaPangan $item) => $this->hitungNilaiNeraca($item)));
+            ->map(fn ($group) => $group->avg(fn (NeracaPangan $item) => $this->hitungNilaiNeraca($item)));
 
         $labels = [];
         $values = [];

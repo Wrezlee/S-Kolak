@@ -384,7 +384,7 @@
                         @forelse ($tableRows as $row)
                             @php
                                 $badge = $statusBadgeMap[$row['status']] ?? 'bg-slate-50 text-slate-600 border border-slate-200';
-                                $nilaiColor = $row['nilai_neraca'] < 0 ? 'text-red-600' : 'text-slate-800';
+                                $nilaiColor = 'text-slate-800';
                             @endphp
                             <tr class="border-b border-slate-100 hover:bg-blue-50/30 transition-colors">
                                 <td class="px-6 py-3 text-slate-400">{{ $row['no'] }}</td>
