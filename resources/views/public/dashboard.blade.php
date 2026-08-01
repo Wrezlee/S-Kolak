@@ -324,6 +324,11 @@
                                 'Waspada' => 'bg-yellow-50 text-yellow-700 border border-yellow-200',
                                 'Rentan' => 'bg-red-50 text-red-700 border border-red-200',
                             ][$detailData['status']];
+                            $infoBoxStyle = [
+                                'Aman' => ['box' => 'bg-green-50 border-green-200', 'text' => 'text-green-700'],
+                                'Waspada' => ['box' => 'bg-yellow-50 border-yellow-200', 'text' => 'text-yellow-700'],
+                                'Rentan' => ['box' => 'bg-red-50 border-red-200', 'text' => 'text-red-700'],
+                            ][$detailData['status']];
                         @endphp
                         <span class="text-xs font-medium px-2.5 py-1 rounded-full {{ $statusStyle }}">
                             ● {{ $detailData['status'] }}
@@ -334,14 +339,14 @@
                 @if ($detailData)
                     <canvas id="detailChart" height="200" class="mt-4"></canvas>
 
-                    <div class="mt-4 rounded-xl bg-green-50 border border-green-200 p-4 flex items-center justify-between">
+                    <div class="mt-4 rounded-xl {{ $infoBoxStyle['box'] }} border p-4 flex items-center justify-between">
                         <div>
                             <p class="text-xs text-slate-500">Neraca</p>
-                            <p class="font-bold text-green-700">{{ fmt_neraca($detailData['nilai_neraca']) }} Ton</p>
+                            <p class="font-bold {{ $infoBoxStyle['text'] }}">{{ fmt_neraca($detailData['nilai_neraca']) }} Ton</p>
                         </div>
                         <div class="text-right">
                             <p class="text-xs text-slate-500">Ketahanan Pangan</p>
-                            <p class="font-bold text-green-700">
+                            <p class="font-bold {{ $infoBoxStyle['text'] }}">
                                 {{ $detailData['ketahanan_hari'] > 0 ? $detailData['ketahanan_hari'].' hari' : 'Stok habis' }}
                             </p>
                         </div>
