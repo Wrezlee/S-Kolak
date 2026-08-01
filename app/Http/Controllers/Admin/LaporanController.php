@@ -98,21 +98,6 @@ class LaporanController extends Controller
             'nilai'  => $trenRows->pluck('nilai')->map(fn ($v) => (float) $v)->take(-9)->values()->all(),
         ];
 
-        $latestValidIds = NeracaPangan::where('status', 'valid')
-            ->selectRaw('MAX(id) as id')
-            ->groupBy('komoditas_id')
-            ->pluck('id');
-
-        $perbandinganNilai = NeracaPangan::with('komoditas')
-            ->whereIn('id', $latestValidIds)
-            ->get()
-            ->map(fn ($n) => [
-                'nama'  => $n->komoditas->nama ?? '-',
-                'nilai' => DataNeracaController::hitungNilaiNeraca($n),
-            ])
-            ->sortByDesc('nilai')
-            ->values();
-
         return view('admin.laporan', [
             'filters'           => $filters,
             'ringkasan'         => $ringkasan,
@@ -122,7 +107,6 @@ class LaporanController extends Controller
             'laporanTahunan'    => $laporanTahunan,
             'entriPerKomoditas' => $entriPerKomoditas,
             'trenBulanan'       => $trenBulanan,
-            'perbandinganNilai' => $perbandinganNilai,
             'notifCount'        => Notifikasi::where('user_id', auth()->id())
                 ->where('dibaca', false)
                 ->count(),

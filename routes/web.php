@@ -56,8 +56,6 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
 
     // Data Neraca Pangan
     Route::get('/data', [DataNeracaController::class, 'index'])->name('data');
-    Route::get('/data/export/excel', [DataNeracaController::class, 'exportExcel'])->name('data.export.excel');
-    Route::get('/data/export/pdf', [DataNeracaController::class, 'cetak'])->name('data.export.pdf');
     Route::delete('/data/{neracaPangan}', [DataNeracaController::class, 'destroy'])->name('data.destroy');
 
     // Laporan

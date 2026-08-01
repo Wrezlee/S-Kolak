@@ -18,12 +18,6 @@ class DataNeracaController extends Controller
         9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
     ];
 
-    private const STATUS_LABEL = [
-        'valid'    => 'Valid',
-        'menunggu' => 'Menunggu Verifikasi',
-        'revisi'   => 'Perlu Revisi',
-    ];
-
     /**
      * Tampilkan seluruh data neraca pangan (khusus admin, lintas komoditas & operator).
      */
@@ -76,98 +70,7 @@ class DataNeracaController extends Controller
         return $query;
     }
 
-    /**
-     * Susun baris data neraca (format array datar) untuk keperluan export Excel & PDF.
-     */
-    private function exportRows(Request $request): array
-    {
-        $items = $this->filteredQuery($request)
-            ->orderBy('periode')
-            ->orderBy('id')
-            ->get();
 
-        return $items->map(function (NeracaPangan $n, $i) {
-            $nilaiNeraca = self::hitungNilaiNeraca($n);
-
-            return [
-                'no'           => $i + 1,
-                'periode'      => self::formatPeriode($n->periode),
-                'komoditas'    => $n->komoditas->nama ?? '-',
-                'stok_awal'    => (float) $n->stok_awal,
-                'produksi'     => (float) $n->produksi,
-                'masuk'        => (float) $n->masuk,
-                'keluar'       => (float) $n->keluar,
-                'keb_rt'       => (float) $n->kebutuhan_rumah_tangga,
-                'keb_non_rt'   => (float) $n->kebutuhan_non_rumah_tangga,
-                'nilai_neraca' => (float) $nilaiNeraca,
-                'status'       => self::STATUS_LABEL[$n->status] ?? ucfirst($n->status),
-                'operator'     => $n->operator->name ?? '-',
-                'verifikator'  => $n->verifikator->name ?? '-',
-                'tanggal'      => $n->created_at ? self::formatTanggalIndo($n->created_at) : '-',
-            ];
-        })->all();
-    }
-
-    /**
-     * Export data neraca pangan (sesuai filter aktif) ke file Excel (.xls).
-     *
-     * Dibuat tanpa dependensi tambahan: berupa tabel HTML yang disajikan dengan
-     * header MIME Excel, sehingga langsung terbuka rapi di Microsoft Excel /
-     * Google Sheets lengkap dengan header berwarna dan angka ter-format.
-     */
-    public function exportExcel(Request $request)
-    {
-        $rows = $this->exportRows($request);
-        $generatedAt = self::formatTanggalIndo(now(), true);
-
-        $html = view('admin.exports.data-neraca-excel', [
-            'rows'        => $rows,
-            'generatedAt' => $generatedAt,
-            'tahun'       => $this->resolveTahun($request),
-            'dicetakOleh' => $request->user()->name,
-        ])->render();
-
-        $filename = 'data-neraca-pangan-' . now()->format('Y-m-d_His') . '.xls';
-
-        return response($html, 200, [
-            'Content-Type'        => 'application/vnd.ms-excel; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            'Cache-Control'       => 'max-age=0',
-        ]);
-    }
-
-    /**
-     * Versi cetak (print-friendly) dari data neraca pangan, memakai filter query string
-     * yang sama dengan halaman index. Sama seperti "Cetak PDF" di Laporan Operator: tidak
-     * memakai library PDF terpisah (mis. DomPDF) — halaman ini dicetak lewat dialog print
-     * browser (window.print()), sehingga tidak bergantung pada extension/paket tambahan
-     * yang mungkin belum terpasang di server.
-     */
-    public function cetak(Request $request)
-    {
-        $rows = $this->exportRows($request);
-        $generatedAt = self::formatTanggalIndo(now(), true);
-
-        return view('admin.exports.data-neraca-cetak', [
-            'rows'        => $rows,
-            'generatedAt' => $generatedAt,
-            'tahun'       => $this->resolveTahun($request),
-            'dicetakOleh' => $request->user()->name,
-        ]);
-    }
-
-    /**
-     * Tentukan label "Tahun" untuk kop cetak/export: mengikuti filter periode
-     * (bulan-tahun) jika dipilih, jika tidak memakai tahun berjalan.
-     */
-    private function resolveTahun(Request $request): string
-    {
-        if ($request->filled('periode')) {
-            return (string) Carbon::parse($request->input('periode'))->year;
-        }
-
-        return (string) now()->year;
-    }
 
     /**
      * Hapus data neraca pangan.

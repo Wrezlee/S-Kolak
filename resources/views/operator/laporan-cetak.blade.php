@@ -17,16 +17,16 @@
 
         .meta { margin-bottom: 14px; font-size: 10.5px; color: #475569; }
         .meta p { margin: 2px 0; }
+        section + section { margin-top: 22px; }
+        section h2 { font-size: 13px; margin: 0 0 4px; }
+        section .rata-rata-label { font-size: 12px; font-weight: 700; color: #1E3A5F; margin: 0 0 8px; }
 
         table { width: 100%; border-collapse: collapse; font-size: 9.5px; table-layout: fixed; }
         th, td { border: 1px solid #DBEAFE; padding: 3px 4px; text-align: center; overflow-wrap: break-word; }
         th { background-color: #EFF6FF; font-weight: 600; }
         td:nth-child(2) { text-align: left; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
-        .badge-valid { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
-        .badge-menunggu { background: #FFF7ED; color: #EA580C; border: 1px solid #FED7AA; }
-        .badge-revisi { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
         td.num { text-align: center; font-variant-numeric: tabular-nums; }
+        td.belum-tersedia { text-align: center; color: #94A3B8; }
         .no-print { margin-bottom: 16px; }
 
         footer { margin-top: 28px; }
@@ -64,62 +64,93 @@
         </div>
     </header>
 
-    @php
-        $statusBadge = [
-            'valid'    => ['label' => 'Valid',              'cls' => 'badge-valid'],
-            'menunggu' => ['label' => 'Menunggu Verifikasi', 'cls' => 'badge-menunggu'],
-            'revisi'   => ['label' => 'Perlu Revisi',        'cls' => 'badge-revisi'],
-        ];
-    @endphp
+    {{-- ===================== TABEL 1: SESUAI FILTER BULAN/TAHUN ===================== --}}
+    <section>
+        <div class="meta">
+            <p>Bulan: {{ $bulanLabel }}</p>
+            <p>Tahun: {{ $filters['tahun'] }}</p>
+        </div>
 
-    <div class="meta">
-        <p>Tahun: {{ $tahun }}</p>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Komoditas</th>
-                <th>Periode</th>
-                <th>Status</th>
-                <th>Stok Awal</th>
-                <th>Produksi</th>
-                <th>Masuk</th>
-                <th>Keluar</th>
-                <th>Keb. Rumah Tangga</th>
-                <th>Keb. Non-RT</th>
-                <th>Neraca</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($items as $i => $n)
-                @php
-                    $badge = $statusBadge[$n['status']] ?? ['label' => ucfirst($n['status']), 'cls' => ''];
-                @endphp
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ $i + 1 }}</td>
-                    <td>{{ $n['komoditas'] }}</td>
-                    <td>{{ $n['periode'] }}</td>
-                    <td><span class="badge {{ $badge['cls'] }}">{{ $badge['label'] }}</span></td>
-                    <td class="num">{{ number_format($n['stok_awal'], 0, ',', '.') }}</td>
-                    <td class="num">{{ number_format($n['produksi'], 0, ',', '.') }}</td>
-                    <td class="num">{{ number_format($n['masuk'], 0, ',', '.') }}</td>
-                    <td class="num">{{ number_format($n['keluar'], 0, ',', '.') }}</td>
-                    <td class="num">{{ number_format($n['keb_rt'], 0, ',', '.') }}</td>
-                    <td class="num">{{ number_format($n['keb_non_rt'], 0, ',', '.') }}</td>
-                    <td class="num" style="font-weight:700;">{{ number_format($n['nilai_neraca'], 0, ',', '.') }}</td>
+                    <th>No</th>
+                    <th>Komoditas</th>
+                    <th>Stok Awal</th>
+                    <th>Produksi</th>
+                    <th>Masuk</th>
+                    <th>Keluar</th>
+                    <th>Keb. Rumah Tangga</th>
+                    <th>Keb. Non-RT</th>
+                    <th>Neraca</th>
                 </tr>
-            @empty
-                <tr><td colspan="11" style="text-align:center;color:#94A3B8;">Tidak ada data sesuai filter.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach ($laporanBulanan as $i => $r)
+                    <tr>
+                        <td>{{ $i + 1 }}</td>
+                        <td>{{ $r['nama'] }}</td>
+                        @if ($r['tersedia'])
+                            <td class="num">{{ number_format($r['stok_awal'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['produksi'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['masuk'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keluar'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keb_rt'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keb_non_rt'], 0, ',', '.') }}</td>
+                            <td class="num" style="font-weight:700;">{{ number_format($r['nilai_neraca'], 0, ',', '.') }}</td>
+                        @else
+                            <td colspan="7" class="belum-tersedia">Belum tersedia</td>
+                        @endif
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </section>
+
+    {{-- ===================== TABEL 2: RATA-RATA TAHUNAN ===================== --}}
+    <section>
+        <p class="rata-rata-label">Neraca rata-rata tahun {{ $filters['tahun'] }}</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Komoditas</th>
+                    <th>Stok Awal</th>
+                    <th>Produksi</th>
+                    <th>Masuk</th>
+                    <th>Keluar</th>
+                    <th>Keb. Rumah Tangga</th>
+                    <th>Keb. Non-RT</th>
+                    <th>Neraca</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($laporanTahunan as $i => $r)
+                    <tr>
+                        <td>{{ $i + 1 }}</td>
+                        <td>{{ $r['nama'] }}</td>
+                        @if ($r['tersedia'])
+                            <td class="num">{{ number_format($r['stok_awal'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['produksi'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['masuk'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keluar'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keb_rt'], 0, ',', '.') }}</td>
+                            <td class="num">{{ number_format($r['keb_non_rt'], 0, ',', '.') }}</td>
+                            <td class="num" style="font-weight:700;">{{ number_format($r['nilai_neraca'], 0, ',', '.') }}</td>
+                        @else
+                            <td colspan="7" class="belum-tersedia">Belum tersedia</td>
+                        @endif
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </section>
 
     <footer>
         <div class="cetak-oleh">
             <p>Dicetak pada: {{ $generatedAt }} WIB</p>
-            <p><strong>{{ $namaOperator }}</strong> (ID: <strong>{{ $loginIdCetak }}</strong>)</p>
+            <p><strong>{{ $dicetakOleh }} - S-KOLAK</strong></p>
             <p>Sistem Ketersediaan Stok dan Laporan Aktual</p>
         </div>
         <p class="footer-note">

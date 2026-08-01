@@ -70,13 +70,6 @@
         'nilai'  => [780, 845, 920, 880, 960, 782, 989, 1040, 1125],
     ];
 
-    $perbandinganNilai = $perbandinganNilai ?? collect([
-        ['nama' => 'Beras', 'nilai' => 577], ['nama' => 'Jagung', 'nilai' => 220],
-        ['nama' => 'Minyak Goreng', 'nilai' => 124], ['nama' => 'Kedelai', 'nilai' => 80],
-        ['nama' => 'Telur Ayam Ras', 'nilai' => 70], ['nama' => 'Bawang Merah', 'nilai' => 37],
-        ['nama' => 'Cabai Rawit', 'nilai' => 30], ['nama' => 'Gula Konsumsi', 'nilai' => 97],
-    ]);
-
     $notifCount = $notifCount ?? 2;
     $notifDropdownItems = $notifDropdownItems ?? (isset($aktivitas) ? collect($aktivitas)->take(5)->values() : (isset($notifikasi) ? collect($notifikasi)->take(5)->values() : (
         auth()->check()
@@ -538,11 +531,6 @@
                         <canvas id="chartTrenBulanan" height="220"></canvas>
                     </div>
                 </div>
-
-                <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-5">
-                    <h3 class="text-sm font-bold mb-4" style="color:#1E3A5F;">Perbandingan Nilai Neraca per Komoditas (Data Valid)</h3>
-                    <canvas id="chartPerbandingan" height="220"></canvas>
-                </div>
             </div>
 
             {{-- Script khusus konten halaman ini (tab switching & chart).
@@ -634,27 +622,6 @@
                                 scales: {
                                     y: { beginAtZero: true, grid: { color: '#EFF6FF' } },
                                     x: { grid: { display: false }, ticks: { font: { size: 10 } } }
-                                }
-                            }
-                        });
-
-                        const perbandinganColors = ['#2563EB','#1D4ED8','#60A5FA','#1E40AF','#3B82F6','#93C5FD','#2563EB','#60A5FA'];
-                        const perbandinganData = @json($perbandinganNilai->pluck('nilai'));
-                        new Chart(document.getElementById('chartPerbandingan'), {
-                            type: 'bar',
-                            data: {
-                                labels: @json($perbandinganNilai->pluck('nama')),
-                                datasets: [{
-                                    label: 'Nilai Neraca',
-                                    data: perbandinganData,
-                                    backgroundColor: perbandinganData.map((_, i) => perbandinganColors[i % perbandinganColors.length]),
-                                }]
-                            },
-                            options: {
-                                plugins: { legend: { display: false } },
-                                scales: {
-                                    x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-                                    y: { beginAtZero: true, grid: { color: '#EFF6FF' } },
                                 }
                             }
                         });
