@@ -38,7 +38,7 @@ Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showRes
 Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update');
 
 
-Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth:admin', 'browser.bind'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/dashboard')->name('index');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -69,7 +69,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::patch('/notifikasi/baca-semua', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.baca-semua');
 });
 
-Route::middleware(['auth:operator'])->prefix('operator')->name('operator.')->group(function () {
+Route::middleware(['auth:operator', 'browser.bind'])->prefix('operator')->name('operator.')->group(function () {
     Route::redirect('/', '/operator/dashboard')->name('index');
 
     Route::get('/dashboard', [OperatorDashboardController::class, 'index'])->name('dashboard');
@@ -92,7 +92,7 @@ Route::middleware(['auth:operator'])->prefix('operator')->name('operator.')->gro
     Route::patch('/notifikasi/baca-semua', [OperatorNotifikasiController::class, 'markAllAsRead'])->name('notifikasi.baca-semua');
 });
 
-Route::middleware(['auth:verifikator'])->prefix('verifikator')->name('verifikator.')->group(function () {
+Route::middleware(['auth:verifikator', 'browser.bind'])->prefix('verifikator')->name('verifikator.')->group(function () {
     Route::redirect('/', '/verifikator/dashboard')->name('index');
 
     Route::get('/dashboard', [VerifikatorDashboardController::class, 'index'])->name('dashboard');

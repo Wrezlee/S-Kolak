@@ -8,9 +8,19 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
+    /**
+     * Aturan format password: minimal 8 karakter, wajib ada huruf besar,
+     * huruf kecil, angka, dan simbol.
+     */
+    private function passwordRule(): Password
+    {
+        return Password::min(8)->mixedCase()->numbers()->symbols();
+    }
+
     /**
      * Tampilkan daftar pengguna dengan pencarian nama/ID dan filter role.
      */
@@ -47,7 +57,7 @@ class UserController extends Controller
             'login_id' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:users,login_id'],
             'name'     => ['required', 'string', 'max:150'],
             'role'     => ['required', Rule::in(['admin', 'operator', 'verifikator'])],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', $this->passwordRule()],
         ]);
 
         $user = User::create([
@@ -79,7 +89,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name'     => ['required', 'string', 'max:150'],
             'role'     => ['required', Rule::in(['admin', 'operator', 'verifikator'])],
-            'password' => ['nullable', 'string', 'min:8'],
+            'password' => ['nullable', 'string', $this->passwordRule()],
         ]);
 
         $roleLama = $user->role;

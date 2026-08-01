@@ -41,15 +41,24 @@
                     type="password"
                     name="password"
                     id="password"
-                    placeholder="Minimal 6 karakter"
+                    placeholder="Minimal 8 karakter"
                     required
-                    minlength="6"
+                    minlength="8"
                     autofocus
+                    autocomplete="new-password"
+                    oninput="skolakUpdatePasswordHints(this.value)"
                     class="w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all"
                     style="border-color:#DBEAFE; background-color:#F8FBFF; color:#1E3A5F;"
                     onfocus="this.style.borderColor='#2563EB'"
                     onblur="this.style.borderColor='#DBEAFE'"
                 >
+                <ul class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-[11px] text-slate-400">
+                    <li data-rule="length" class="flex items-center gap-1"><span class="dot w-1.5 h-1.5 rounded-full bg-slate-300"></span>Minimal 8 karakter</li>
+                    <li data-rule="upper" class="flex items-center gap-1"><span class="dot w-1.5 h-1.5 rounded-full bg-slate-300"></span>1 Huruf besar</li>
+                    <li data-rule="lower" class="flex items-center gap-1"><span class="dot w-1.5 h-1.5 rounded-full bg-slate-300"></span>1 Huruf kecil</li>
+                    <li data-rule="number" class="flex items-center gap-1"><span class="dot w-1.5 h-1.5 rounded-full bg-slate-300"></span>1 Angka</li>
+                    <li data-rule="symbol" class="flex items-center gap-1"><span class="dot w-1.5 h-1.5 rounded-full bg-slate-300"></span>1 Simbol</li>
+                </ul>
             </div>
 
             <div class="flex flex-col gap-1.5">
@@ -60,13 +69,33 @@
                     id="password_confirmation"
                     placeholder="Ulangi password baru"
                     required
-                    minlength="6"
+                    minlength="8"
+                    autocomplete="new-password"
                     class="w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all"
                     style="border-color:#DBEAFE; background-color:#F8FBFF; color:#1E3A5F;"
                     onfocus="this.style.borderColor='#2563EB'"
                     onblur="this.style.borderColor='#DBEAFE'"
                 >
             </div>
+
+            <script>
+                // Indikator visual format password (besar/kecil/angka/simbol, min 8 karakter)
+                function skolakUpdatePasswordHints(value) {
+                    const rules = {
+                        length: value.length >= 8,
+                        upper:  /[A-Z]/.test(value),
+                        lower:  /[a-z]/.test(value),
+                        number: /[0-9]/.test(value),
+                        symbol: /[^A-Za-z0-9]/.test(value),
+                    };
+                    Object.keys(rules).forEach(function (rule) {
+                        const el = document.querySelector('li[data-rule="' + rule + '"] .dot');
+                        if (!el) return;
+                        el.classList.toggle('bg-green-500', rules[rule]);
+                        el.classList.toggle('bg-slate-300', !rules[rule]);
+                    });
+                }
+            </script>
 
             <button
                 type="submit"

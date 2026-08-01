@@ -360,7 +360,9 @@
             <div>
                 <label class="text-xs text-slate-500 block mb-1">Password Awal <span class="text-red-500">*</span></label>
                 <input type="password" name="password" placeholder="Minimal 8 karakter" required
+                       autocomplete="new-password" oninput="skolakPasswordHints(this, 'hintTambah')"
                        class="w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
+                @include('admin.partials.password-hints', ['id' => 'hintTambah'])
                 @error('password') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
             <div class="flex gap-2 justify-end pt-2">
@@ -402,7 +404,10 @@
             <div>
                 <label class="text-xs text-slate-500 block mb-1">Password Baru (opsional)</label>
                 <input name="password" type="password" placeholder="Kosongkan jika tidak diubah"
+                       autocomplete="new-password" oninput="skolakPasswordHints(this, 'hintEdit')"
                        class="w-full px-3 py-2 rounded-lg border border-blue-200 text-xs outline-none focus:border-blue-400">
+                @include('admin.partials.password-hints', ['id' => 'hintEdit'])
+                @error('password') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
             <div class="flex gap-2 justify-end pt-2">
                 <button type="button" onclick="document.getElementById('modalEdit').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-slate-200 text-xs text-slate-500 hover:bg-slate-50">Batal</button>
@@ -432,11 +437,37 @@
 (function () {
     const usersBaseUrl = @json(url('admin/users'));
 
+    // Format password: minimal 8 karakter, wajib huruf besar, huruf kecil,
+    // angka, dan simbol. Menyalakan titik hijau tiap syarat yang terpenuhi.
+    window.skolakPasswordHints = function (input, listId) {
+        const value = input.value;
+        const rules = {
+            length: value.length >= 8,
+            upper:  /[A-Z]/.test(value),
+            lower:  /[a-z]/.test(value),
+            number: /[0-9]/.test(value),
+            symbol: /[^A-Za-z0-9]/.test(value),
+        };
+        const list = document.getElementById(listId);
+        if (!list) return;
+        Object.keys(rules).forEach(function (rule) {
+            const dot = list.querySelector('li[data-rule="' + rule + '"] .dot');
+            if (!dot) return;
+            dot.classList.toggle('bg-green-500', rules[rule]);
+            dot.classList.toggle('bg-slate-300', !rules[rule]);
+        });
+    };
+
     window.openEdit = function (user) {
         document.getElementById('editUsername').value = user.username;
         document.getElementById('editName').value = user.name;
         document.getElementById('editRole').value = user.role;
         document.getElementById('editForm').action = usersBaseUrl + '/' + user.id;
+        document.getElementById('editForm').password.value = '';
+        document.querySelectorAll('#hintEdit .dot').forEach(function (dot) {
+            dot.classList.remove('bg-green-500');
+            dot.classList.add('bg-slate-300');
+        });
         document.getElementById('modalEdit').classList.remove('hidden');
     };
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\EnsureSessionBoundToBrowser;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,13 +33,29 @@ class LoginController extends Controller
         }
 
         // Login lewat guard khusus role user ini (admin/operator/verifikator),
-        // bukan guard 'web' default. Dengan begini status login tiap role
-        // disimpan terpisah dalam session, jadi login sebagai role lain di
-        // tab lain tidak akan menggeser/menimpa login role ini.
+        // bukan guard 'web' default. Setiap role punya akses/guard sendiri.
         $guard = in_array($user->role, self::ROLE_GUARDS, true) ? $user->role : 'web';
+
+        // Satu browser hanya boleh punya satu sesi role aktif (alasan
+        // keamanan data). Kalau ada role lain yang masih login di browser
+        // ini, putuskan dulu sebelum login sebagai role yang baru.
+        foreach ([...self::ROLE_GUARDS, 'web'] as $otherGuard) {
+            if ($otherGuard !== $guard && Auth::guard($otherGuard)->check()) {
+                Auth::guard($otherGuard)->logout();
+            }
+        }
 
         Auth::guard($guard)->login($user);
         $request->session()->regenerate();
+
+        // Ikat sesi ini ke browser (User-Agent) yang dipakai saat login.
+        // Kalau cookie sesi ini nanti dipakai/dipindah ke browser lain,
+        // EnsureSessionBoundToBrowser akan menolaknya dan memaksa login
+        // ulang, bukan langsung memberi akses.
+        $request->session()->put(
+            "browser_fingerprint_{$guard}",
+            EnsureSessionBoundToBrowser::fingerprint($request)
+        );
 
         $user->forceFill(['last_login_at' => now()])->save();
 

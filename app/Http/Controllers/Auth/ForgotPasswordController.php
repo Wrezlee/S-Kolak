@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rules\Password;
 
 class ForgotPasswordController extends Controller
 {
@@ -89,7 +90,7 @@ class ForgotPasswordController extends Controller
         $data = $request->validate([
             'id'                    => 'required|string',
             'token'                 => 'required|string',
-            'password'              => 'required|string|min:6|confirmed',
+            'password'              => ['required', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
         ]);
 
         $record = DB::table('password_reset_tokens')->where('login_id', $data['id'])->first();
