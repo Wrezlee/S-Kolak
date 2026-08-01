@@ -425,6 +425,12 @@
                             </tbody>
                         </table>
                     </div>
+
+                    @if ($nilaiValidTable instanceof \Illuminate\Contracts\Pagination\Paginator && $nilaiValidTable->hasPages())
+                        <div class="pt-4 mt-4 border-t border-blue-50">
+                            {{ $nilaiValidTable->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
 

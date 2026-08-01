@@ -48,16 +48,25 @@ class LaporanController extends Controller
             ];
         })->values();
 
-        $nilaiValidTable = $validItems->sortByDesc('periode')->values()->map(function ($n) {
-            $nilai = DataNeracaController::hitungNilaiNeraca($n);
+        // Query terpisah (bukan dari $allItems yang sudah di-load penuh di atas) supaya
+        // bisa di-paginate langsung di level database. Tetap tanpa filter tahun/bulan,
+        // sesuai catatan di atas: Ringkasan Eksekutif selalu dari seluruh data valid.
+        $nilaiValidTable = NeracaPangan::with('komoditas')
+            ->where('status', 'valid')
+            ->orderByDesc('periode')
+            ->orderByDesc('id')
+            ->paginate(10)
+            ->withQueryString()
+            ->through(function ($n) {
+                $nilai = DataNeracaController::hitungNilaiNeraca($n);
 
-            return [
-                'periode'   => DataNeracaController::formatPeriode($n->periode),
-                'komoditas' => $n->komoditas->nama ?? '-',
-                'nilai'     => $nilai,
-                'surplus'   => $nilai > 0,
-            ];
-        });
+                return [
+                    'periode'   => DataNeracaController::formatPeriode($n->periode),
+                    'komoditas' => $n->komoditas->nama ?? '-',
+                    'nilai'     => $nilai,
+                    'surplus'   => $nilai > 0,
+                ];
+            });
 
         // ── Laporan Detail (2 tabel: sesuai filter bulan/tahun, & rata-rata tahunan) ──
         $laporanBulanan = $this->buildLaporanPeriode($filters['tahun'], $filters['bulan']);

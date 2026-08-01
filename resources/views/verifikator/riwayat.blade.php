@@ -253,7 +253,7 @@
 
             <div>
                 <h1 class="text-xl font-bold" style="color:#1E3A5F;">Riwayat Verifikasi</h1>
-                <p class="text-sm text-slate-500">{{ $riwayat->count() }} data telah diverifikasi · Kota Kediri</p>
+                <p class="text-sm text-slate-500">{{ $riwayat instanceof \Illuminate\Contracts\Pagination\Paginator ? $riwayat->total() : $riwayat->count() }} data telah diverifikasi · Kota Kediri</p>
             </div>
 
             <div class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden">
@@ -317,6 +317,12 @@
                         </tbody>
                     </table>
                 </div>
+
+                @if ($riwayat instanceof \Illuminate\Contracts\Pagination\Paginator && $riwayat->hasPages())
+                    <div class="p-4 border-t border-blue-50">
+                        {{ $riwayat->links() }}
+                    </div>
+                @endif
             </div>
 
         
