@@ -18,6 +18,26 @@ class DashboardPublikController extends Controller
         9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
     ];
 
+    /**
+     * Tabel referensi statis "Ketahanan Stok Pangan": batas jumlah hari ketahanan
+     * untuk masing-masing komoditas pokok Kota Kediri. Tidak dihitung dari data
+     * transaksi — ini acuan baku yang ditampilkan sebagai informasi publik.
+     */
+    private const KETAHANAN_TABLE = [
+        ['nama' => 'Bawang Merah',    'aman' => '> 13', 'waspada' => '6 - 13',  'rentan' => '< 6'],
+        ['nama' => 'Bawang Putih',    'aman' => '> 29', 'waspada' => '4 - 29',  'rentan' => '< 4'],
+        ['nama' => 'Beras',           'aman' => '> 32', 'waspada' => '12 - 32', 'rentan' => '< 12'],
+        ['nama' => 'Cabai Besar',     'aman' => '> 6',  'waspada' => '3 - 6',   'rentan' => '< 3'],
+        ['nama' => 'Cabai Rawit',     'aman' => '> 6',  'waspada' => '3 - 6',   'rentan' => '< 3'],
+        ['nama' => 'Daging Ayam Ras', 'aman' => '> 13', 'waspada' => '6 - 13',  'rentan' => '< 6'],
+        ['nama' => 'Daging Sapi',     'aman' => '> 56', 'waspada' => '19 - 56', 'rentan' => '< 19'],
+        ['nama' => 'Gula Konsumsi',   'aman' => '> 38', 'waspada' => '21 - 38', 'rentan' => '< 21'],
+        ['nama' => 'Jagung',          'aman' => '> 24', 'waspada' => '14 - 24', 'rentan' => '< 14'],
+        ['nama' => 'Kedelai',         'aman' => '> 30', 'waspada' => '14 - 30', 'rentan' => '< 14'],
+        ['nama' => 'Minyak Goreng',   'aman' => '> 38', 'waspada' => '21 - 38', 'rentan' => '< 21'],
+        ['nama' => 'Telur Ayam Ras',  'aman' => '> 13', 'waspada' => '6 - 13',  'rentan' => '< 6'],
+    ];
+
     public function index(Request $request)
     {
         $komoditasList = Komoditas::orderBy('nama')->pluck('nama');
@@ -49,12 +69,39 @@ class DashboardPublikController extends Controller
             ];
         });
 
-        // Kartu ringkasan
+        // Kartu ringkasan (4 kotak) & modal "Lihat detail" — SENGAJA tidak ikut
+        // filter periode/komoditas yang dipilih pengguna. Selalu dihitung dari
+        // SELURUH data valid yang sudah terinput, memakai entri periode TERBARU
+        // untuk tiap komoditas (jadi tetap sesuai kondisi stok terkini walau
+        // tabel & grafik di bawahnya sedang difilter ke periode lain).
+        $allValidRecords = NeracaPangan::with('komoditas')
+            ->where('status', 'valid')
+            ->orderByDesc('periode')
+            ->get();
+
+        $globalRows = $allValidRecords->values()->map(function (NeracaPangan $item, int $index) {
+            $nilaiNeraca = $this->hitungNilaiNeraca($item);
+
+            return [
+                'no' => $index + 1,
+                'periode' => $this->formatPeriode($item->periode),
+                'periode_key' => Carbon::parse($item->periode)->format('Y-m'),
+                'komoditas' => $item->komoditas->nama,
+                'nilai_neraca' => $nilaiNeraca,
+                'status' => $this->statusStok($nilaiNeraca, $item),
+            ];
+        });
+
+        // $allValidRecords sudah diurutkan periode terbaru -> terlama, sehingga
+        // unique('komoditas') otomatis menyisakan entri periode PALING BARU
+        // untuk setiap komoditas.
+        $globalLatestPerKomoditas = $globalRows->unique('komoditas')->values();
+
         $summary = [
-            'total_komoditas' => $rows->pluck('komoditas')->unique()->count(),
-            'aman' => $rows->where('status', 'Aman')->count(),
-            'waspada' => $rows->where('status', 'Waspada')->count(),
-            'rentan' => $rows->where('status', 'Rentan')->count(),
+            'total_komoditas' => $globalLatestPerKomoditas->count(),
+            'aman' => $globalLatestPerKomoditas->where('status', 'Aman')->count(),
+            'waspada' => $globalLatestPerKomoditas->where('status', 'Waspada')->count(),
+            'rentan' => $globalLatestPerKomoditas->where('status', 'Rentan')->count(),
         ];
 
         // Data untuk grafik tren (kumulatif nilai neraca seluruh komoditas per periode)
@@ -117,6 +164,7 @@ class DashboardPublikController extends Controller
                 'rows',
                 'tableRows',
                 'summary',
+                'globalLatestPerKomoditas',
                 'trendLabels',
                 'trendValues',
                 'detailData',
@@ -154,6 +202,9 @@ class DashboardPublikController extends Controller
         // Menyimpan nilai filter yang dipilih
         $q = $request->all();
 
+        // Tabel referensi statis "Ketahanan Stok Pangan" (lihat KETAHANAN_TABLE di atas)
+        $ketahananTable = collect(self::KETAHANAN_TABLE);
+
         return view('public.dashboard', compact(
             'komoditasList',
             'bulanList',
@@ -162,6 +213,8 @@ class DashboardPublikController extends Controller
             'rows',
             'tableRows',
             'summary',
+            'globalLatestPerKomoditas',
+            'ketahananTable',
             'trendLabels',
             'trendValues',
             'detailData',

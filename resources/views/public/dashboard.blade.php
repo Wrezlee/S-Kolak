@@ -67,7 +67,7 @@
             </h1>
 
             <p class="mt-4 max-w-2xl text-blue-100 text-sm md:text-base">
-                (S-KOLAK) adalah Sistem Perekaman dan penyajian Neraca Pangan berdasarkan analisis prognosa data stok dari perilaku usaha pangan di Kota Kediri. 
+                (S-KOLAK) adalah sistem perekaman dan penyajian neraca pangan berdasarkan analisis prognosa data stok dari perilaku usaha pangan di Kota Kediri.
             </p>
 
             {{-- Summary cards — square icon badges + matching border colors, same
@@ -125,24 +125,28 @@
 
     @php
 
-    $rowsCollection = collect($rows);
+    // $globalLatestPerKomoditas TIDAK ikut filter halaman ini — sudah berisi
+    // entri periode terbaru per komoditas dari SELURUH data valid, jadi 4 kartu
+    // ringkasan & modal "Lihat detail"-nya tetap konsisten walau tabel/grafik
+    // di bawah sedang difilter ke periode lain.
+    $globalRowsCollection = collect($globalLatestPerKomoditas);
 
     $modalData = [
         'terpantau' => [
             'title' => 'Status neraca',
-            'items' => $rowsCollection->unique('komoditas')->values()
+            'items' => $globalRowsCollection->values()
         ],
         'aman' => [
             'title' => 'Komoditas Stok Aman',
-            'items' => $rowsCollection->where('status','Aman')->values()
+            'items' => $globalRowsCollection->where('status','Aman')->values()
         ],
         'waspada' => [
             'title' => 'Komoditas Stok Waspada',
-            'items' => $rowsCollection->where('status','Waspada')->values()
+            'items' => $globalRowsCollection->where('status','Waspada')->values()
         ],
         'rentan' => [
             'title' => 'Komoditas Stok Rentan',
-            'items' => $rowsCollection->where('status','Rentan')->values()
+            'items' => $globalRowsCollection->where('status','Rentan')->values()
         ],
     ];
 
@@ -155,6 +159,39 @@
     @endphp
 
     <main class="max-w-7xl mx-auto px-6 pb-16">
+
+        {{-- Tabel Ketahanan Stok Pangan — referensi statis, tidak ikut filter --}}
+        <div class="mt-8 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100">
+                <p class="font-bold text-slate-800">Tabel Ketahanan Stok Pangan</p>
+                <p class="text-xs text-slate-400 mt-0.5">Indikasi batas hari ketahanan stok per komoditas</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-blue-50/60">
+                            <th rowspan="2" class="px-6 py-3 text-left text-xs font-bold text-slate-700 border-b border-slate-200 align-bottom">Komoditas</th>
+                            <th colspan="3" class="px-4 py-2 text-center text-xs font-bold text-slate-700 border-b border-l border-slate-200">Ketahanan Stok (hari)</th>
+                        </tr>
+                        <tr class="bg-blue-50/60">
+                            <th class="px-4 py-2 text-center text-xs font-semibold text-green-700 border-b border-l border-slate-200">Aman</th>
+                            <th class="px-4 py-2 text-center text-xs font-semibold text-yellow-600 border-b border-l border-slate-200">Waspada</th>
+                            <th class="px-4 py-2 text-center text-xs font-semibold text-red-700 border-b border-l border-slate-200">Rentan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($ketahananTable as $i => $k)
+                            <tr class="{{ $i % 2 === 0 ? 'bg-white' : 'bg-blue-50/20' }} border-t border-slate-100">
+                                <td class="px-6 py-2.5 font-medium text-slate-700">{{ $k['nama'] }}</td>
+                                <td class="px-4 py-2.5 text-center font-mono font-semibold text-slate-800 border-l border-slate-100">{{ $k['aman'] }}</td>
+                                <td class="px-4 py-2.5 text-center font-mono font-semibold text-slate-800 border-l border-slate-100">{{ $k['waspada'] }}</td>
+                                <td class="px-4 py-2.5 text-center font-mono font-semibold text-slate-800 border-l border-slate-100">{{ $k['rentan'] }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
         {{-- Filter card — sekarang di bawah 4 kotak ringkasan --}}
         <form method="GET" class="mt-8 bg-white text-slate-800 rounded-2xl shadow-lg border border-slate-100 p-6">
@@ -264,7 +301,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-6">
             <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
                 <p class="font-semibold text-slate-800">Neraca Seluruh Komoditas</p>
-                <p class="text-xs text-slate-500 mb-4">Sumbu X: Periode (bulan) · Sumbu Y: Nilai neraca (kumulatif)</p>
+                <p class="text-xs text-slate-500 mb-4">Sumbu X: Periode (bulan) · Sumbu Y: neraca (kumulatif)</p>
                 @if (count($trendLabels) === 0)
                     <div class="flex items-center justify-center h-[220px] text-slate-400 text-sm text-center px-6">
                         Data belum tersedia untuk filter yang dipilih.
@@ -299,7 +336,7 @@
 
                     <div class="mt-4 rounded-xl bg-green-50 border border-green-200 p-4 flex items-center justify-between">
                         <div>
-                            <p class="text-xs text-slate-500">Nilai Neraca</p>
+                            <p class="text-xs text-slate-500">Neraca</p>
                             <p class="font-bold text-green-700">{{ fmt_neraca($detailData['nilai_neraca']) }} Ton</p>
                         </div>
                         <div class="text-right">
@@ -339,7 +376,7 @@
                             <th class="px-4 py-3 text-right font-semibold">Keluar</th>
                             <th class="px-4 py-3 text-right font-semibold">Keb. RT</th>
                             <th class="px-4 py-3 text-right font-semibold">Keb. Non-RT</th>
-                            <th class="px-4 py-3 text-right font-semibold">Nilai Neraca</th>
+                            <th class="px-4 py-3 text-right font-semibold">Neraca</th>
                             <th class="px-4 py-3 text-left font-semibold">Status</th>
                         </tr>
                     </thead>
@@ -420,7 +457,7 @@
                 data: {
                     labels: trendLabels,
                     datasets: [{
-                        label: 'Nilai Neraca (kumulatif)',
+                        label: 'Neraca (kumulatif)',
                         data: trendValues,
                         borderColor: '#1d4ed8',
                         backgroundColor: 'rgba(29, 78, 216, 0.1)',

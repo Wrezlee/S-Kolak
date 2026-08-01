@@ -1,24 +1,27 @@
 @php
-    $rowsCollection = collect($rows);
     // $tableRows dipaginasi terpisah dari $rows — fallback ke $rows kalau controller lama belum mengirimnya.
     $tableRows = $tableRows ?? $rows;
+
+    // $globalLatestPerKomoditas TIDAK ikut filter — sudah berisi entri periode
+    // terbaru per komoditas dari SELURUH data valid (lihat DashboardPublikController).
+    $globalRowsCollection = collect($globalLatestPerKomoditas ?? []);
 
     $modalData = [
         'terpantau' => [
             'title' => 'Semua Komoditas Terpantau',
-            'items' => $rowsCollection->unique('komoditas')->values()
+            'items' => $globalRowsCollection->values()
         ],
         'aman' => [
             'title' => 'Komoditas Stok Aman',
-            'items' => $rowsCollection->where('status','Aman')->values()
+            'items' => $globalRowsCollection->where('status','Aman')->values()
         ],
         'waspada' => [
             'title' => 'Komoditas Stok Waspada',
-            'items' => $rowsCollection->where('status','Waspada')->values()
+            'items' => $globalRowsCollection->where('status','Waspada')->values()
         ],
         'rentan' => [
             'title' => 'Komoditas Stok Rentan',
-            'items' => $rowsCollection->where('status','Rentan')->values()
+            'items' => $globalRowsCollection->where('status','Rentan')->values()
         ],
     ];
 
